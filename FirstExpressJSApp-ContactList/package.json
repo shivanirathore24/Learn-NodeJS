@@ -1,0 +1,14 @@
+{
+  "name": "firstexpressjsapp-contactlist",
+  "version": "1.0.0",
+  "description": "A basic Contact list to learn express.js as a framework.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shivani Rathore",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
