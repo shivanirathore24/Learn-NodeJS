@@ -6,7 +6,17 @@
     <title><%= title %></title>
 </head>
 <body>
-    <h1>Rendered from EJS view !</h1>
-    <h3>EJS is a simple templating language that lets you generate HTML markup with plain JavaScript</h3>
+    <h1>Contact List</h1>
+    
+    <div>
+        <ul>
+            <% for(let i of contact_list) { %>
+                <li>
+                    <p><%= i.name %></p>
+                    <p><%= i.phone %></p>
+                </li>
+            <% } %>
+        </ul>
+    </div>
 </body>
 </html>
