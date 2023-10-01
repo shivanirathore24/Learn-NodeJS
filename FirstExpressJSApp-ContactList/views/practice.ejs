@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= locals.title %></title>
+</head>
+<body>
+    <h1>Playground</h1>
+
+    <ul>
+        <% for(let i=1; i<6; i++){ %>
+            <li>
+                <%= i %>
+            </li>
+        <% } %>
+    </ul>
+
+    <% if(true) { %>
+        <h1> It's true !</h1>
+   <% } else{ %>
+        <p> It's false !</p>
+    <% } %>
+</body>
+</html>
