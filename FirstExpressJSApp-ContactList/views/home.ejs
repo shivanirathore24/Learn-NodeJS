@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Contact List</h1>
-    
+
     <div>
         <ul>
             <% for(let i of contact_list) { %>
@@ -18,5 +18,12 @@
             <% } %>
         </ul>
     </div>
+
+    <!--   form filled -> submit -> action-route i.e /create-contact -> redirect i.e /practice   -->
+    <form action="/create-contact" method="POST">
+        <input type="text" name="name" placeholder="Enter name" required>
+        <input type="number" name="phone" placeholder="Enter phone" required>
+        <button type="submit">Add contact</button>
+    </form>
 </body>
 </html>

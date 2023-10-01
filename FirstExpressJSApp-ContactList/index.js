@@ -29,6 +29,17 @@ app.get("/", function (req, res) {
   });
 });
 
+app.get("/practice", function (req, res) {
+  return res.render("practice", {
+    title: "Let us play with ejs",
+  });
+});
+
+//Controller : create-contact
+app.post("/create-contact", function (req, res) {
+  return res.redirect("/practice");
+});
+
 app.listen(port, function (err) {
   if (err) {
     console.log("Error is running the server", err);
