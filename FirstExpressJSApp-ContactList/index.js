@@ -8,6 +8,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 //Praser takes the data from browser and creates body key inside request object, addes data inside body.
 app.use(express.urlencoded()); //signifies middleware
+app.use(express.static("assets"));
 
 contactList = [
   {
