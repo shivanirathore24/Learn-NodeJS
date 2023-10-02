@@ -24,7 +24,36 @@ contactList = [
   },
 ];
 
+/* 
+1.Middleware functions are functions that have access to the request object (req), the response object (res), and the next
+  function in the application’s request-response cycle. The next function is a function in the Express router which, when
+  invoked, executes the middleware succeeding the current middleware.
+2.Middleware functions can perform the following tasks:
+  - Execute any code.
+  - Make changes to the request and the response objects.
+  - End the request-response cycle.
+  - Call the next middleware in the stack.
+3.Before the controller, all the middlewares get executed in chronological order. 
+  So first middleware-1 is called. But if we haven’t called the next() function in it, the next middleware doesn’t get triggered.
+  Then, only “middleware 1 is called” is printed.
+*/
+
+//middleware-1
+app.use(function (req, res, next) {
+  //console.log('middleware-1 is called');
+  req.name = "Shiv";
+  next();
+});
+
+//middleware-2
+app.use(function (req, res, next) {
+  //console.log("middlware-2 is called");
+  console.log("My name from MW2: ", req.name);
+  next();
+});
+
 app.get("/", function (req, res) {
+  console.log("from get from route controller", req.name);
   return res.render("home", {
     title: "Contact List",
     contact_list: contactList,
@@ -39,8 +68,8 @@ app.get("/practice", function (req, res) {
 
 //Controller : create-contact
 app.post("/create-contact", function (req, res) {
-  //as soon you kill the server, re-start the page so your Added Contact through form will get vanished becoz compiled file was
-  //saved in RAM andn will be removed from the memmory. Only hard-coded value will be there i.e SHivani, Neeraj, Shubman.
+  //as soon you kill the server, re-start the page, so your already Added-Contact through form will get vanished becoz compiled file
+  //was saved in RAM and will be removed from the memmory. Only hard-coded value will be there i.e Shivani, Neeraj, Shubman.
   contactList.push(req.body);
 
   return res.redirect("back"); //go back to page from which it was coming
