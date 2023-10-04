@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
+    <script src="https://kit.fontawesome.com/b6c49c3071.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
-    <h1>Contact List</h1>
+    <div id="main-div">
+    <h1 id="page-heading">
+        <i class="fa-regular fa-address-book"></i>
+       My Contact List
+    </h1>
 
-    <div>
+    <div id="contact-div">
         <ul>
             <% for(let i of contact_list) { %>
                 <li>
@@ -21,11 +26,14 @@
     </div>
 
     <!--   form filled -> submit -> action-route i.e /create-contact -> redirect i.e /practice   -->
-    <form action="/create-contact" method="POST">
-        <input type="text" name="name" placeholder="Enter name" required>
-        <input type="number" name="phone" placeholder="Enter phone" required>
-        <button type="submit">Add contact</button>
-    </form>
+    <div id="form-div">
+        <form action="/create-contact" method="POST">
+            <input type="text" name="name" placeholder="Name" required>
+            <input type="number" name="phone" placeholder="Phone" required>
+            <button type="submit">Add</button>
+        </form>
+    </div>
+</div>
 
     <script type="text/javascript" src="/js/home.js"></script>
 </body>
