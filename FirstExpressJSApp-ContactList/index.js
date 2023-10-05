@@ -12,15 +12,15 @@ app.use(express.static("assets"));
 
 contactList = [
   {
-    name: "Shivani",
+    name: "Shivani Rathore",
     phone: 9999999999,
   },
   {
-    name: "Neeraj",
+    name: "Neeraj Chopra",
     phone: 8888888888,
   },
   {
-    name: "Shubman",
+    name: "Shubman Gill",
     phone: 1234567890,
   },
 ];
@@ -91,10 +91,10 @@ app.post("/create-contact", function (req, res) {
 });
 */
 
-app.get("/delete-contact/:phone", function (req, res) {
-  console.log(req.params);
-  let phone = req.params.phone; //here phone is variable
-  console.log(phone); //Shivani if <a href="/delete-contact/Shivani">
+app.get("/delete-contact/", function (req, res) {
+  console.log(req.query); // Shivani Rathore contact is clicked, { phone: '9999999999', name: 'Shivani Rathore' }
+  let phone = req.query.phone; //here phone is variable
+  console.log(phone); //9999999999
 });
 
 app.listen(port, function (err) {
