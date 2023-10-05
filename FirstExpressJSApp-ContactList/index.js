@@ -7,7 +7,7 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 //Praser takes the data from browser and creates body key inside request object, addes data inside body.
-app.use(express.urlencoded()); //signifies middleware
+app.use(express.urlencoded()); //signifies middleware, reads only form data which was submitted, not params
 app.use(express.static("assets"));
 
 contactList = [
@@ -90,6 +90,12 @@ app.post("/create-contact", function (req, res) {
   return res.redirect("/");
 });
 */
+
+app.get("/delete-contact/:phone", function (req, res) {
+  console.log(req.params);
+  let phone = req.params.phone; //here phone is variable
+  console.log(phone); //Shivani if <a href="/delete-contact/Shivani">
+});
 
 app.listen(port, function (err) {
   if (err) {

@@ -25,9 +25,13 @@
                         <p><%= i.phone %></p>
                     </div>
                     <div class="delete-button">
-                        <a href="">
+                        <!-- String params -->
+                        <a href="/delete-contact/<%= i.phone %>">
                             <i class="fa fa-window-close"></i>
                         </a>
+                        <!-- <a href="/delete-contact/Shivani">
+                            <i class="fa fa-window-close"></i>
+                        </a> -->
                     </div>
                 </li>
             <% } %>
