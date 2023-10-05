@@ -93,8 +93,12 @@ app.post("/create-contact", function (req, res) {
 
 app.get("/delete-contact/", function (req, res) {
   console.log(req.query); // Shivani Rathore contact is clicked, { phone: '9999999999', name: 'Shivani Rathore' }
-  let phone = req.query.phone; //here phone is variable
-  console.log(phone); //9999999999
+  let phone = req.query.phone;
+  let contactIndex = contactList.findIndex((contact) => contact.phone == phone);
+  if (contactIndex != -1) {
+    contactList.splice(contactIndex, 1);
+  }
+  return res.redirect("back");
 });
 
 app.listen(port, function (err) {
