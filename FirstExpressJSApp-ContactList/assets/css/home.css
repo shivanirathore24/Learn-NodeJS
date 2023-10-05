@@ -10,6 +10,7 @@ body{
     box-sizing: border-box;
 }
 
+
  /* Style the header */
 #page-heading {
     text-align: center;
@@ -30,31 +31,61 @@ ul{
     width: 100%;
 }
 
-/* #contact-div{
-    border: 1px solid orange;   
-} */
+#contact-div{
+    border: 1px solid #ccc; /* Add a border for better visibility */
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); /* Apply the shadow */ 
+}
 
 ul li {
     display: flex;
-    flex-wrap: wrap;
-    margin: 5px 0px;
+    margin: 2px 0px;
     justify-content: space-between;
     background-color: #5151e0;
+    width:100%;
 }
 
-ul li p{
+ul li .details p{
     color: white;
     margin: 0.5rem 0.5rem;
 }
 
+ul li .details{
+    /* border: 1px solid #000;  */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    flex-grow: 1;
+    width: 90%;
+}
+
+ul li .delete-button {
+    /* border: 1px solid orange; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width:10%
+    
+}
+
+.delete-button a{
+    color: white;
+    background-color: red;
+    /* border: 1px solid greenyellow; */
+}
+
+/* .delete-button a i{
+     border: 1px dotted white; 
+} */
+
 ul li:hover{
-    background-color: grey;
+    background-color: #7272f8;
 }
 
 
 /* Styling the form */
 #form-div{
     width:100%;
+    margin-top: 5px;
     /* border: 1px solid blue; */
 }
 
@@ -66,21 +97,24 @@ form{
 input[type='text'],
 input[type='number']{
     padding: 10px;
+    width: 40%;
     border-left: none;
     border-right: none;
     border-top: none;
-    flex-shrink: 1; /* Make elements flexible to occupy available space */
+    flex-shrink: 2;
     flex-grow: 1.5;
     min-width: 0; /* Prevent input fields from expanding beyond their content */
 }
 
 button{
     padding: 10px 20px;
+    width: 20%;
     background-color: grey;
     color: white;
     border: none;
+    font-weight:bold;
     border-radius: 5px;
-    flex-shrink: 1;
+    flex-shrink:4 ;
     flex-grow: 1.5;
 }
 
@@ -99,6 +133,12 @@ button:hover{
 @media screen and (max-width: 820px) {
     #main-div{
         width: 70%;  
+    } 
+}
+
+@media screen and (max-width: 480px) {
+    #main-div{
+        width: 90%;  
     } 
 }
 

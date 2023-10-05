@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- compulsory to add to work media queries  -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
     <title><%= title %></title>
     <script src="https://kit.fontawesome.com/b6c49c3071.js" crossorigin="anonymous"></script>
+     <!-- our css file should be below all other styles, so that we can override it. -->
     <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
@@ -17,15 +19,22 @@
     <div id="contact-div">
         <ul>
             <% for(let i of contact_list) { %>
-                <li>
-                    <p><%= i.name %></p>
-                    <p><%= i.phone %></p>
+                <li >
+                    <div class="details">
+                        <p><%= i.name %></p>
+                        <p><%= i.phone %></p>
+                    </div>
+                    <div class="delete-button">
+                        <a href="">
+                            <i class="fa fa-window-close"></i>
+                        </a>
+                    </div>
                 </li>
             <% } %>
         </ul>
     </div>
 
-    <!--   form filled -> submit -> action-route i.e /create-contact -> redirect i.e /practice   -->
+    <!--   form filled -> submit -> action-route i.e /create-contact -> redirect i.e /home  -->
     <div id="form-div">
         <form action="/create-contact" method="POST">
             <input type="text" name="name" placeholder="Name" required>
