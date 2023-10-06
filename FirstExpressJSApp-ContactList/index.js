@@ -32,17 +32,27 @@ contactList = [
 ];
 
 app.get("/", function (req, res) {
-  console.log("from get from route controller", req.name);
+  // console.log("from get from route controller", req.name);
   return res.render("home", {
     title: "Contact List",
     contact_list: contactList,
   });
 });
 
-//Controller : create-contact
-app.post("/create-contact", function (req, res) {
-  contactList.push(req.body);
-  return res.redirect("back"); ////go back to page from which it was coming
+//Controller : create-contactcd
+app.post("/create-contact", async function (req, res) {
+  try {
+    const newContact = await Contact.create({
+      name: req.body.name,
+      phone: req.body.phone,
+    });
+
+    console.log("New contact:", newContact);
+    return res.redirect("back");
+  } catch (err) {
+    console.error("Error in creating a contact:", err);
+    return res.status(500).send("Internal Server Error"); // Handle the error gracefully
+  }
 });
 
 //Controller : delete-contact
@@ -60,5 +70,5 @@ app.listen(port, function (err) {
   if (err) {
     console.log("Error is running the server", err);
   }
-  console.log("My Express server is running on port", port);
+  console.log("My Express server is running on port:", port);
 });
