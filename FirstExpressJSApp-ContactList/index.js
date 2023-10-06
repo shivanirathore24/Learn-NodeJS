@@ -31,15 +31,36 @@ contactList = [
   },
 ];
 
+//Getting data from database
 app.get("/", function (req, res) {
-  // console.log("from get from route controller", req.name);
-  return res.render("home", {
-    title: "Contact List",
-    contact_list: contactList,
-  });
+  Contact.find({})
+    .then((contacts) => {
+      return res.render("home", {
+        title: "Contact List",
+        contact_list: contacts,
+      });
+    })
+    .catch((err) => {
+      console.log("Error in fetching contacts from db", err);
+    });
 });
 
-//Controller : create-contactcd
+/* 
+//OR
+app.get("/", async function (req, res) {
+  try {
+    const contacts = await Contact.find({});
+    return res.render("home", {
+      title: "Contact List",
+      contact_list: contacts,
+    });
+  } catch (err) {
+    console.log("Error in fetching contacts from db", err);
+  }
+});
+*/
+
+//Posting data to database
 app.post("/create-contact", async function (req, res) {
   try {
     const newContact = await Contact.create({
