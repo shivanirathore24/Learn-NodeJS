@@ -45,20 +45,17 @@ app.get("/", function (req, res) {
     });
 });
 
-/* 
-//OR
-app.get("/", async function (req, res) {
-  try {
-    const contacts = await Contact.find({});
-    return res.render("home", {
-      title: "Contact List",
-      contact_list: contacts,
-    });
-  } catch (err) {
-    console.log("Error in fetching contacts from db", err);
-  }
-});
-*/
+// app.get("/", async function (req, res) {
+//   try {
+//     const contacts = await Contact.find({ name: "Shivani" }); //this will show only Shivani name Contact
+//     return res.render("home", {
+//       title: "Contact List",
+//       contact_list: contacts,
+//     });
+//   } catch (err) {
+//     console.log("Error in fetching contacts from db", err);
+//   }
+// });
 
 //Posting data to database
 app.post("/create-contact", async function (req, res) {
@@ -76,16 +73,36 @@ app.post("/create-contact", async function (req, res) {
   }
 });
 
-//Controller : delete-contact
+//Deleting from Database
 app.get("/delete-contact/", function (req, res) {
-  console.log(req.query); // Shivani Rathore contact is clicked, { phone: '9999999999', name: 'Shivani Rathore' }
-  let phone = req.query.phone;
-  let contactIndex = contactList.findIndex((contact) => contact.phone == phone);
-  if (contactIndex != -1) {
-    contactList.splice(contactIndex, 1);
-  }
-  return res.redirect("back");
+  let id = req.query.id; // Get the id from the query in the URL
+  Contact.findByIdAndDelete(id) // Find the contact in the database using id and delete
+    .then(() => {
+      return res.redirect("back");
+    })
+    .catch((err) => {
+      console.log("Error in deleting an object from the database", err);
+      // Handle the error here, such as sending an error response
+      return res.status(500).send("Internal Server Error");
+    });
 });
+
+/* OR
+app.get("/delete-contact/", async function (req, res) {
+  try {
+    // Get the id from the query in the URL
+    let id = req.query.id;
+
+    // Find the contact in the database using id and delete
+    await Contact.findByIdAndDelete(id);
+    return res.redirect("back");
+  } catch (err) {
+    console.log("Error in deleting an object from the database", err);
+    // Handle the error here, such as sending an error response
+    return res.status(500).send("Internal Server Error");
+  }
+});
+*/
 
 app.listen(port, function (err) {
   if (err) {
