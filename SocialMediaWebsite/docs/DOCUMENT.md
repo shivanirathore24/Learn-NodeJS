@@ -35,3 +35,22 @@
     ```bash
     mkdir config
     ```
+### 2: Setup Express Server
+
+1. Install express server, then node_modules folder will be created.
+    ```bash
+    npm install express
+    ```
+2. Write code in 'index.js' file to setup express server.
+
+### 3: Add .gitignore file and npm start
+1. Added "node_modules/" inside .gitignore file.
+2. Intially, we were using command to run project:
+    ```bash
+    nodemon index.js
+    ```
+3. Now added "start": "nodemon index.js" inside script in package.json, now to run project use command:
+    ```bash
+    npm start
+    ```
+
