@@ -68,9 +68,24 @@
 2. Entry file(index.js), use express router.
 3. Do check "npm start" whether router is loaded or not.
 
-### 5: Create a Controller 
+### 5: Create a 'home' Controller and router for request '/':
+
 1. Created 'home_controller.js' file under 'controllers folder' and write code.
-2. Access and use function of home_controlleer.js inside routes(index.js).
-3. Start project and check in browser "http://localhost:8000/".
+2. Access and use 'home function of home_controlleer.js' inside routes(index.js).
+3. For default route, access from index.js(entry file): app.use("/", require("./routes"));
+4. Start project and check in browser "http://localhost:8000/".
 
+### 6: Create a 'user' controller and router for request 'users/profile':
 
+1. Created 'users_controller.js' file under 'controllers folder' and write code.
+2. Created 'users.js' file under 'routes folder'.
+3. Access and use 'profile function of users_controlleer.js' inside routes(users.js) for /profile request.
+4. routes(index.js) --> root of all other routes i.e for further routes, access from here:
+   router.use('/routerName', require('./routerFile'))
+   - for request '/'(bydefault): index.js(entry point) --> routes(index.js) --> home_controller.js (home function)
+   - for reuqest '/users/profile': index.js(entry point) --> routes(index.js) --> routes(users.js) -->users_controller.js (profile function)
+
+### 7: Routes:
+
+1. routes(index.js): Entry point for all request and handles all direct urls i.e (root level routes) For example : /home , /contact, /about etc
+2. routes(users.js): handles all user related request. For example: users/profile , users/create, users/edit etc..
