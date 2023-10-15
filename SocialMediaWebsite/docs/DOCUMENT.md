@@ -67,3 +67,10 @@
 1. Created 'index.js' file under 'routes folder' and write code.
 2. Entry file(index.js), use express router.
 3. Do check "npm start" whether router is loaded or not.
+
+### 5: Create a Controller 
+1. Created 'home_controller.js' file under 'controllers folder' and write code.
+2. Access and use function of home_controlleer.js inside routes(index.js).
+3. Start project and check in browser "http://localhost:8000/".
+
+
