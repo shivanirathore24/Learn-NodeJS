@@ -44,7 +44,7 @@
 
 ### 2: Setup Express Server
 
-1. Install express server, then node_modules folder will be created.
+1. Install express server; then node_modules folder will be created; verify either installed or not: check package.json file --> in dependencies you will find 'express' with verson .
    ```bash
    npm install express
    ```
@@ -89,3 +89,11 @@
 
 1. routes(index.js): Entry point for all request and handles all direct urls i.e (root level routes) For example : /home , /contact, /about etc
 2. routes(users.js): handles all user related request. For example: users/profile , users/create, users/edit etc..
+
+### 8: Install EJS And Setup View Engine:
+
+1. Install EJS; verify either installed or not: check package.json file --> in dependencies you will find 'ejs' with verson.
+   ```bash
+   npm install ejs
+   ```
+2. Setup View Engine (EJS) in index.js(entry file).
