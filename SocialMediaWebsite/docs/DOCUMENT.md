@@ -97,3 +97,8 @@
    npm install ejs
    ```
 2. Setup View Engine (EJS) in index.js(entry file).
+
+### 9: Create a View for 'home'
+
+1. Create 'home.ejs' file under 'views folder' to write html code.
+2. Edit home_controller.js file, replace 'res.end' method(used to render static data directly to browser) with 'res.render' method(used to render dyanamic content).
