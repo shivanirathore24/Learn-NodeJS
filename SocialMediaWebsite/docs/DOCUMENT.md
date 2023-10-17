@@ -102,3 +102,7 @@
 
 1. Create 'home.ejs' file under 'views folder' to write html code.
 2. Edit home_controller.js file, replace 'res.end' method(used to render static data directly to browser) with 'res.render' method(used to render dyanamic content).
+
+### 9: Partial views are not re-used.
+1. Partials are particularly useful for reusing the same markup between different views, layouts, and even other partials.
+2. Header and Footer which are to be used in both home and user_profile but right now it's not re-used.
