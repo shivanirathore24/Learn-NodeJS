@@ -110,5 +110,16 @@
 
 ### 10: Implementing Partials
 
-1. Created '_header.ejs' and '_footer.ejs' partial views files which are to be re-used in different views i.e home and user_profie.
+1. Created '\_header.ejs' and '\_footer.ejs' partial views files which are to be re-used in different views i.e home and user_profie.
 2. Include a relative partial file in a template using <%- include(PARTIAL_FILE) %>.
+
+### 11: Create a layout
+
+1. Install Express EJS Layouts:
+   ```bash
+   npm install express-ejs-layouts
+   ```
+2. EJS layouts Benefits - simplify code management, enhance efficiency, and ensure a consistent user experience by reusing common elements. This reduces redundancy, speeds up page loading, and eases updates.
+3. Use 'express ejs Layout' before express router in index.js(entry file).
+4. Create layout.ejs file which gets render, and body i.e '<%- body %>' gets filled with variable part.
+5. Keep only variable part in home.ejs and user_profile.ejs.
