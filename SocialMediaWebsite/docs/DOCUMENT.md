@@ -123,3 +123,18 @@
 3. Use 'express ejs Layout' before express router in index.js(entry file).
 4. Create layout.ejs file which gets render, and body i.e '<%- body %>' gets filled with variable part.
 5. Keep only variable part in home.ejs and user_profile.ejs.
+
+### 12: Setting up Static files Access
+
+1. Create 'assets' folder under project directory i.e 'SocialMediaWebsite' folder.
+
+   - To create a 'assets' folder:
+
+   ```bash
+   mkdir assets
+   ```
+
+2. Create sub-folder 'css', 'js' , 'images' within 'assets folder'. Within css folder, create 'layout.css' file and put styling.
+3. Setup static assets inside index.js(entry file) using - app.use(express.static("./assets"));
+4. Link layout.css "href - /css/layout.css" inside layout.ejs(views folder).
+5. Styles will be applied to all other pages (i.e, layout.css contains the common styles) that will be applied to all page which inherit from layout.ejs file.
