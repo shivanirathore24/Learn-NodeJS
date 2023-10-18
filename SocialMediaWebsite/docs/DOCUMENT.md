@@ -148,3 +148,15 @@
    - app.set("layout extractStyles", true);
    - app.set("layout extractScripts", true);
 5. Step-2: put '<%- style %>' at the end of head tag and '<%- script %>' at the end of body tag [inside layout.ejs]
+
+### 14: Linking to mongoDB using mongoose
+
+1. Mongoose is a Node.js(Object Data Modeling) library for MongoDB, offering schema definition, data validation, and an API for data operations. It streamlines MongoDB usage, maintaining data integrity, and simplifying Node.js app development with MongoDB.
+
+2. Install mongoose; verify either installed or not: check package.json file --> in dependencies you will find 'mongoose' with verson.
+   ```bash
+   npm install mongoose
+   ```
+3. Create mongoose.js file inside config folder; write code that connects Node.js to a MongoDB database and logs either a successful or failed connection.
+
+4. Imports a database connection setup from the "mongoose.js" file into index.js (entry file).
