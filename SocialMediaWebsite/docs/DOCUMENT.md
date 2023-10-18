@@ -138,3 +138,13 @@
 3. Setup static assets inside index.js(entry file) using - app.use(express.static("./assets"));
 4. Link layout.css "href - /css/layout.css" inside layout.ejs(views folder).
 5. Styles will be applied to all other pages (i.e, layout.css contains the common styles) that will be applied to all page which inherit from layout.ejs file.
+
+### 13: Static Files for styling individuals Pages
+
+1. Create user_profile.css file for styling user_profile page and write styles.
+2. Link user_profile.css "href - /css/user_profile.css" inside user_profile.ejs(views folder).
+3. Run Project, inspect - You will find link is coming under body which is a bad solution. For better solution follow below steps:
+4. Step-1: Extract style and scripts from sub pages into the layout [inside index.js(entry file)]
+   - app.set("layout extractStyles", true);
+   - app.set("layout extractScripts", true);
+5. Step-2: put '<%- style %>' at the end of head tag and '<%- script %>' at the end of body tag [inside layout.ejs]
