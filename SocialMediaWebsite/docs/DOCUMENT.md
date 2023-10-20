@@ -160,3 +160,8 @@
 3. Create mongoose.js file inside config folder; write code that connects Node.js to a MongoDB database and logs either a successful or failed connection.
 
 4. Imports a database connection setup from the "mongoose.js" file into index.js (entry file).
+
+### 15: Setting up User Schema
+
+1. A schema - used with database like MongoDB, defines the structure of data, specifying the type and organization of fields. It enforces data consistency, validation, and integrity, ensuring that data adheres to a predefined structure.
+2. Create 'user.js' file under 'models folder' for userSchema and create fields - email, password and name with timestamps(to record when user was created).
