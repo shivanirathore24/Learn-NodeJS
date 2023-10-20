@@ -190,5 +190,32 @@
 
 4. Run Project> npm start; inspect --> application --> cookies : add - name: user_id and value: 24 (at browser side).
 5. In home_controller.js --> you can print user_id value from request body(from browser side) i.e console.log(req.cookies);  
-You can edit value of user_id at server side i.e res.cookie("user_id", 25);
+   You can edit value of user_id at server side i.e res.cookie("user_id", 25);
 6. Refresh home page, check value at console and in cookie.
+
+## _Authentication Steps:_
+
+- Create user (Sign-up)
+- Create Session (Sign-In)
+- Show Details of signed-in user on profile page.
+- Sign out.
+
+### 19: Create User Sign-Up
+
+1. Create action - 'create' inside users_controller.js for creating user during Sign-up.
+2. Action 'create' - to handle user sign-up , utilizes modern asynchronous programming using `async/await` for improved readability and control flow.
+   Steps followed :
+
+- Imports the user.js from Models [i.e const User = require("../models/user");], in which user Schema is defined through, which we can interact with database.
+- _Password Confirmation_ : if they don't match, the user is redirected back to the registration/sign-up page.
+
+- _User Existence check_ : It then proceeds to query the database to check for the existence of a user with the same email.
+  - _If No Matching User is Found_ : A new user is created using the data from the registration form(`model.create(data)' --> i.e User.create(req.body)).
+    The user is redirected to the sign-in page.
+  - _If a User With the Same Email Already Exists_ : The code redirects the user back to the registration page.
+- _Error Handling_ : The code includes error handling to catch and log any issues that may occur during the process. If an error is encountered, the server responds with a server error message (status code 500).
+
+3. Defines a POST request route in user.js(views) where the usersController.create function is executed when the "/create" endpoint is accessed.
+   i.e router.post("/create", usersController.create);
+
+4. Click Image: [Data saved in database after Sign-up](../assets/images/output/user_signup_db.png)
