@@ -172,3 +172,9 @@
 2. Add actions - 'signUp' and 'signIn' inside users_controller.js file to handle request from routes.
 3. Add Mapping "/sign-up" and "/sign-in" inside user.js(routes) URLs to functions in "users_controller.js"
 4. For example- Type URL in browser: http://localhost:8000/users/sign-up --> this url is sent as request to routes --> routes maps this request to action 'signUp' --> 'signUp' action renders view page i.e 'user_sign_up.ejs'.
+
+### 17: Creating Forms for SignUp and SignIn
+
+1. Create forms for signUp and signIn in 'user_sign_up.ejs' and 'user_sign_in.ejs'.
+2. After Clicking "Sign Up" button --> Action - '/users/create' will be called --> Add action - 'create' in users_controller.js file & will write code later.
+3. After Clicking "Sign In" button --> Action - '/users/create-session' will be called --> Add action - 'createSession' in users_controller.js file & will write code later.
