@@ -1,6 +1,11 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const app = express(); //to get all functionalities of express libraries to run server
 const port = 8000;
+
+/*** Parser-Cookie as middleware ***/
+app.use(express.urlencoded()); //middleware for parsing incoming requests' URL-encoded form data
+app.use(cookieParser()); // middleware for parsing cookies, enabling data handling and session management
 
 //write before express router, becoz views are going tp be render which have layouts.
 const expressLayout = require("express-ejs-layouts");

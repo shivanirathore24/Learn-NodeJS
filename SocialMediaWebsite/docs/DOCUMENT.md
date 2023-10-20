@@ -178,3 +178,17 @@
 1. Create forms for signUp and signIn in 'user_sign_up.ejs' and 'user_sign_in.ejs'.
 2. After Clicking "Sign Up" button --> Action - '/users/create' will be called --> Add action - 'create' in users_controller.js file & will write code later.
 3. After Clicking "Sign In" button --> Action - '/users/create-session' will be called --> Add action - 'createSession' in users_controller.js file & will write code later.
+
+### 18: Creating and Altering a Cookie
+
+1. Cookie - small piece of data stored on a user's web browser by a website, commonly used for - user authentication, session management, and tracking user preferences.
+2. "cookie-parser" is a middleware in Node.js that simplifies handling cookies, parsing their data, and attaching them to the request object, making it easier to work with cookies in web applications. Install "cookie-parser" :
+   ```bash
+   npm install cookie-parser
+   ```
+3. Use cookie in index.js(entry file) as middleware for parsing cookies, enabling data handling and session management.
+
+4. Run Project> npm start; inspect --> application --> cookies : add - name: user_id and value: 24 (at browser side).
+5. In home_controller.js --> you can print user_id value from request body(from browser side) i.e console.log(req.cookies);  
+You can edit value of user_id at server side i.e res.cookie("user_id", 25);
+6. Refresh home page, check value at console and in cookie.
