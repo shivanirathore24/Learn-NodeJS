@@ -3,7 +3,6 @@
 ### 1: Setting up Directory Structure:
 
 1. Create an 'index.js' file under your project directory i.e 'SocialMediaWebsite' folder.
-
 2. For creating 'package.json,' run the following command in your project directory:
 
    ```bash
@@ -11,33 +10,23 @@
    ```
 
 3. Create folders using the 'mkdir' command in your project directory. For example:
-
    - To create a 'routes' folder:
-
    ```bash
    mkdir routes
    ```
-
    - To create a 'controllers' folder:
-
    ```bash
    mkdir controllers
    ```
-
    - To create a 'views' folder:
-
    ```bash
    mkdir views
    ```
-
    - To create a 'models' folder:
-
    ```bash
    mkdir models
    ```
-
    - To create a 'config' folder:
-
    ```bash
    mkdir config
    ```
@@ -115,7 +104,7 @@
 
 ### 11: Create a layout
 
-1. Install Express EJS Layouts:
+1. Install Express EJS Layouts
    ```bash
    npm install express-ejs-layouts
    ```
@@ -143,7 +132,7 @@
 
 1. Create user_profile.css file for styling user_profile page and write styles.
 2. Link user_profile.css "href - /css/user_profile.css" inside user_profile.ejs(views folder).
-3. Run Project, inspect - You will find link is coming under body which is a bad solution. For better solution follow below steps:
+3. Run Project, inspect - You will find css link is coming under body which is a bad solution. For better solution follow below steps:
 4. Step-1: Extract style and scripts from sub pages into the layout [inside index.js(entry file)]
    - app.set("layout extractStyles", true);
    - app.set("layout extractScripts", true);
@@ -152,14 +141,13 @@
 ### 14: Linking to mongoDB using mongoose
 
 1. Mongoose is a Node.js(Object Data Modeling) library for MongoDB, offering schema definition, data validation, and an API for data operations. It streamlines MongoDB usage, maintaining data integrity, and simplifying Node.js app development with MongoDB.
-
 2. Install mongoose; verify either installed or not: check package.json file --> in dependencies you will find 'mongoose' with verson.
    ```bash
    npm install mongoose
    ```
 3. Create mongoose.js file inside config folder; write code that connects Node.js to a MongoDB database and logs either a successful or failed connection.
-
 4. Imports a database connection setup from the "mongoose.js" file into index.js (entry file).
+5. Run Project, you will see "MongoDB connect" message for successful connection.
 
 ### 15: Setting up User Schema
 
@@ -187,7 +175,6 @@
    npm install cookie-parser
    ```
 3. Use cookie in index.js(entry file) as middleware for parsing cookies, enabling data handling and session management.
-
 4. Run Project> npm start; inspect --> application --> cookies : add - name: user_id and value: 24 (at browser side).
 5. In home_controller.js --> you can print user_id value from request body(from browser side) i.e console.log(req.cookies);  
    You can edit value of user_id at server side i.e res.cookie("user_id", 25);
@@ -219,3 +206,28 @@
    i.e router.post("/create", usersController.create);
 
 4. Click Image: [Data saved in database after Sign-up](../assets/images/output/user_signup_db.png)
+
+### 20. Create User Sign-In (Manual Authentication)
+
+1. Created seperate branch for Manual Authentication :
+   ```bash
+   git checkout -b manual-local-auth
+   ```
+2. When user clicks on 'Sign In' button then action - '/users/create-session is called'.
+2. Create action - 'createSession' inside users_controller.js for creating Session during Sign-In.
+3. The 'createSession' function in the user controller handles user sign-in and session creation, employing modern asynchronous programming with async/await. Steps are taken within this action :
+
+- _User Lookup_ : Search for a user in database with the provided email using await User.findOne({ email: req.body.email }).
+
+- _User Found_ :
+
+  - _Password Check_: If a user is found, check if the provided password matches the user's password stored in the database. If not, the user is redirected back to the 'sign-in' page.
+  - _Session Creation_: If the user's email and password match, a session is created. This involves setting a user identifier in a cookie (in response i.e res.cookie("user_id", user.id); - "user_id" is set to the user's ID) and then redirecting the user to their 'profile page'.
+
+- _User Not Found_ : If no user with the provided email is found, the code redirects the user back to the sign-in page, indicating that the user doesn't exist.
+
+- Error Handling : The code includes error handling to catch and log any issues that may occur during the process. If an error is encountered, the server responds with a server error message (status code 500).
+
+4. Defines a POST request in routes(users.js) that links to the createSession function in the usersController. When accessed, it initiates user session creation.
+
+5. If user sign-in successfully --> session is created --> verfiy: inspect --> application --> cookies --> check user_id value that will be same as store in database for that user.
