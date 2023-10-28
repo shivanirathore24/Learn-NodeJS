@@ -1,13 +1,47 @@
-const User = require("../models/user"); //import User Schem
+const User = require("../models/user"); //import User Schema
 
+/*
 module.exports.profile = function (req, res) {
-  // res.end("<h1>User Profile!</h1>");
-  return res.render("user_profile", {
-    title: "User Profile",
-  });
+  if (req.cookies.user_id) {
+    user.findById(req.cookies.user_id, function (err, user) {
+      if (user) {
+        return res.render("user_profile", {
+          title: "User Profile",
+          user: user,
+        });
+      } else {
+        return res.redirect("/users/sign-in");
+      }
+    });
+  } else {
+    return res.redirect("/users/sign-in");
+  }
+};
+*/
+module.exports.profile = async function (req, res) {
+  try {
+    if (req.cookies.user_id) {
+      const user = await User.findById(req.cookies.user_id).exec();
+
+      if (user) {
+        return res.render("user_profile", {
+          title: "User Profile",
+          user: user,
+        });
+      } else {
+        return res.redirect("/users/sign-in");
+      }
+    } else {
+      return res.redirect("/users/sign-in");
+    }
+  } catch (error) {
+    // Handle any potential errors here
+    console.error(error);
+    return res.status(500).send("Internal Server Error");
+  }
 };
 
-//render the sigh up page
+//render the sign up page
 module.exports.signUp = function (req, res) {
   return res.render("user_sign_up", {
     title: "Social Media | Sign up",

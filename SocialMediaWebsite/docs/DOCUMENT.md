@@ -231,3 +231,7 @@
 4. Defines a POST request in routes(users.js) that links to the createSession function in the usersController. When accessed, it initiates user session creation.
 
 5. If user sign-in successfully --> session is created --> verfiy: inspect --> application --> cookies --> check user_id value that will be same as store in database for that user.
+
+### 21. Show details of Signed-in User
+1. Edit 'profile' action of users_controller.js - checking if a user is authenticated via cookies, fetching user data by ID, rendering a profile page (passing a title and user data to the template), and handling potential errors.
+2. Show details of user in views(user_profile.js) - displays the user's name and email, using data from the "user" object.
