@@ -237,12 +237,39 @@
 1. Edit 'profile' action of users_controller.js - checking if a user is authenticated via cookies, fetching user data by ID, rendering a profile page (passing a title and user data to the template), and handling potential errors.
 2. Show details of user in views(user_profile.js) - displays the user's name and email, using data from the "user" object.
 
-## OR 
+## OR
 
-### 20. Installing and Setting up Passport.js 
-1. Install passport.js 
+### 20. Installing and Setting up Passport.js
+
+1. Install passport.js
    ```bash
-   npm install passport 
+   npm install passport
    npm install passport-local
    ```
-2. Create file 'passport-local-strategy.js ' under config folder - configures Passport, a Node.js authentication middleware, to use a LocalStrategy for user authentication. When a user signs in, Passport finds the user by their email, checks if the password matches, and serializes their user ID into a cookie. When a request is made, it deserializes the user based on the stored user ID from the cookie for authentication
+2. Passport.js:
+   - Simplifies user authentication in Node.js applications.
+   - Supports various authentication strategies (e.g., username/password or OAuth).
+   - Primarily handles user identity verification and authentication.
+   - Used to secure routes and personalize user experiences.
+
+3. Create file 'passport-local-strategy.js ' under config folder - configures Passport, a Node.js authentication middleware, to use a LocalStrategy for user authentication. When a user signs in, Passport finds the user by their email, checks if the password matches, and serializes their user ID into a cookie. When a request is made, it deserializes the user based on the stored user ID from the cookie for authentication
+
+### 21. Express-Session and using passport for authentication
+
+1. Install express-session :
+   ```bash
+   npm install express-session
+   ```
+2. Express Session:
+   - Manages/create user sessions in Express.js.
+   - Stores and manages session data, like user-specific information in encrypted format in the cookie.
+   - Focuses on session data storage and state management.
+   - Enhances security and enables customization of user experiences.
+
+3. index.js(entry file)- setup to use passport and express-session.
+
+4. users_controller.js - redirect to homepage when createSession action is executed.
+
+5. routes(users.js) - uses Passport's local authentication strategy as middleware. On failure, it redirects to "/users/sign-in"; on success, it calls "createSession" in "usersController."
+
+6. Run Project --> Sign-In --> inspect(homepage) --> application --> cookies - check name of session will be "SocialMediaWeb" and value will be encrypted.

@@ -8,21 +8,20 @@ passport.use(
     {
       usernameField: "email",
     },
-    function (email, password, done) {
-      //find the user and establish the identity
-      User.findOne({ email: email }, function (err, user) {
-        if (err) {
-          console.log("Error in finding user --> Passport");
-          return done(err);
+    async function (email, password, done) {
+      try {
+        const user = await User.findOne({ email: email });
+
+        if (!user || user.password != password) {
+          console.log("Invalid Username/Password");
+          return done(null, false); // Authentication failed
         }
 
-        if (!user || user.passport != password) {
-          console.log("Invalid Username/ Password");
-          return null, false; // error --> null , authentication -->false i.e auth failed
-        }
-
-        return done(null, user); // error--> null, authentication passed so returned User
-      });
+        return done(null, user); // Authentication passed, return the user
+      } catch (err) {
+        console.log("Error in finding user --> Passport");
+        return done(err);
+      }
     }
   )
 );
@@ -33,15 +32,22 @@ passport.serializeUser(function (user, done) {
 });
 
 //deserializing the user from the key in the cookies
-passport.deserializeUser(function (id, done) {
-  User.findById(id, function (err, user) {
-    if (err) {
+passport.deserializeUser(async function (id, done) {
+    try {
+      const user = await User.findById(id);
+      
+      if (!user) {
+        console.log("User not found");
+        return done(null, false);
+      }
+  
+      return done(null, user);
+    } catch (err) {
       console.log("Error in finding user --> Passport");
       return done(err);
     }
-    return done(null, user);
   });
-});
+  
 
 module.exports = passport;
 
