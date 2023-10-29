@@ -214,8 +214,8 @@
    git checkout -b manual-local-auth
    ```
 2. When user clicks on 'Sign In' button then action - '/users/create-session is called'.
-2. Create action - 'createSession' inside users_controller.js for creating Session during Sign-In.
-3. The 'createSession' function in the user controller handles user sign-in and session creation, employing modern asynchronous programming with async/await. Steps are taken within this action :
+3. Create action - 'createSession' inside users_controller.js for creating Session during Sign-In.
+4. The 'createSession' function in the user controller handles user sign-in and session creation, employing modern asynchronous programming with async/await. Steps are taken within this action :
 
 - _User Lookup_ : Search for a user in database with the provided email using await User.findOne({ email: req.body.email }).
 
@@ -231,3 +231,18 @@
 4. Defines a POST request in routes(users.js) that links to the createSession function in the usersController. When accessed, it initiates user session creation.
 
 5. If user sign-in successfully --> session is created --> verfiy: inspect --> application --> cookies --> check user_id value that will be same as store in database for that user.
+
+### 21. Show details of Signed-in User
+
+1. Edit 'profile' action of users_controller.js - checking if a user is authenticated via cookies, fetching user data by ID, rendering a profile page (passing a title and user data to the template), and handling potential errors.
+2. Show details of user in views(user_profile.js) - displays the user's name and email, using data from the "user" object.
+
+## OR 
+
+### 20. Installing and Setting up Passport.js 
+1. Install passport.js 
+   ```bash
+   npm install passport 
+   npm install passport-local
+   ```
+2. Create file 'passport-local-strategy.js ' under config folder - configures Passport, a Node.js authentication middleware, to use a LocalStrategy for user authentication. When a user signs in, Passport finds the user by their email, checks if the password matches, and serializes their user ID into a cookie. When a request is made, it deserializes the user based on the stored user ID from the cookie for authentication
