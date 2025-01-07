@@ -74,3 +74,37 @@ file is saved.
 5. Type node hello-world.js and press enter.
 6. The program will execute, and the output "Hello, World!" will be displayed in
 the terminal/command prompt.
+
+## Blocking and Non-Blocking Code
+***Blocking code***, or synchronous code, is code that stops the execution of your
+program until a task is completed. This can cause your application to become
+unresponsive, especially when dealing with tasks that take significant time, like
+calculations or loops.
+Here's an example of blocking code:
+
+```javascript
+for (let i = 0; i < 1000000000; i++) {
+  // This code illustrates a time-consuming task and does not perform any //
+  // practical action.
+}
+console.log('Finished loop.')
+```
+
+The code is blocking because it contains a long-running synchronous task.
+The program cannot perform other tasks during the execution of the loop, which may
+cause it to appear frozen or unresponsive to the user.
+
+***Non-Blocking*** or asynchronous code enables a program to continue execution while
+waiting for a task to complete. This is done using callbacks, promises, or async/await
+syntax in JavaScript.
+Here's an example of non-blocking code:
+```javascript
+console.log('Starting timer')
+setTimeout(() => {
+    console.log('Timer finished.')
+}, 5000)
+console.log('Finished timer.')
+```
+In this example, the setTimeout function doesn't block the execution. Instead, it takes
+a callback function that gets executed after a specified delay.
+
