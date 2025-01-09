@@ -108,3 +108,97 @@ console.log('Finished timer.')
 In this example, the setTimeout function doesn't block the execution. Instead, it takes
 a callback function that gets executed after a specified delay.
 
+## How does NodeJS work?
+### Event Loop
+The Event Loop is a crucial component of Node.js, responsible for enabling
+non-blocking I/O operations in a single-threaded architecture. Essentially, it is a
+continuous loop that checks for pending tasks and executes them one by one in the
+order they were added to the queue. This process continues until there are no more
+tasks left in the queue. By allowing Node.js to perform I/O operations
+asynchronously, the Event Loop helps to ensure that the application remains
+responsive even when handling a large number of requests.
+
+### I/O Operations
+Refer to the tasks that involve reading or writing data to external resources like files,
+databases, or network connections. As these operations are generally
+time-consuming, Node.js manages them asynchronously to prevent the main thread
+from being blocked.
+
+### Handling I/O Operations
+1. Node.js uses a combination of the Event Loop, worker threads, and callback
+functions to handle I/O operations.
+2. When an I/O operation is initiated, Node.js sends the task to a worker thread,
+which is separate from the main thread.
+3. The worker thread handles the I/O operation in the background, allowing the
+main thread to continue executing other tasks.
+4. Once the I/O operation is complete, the worker thread adds a callback
+function associated with the operation to the Event queue.
+5. The Event Loop executes the callback function when it becomes available,
+allowing Node.js to handle the result of the I/O operation asynchronously.
+
+### Performance:
+Pros
+1. Node.js is excellent for I/O-bound operations.
+2. Non-blocking, the event-driven architecture enables it to handle many
+simultaneous connections.
+
+Cons
+1. It may struggle with CPU-bound tasks.
+2. Single-threaded execution of JavaScript can cause decreased
+performance for complex calculations and data processing
+
+## What is a Server?
+### How Web Applications Work?
+Web applications follow a client-server architecture, where the client sends requests
+to the server. The server processes the request and sends a response back to the
+client. This communication between the client and server happens via HTTP
+requests and responses.
+
+### Server:
+A server is a computer or software that provides resources or services to other
+computers over a network. In web applications, servers store and process data,
+handle user authentication, and execute server-side code. Servers are responsible
+for serving static files to the browser for rendering web pages, as well as receiving
+and processing user input to enable dynamic updates on the page.
+
+## Creating an HTTP Server
+### What is HTTP?
+HTTP stands for Hypertext Transfer Protocol. It is a communication protocol used to transmit
+and receive data over the Internet. HTTP allows clients (such as web browsers) to send
+requests to servers, and servers respond with the requested data.
+
+### Creating a Server
+To create a server in Node.js, use the built-in 'http' module.
+1. Start by importing it:
+```javascript 
+const http = require('http')
+```
+2. Now, create a simple server using the 'http.createServer()' method:
+The createServer method creates an HTTP server. It takes a callback function as an
+argument that will be called every time a request is made to the server. The callback
+function has two arguments: req, which represents the incoming HTTP request, and
+res, the HTTP response object we can use to send data back to the client.
+```javascript
+const server = http.createServer((req, res){
+res.end('Hello World!')
+});
+```
+3. Make the server listen on a specific port:
+```javascript
+const PORT = 3000;
+server.listen(PORT)
+console.log(`Server is listening at http://localhost:${PORT}`)
+```
+With this code, we've created a basic server that listens on port 3000 and sends
+back a "Hello World!" message for every request.
+
+### Understanding Ports
+A port is a unique address that identifies a process or service. Each application has
+a unique port number assigned to it. When running multiple servers on a single
+computer, using a different port number for each server allows the client to know
+which server to communicate with.
+
+
+
+
+
