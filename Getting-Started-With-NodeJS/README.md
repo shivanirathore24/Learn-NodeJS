@@ -198,6 +198,11 @@ a unique port number assigned to it. When running multiple servers on a single
 computer, using a different port number for each server allows the client to know
 which server to communicate with.
 
+### Handling Multiple Requests
+1. ```req.url``` is a property of the req (request) object in Node.js.
+It contains the URL path of the incoming HTTP request. This includes the portion of the URL after the domain name (e.g., /product, /user, or /).
+2. ```res.write()``` -> is a method in Node.js used to send data as part of the HTTP response body.
+It allows you to send chunks of data to the client before ending the response with res.end().
 
 
 
