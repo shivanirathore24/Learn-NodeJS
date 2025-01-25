@@ -204,6 +204,35 @@ It contains the URL path of the incoming HTTP request. This includes the portion
 2. ```res.write()``` -> is a method in Node.js used to send data as part of the HTTP response body.
 It allows you to send chunks of data to the client before ending the response with res.end().
 
+## Returning HTML as Response
+To return an HTML file, we need to read it using the fs module and then send its
+content as a response. Let's create a simple example to demonstrate this.
+1. First, create an HTML file named index.html with some primary content.
+2. Now, modify the server that serves this file:
+  ```javascript
+  const http = require('http')
+  const fs = require('fs')
+  const server = http.createServer((req, res){
+    const data = fs.readFileSync('index.html')
+    res.end(data)
+  })
+  server.listen(3100)
+  console.log('Server is listening on 3100')
+  ```
+In this example, we are using the fs.readFileSync method to read the index.html
+file, and it can read files and provide content to you
+
+## Summarising it
+Let’s summarise what we have learned in this module:
+1. Introduction to Node.js.
+2. Understanding the runtime and how it works
+3. Advantages of using event-driven non-blocking I/O model
+4. Installation of Node.js
+5. Differences between blocking and non-blocking code
+6. Role of the Event Loop, worker threads, and callback functions in handling I/O operations
+7. Communication between web applications and servers
+8. Creating a server using the http module
+9. Sending text and HTML as a response to an HTTP reque
 
 
 
