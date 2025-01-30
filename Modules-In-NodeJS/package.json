@@ -9,6 +9,7 @@
   },
   "author": "Shivani Rathore",
   "license": "ISC",
+  "type": "module",    
   "devDependencies": {
     "nodemon": "^3.1.9"
   }
