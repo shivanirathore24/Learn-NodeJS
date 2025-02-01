@@ -287,3 +287,25 @@ which provides methods for reading input from the console.
 enter a response. The response is then passed to a callback function that we
 provide.
 3. rl.close(): This function closes the Readline interface and frees up resources.
+
+## File System Module
+The FileSystem module, also known as 'fs', is a built-in module in Node.js that
+provides a variety of methods for interacting with the file system. It enables you to
+perform various operations on files and directories, including reading, writing,
+deleting, and updating them.
+### Types of “fs” methods
+There are two types of fs methods available: blocking (or synchronous) and
+non-blocking (asynchronous).
+
+### Using Synchronous Methods
+1. Reading a file: To read a file, you can use the `fs.readFileSync()` method, which
+returns a buffer. You can convert the buffer to a string, or you can set the
+encoding property to 'utf8' to get the content directly as a string.
+```javascript
+const fs = require('fs');
+const path = 'example.txt'; // A file at path exists
+// Reading a file synchronously
+const data = fs.readFileSync(path,{encoding :'utf8'});
+console.log(data);
+```
+
