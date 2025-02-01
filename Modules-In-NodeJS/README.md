@@ -308,4 +308,32 @@ const path = 'example.txt'; // A file at path exists
 const data = fs.readFileSync(path,{encoding :'utf8'});
 console.log(data);
 ```
+2. Writing to a file: To write data to a file, use the fs.writeFileSync() method. It
+creates a new file or overwrites an existing one.
+```javascript
+const fs = require('fs');
+const path = 'example.txt';
+// Writing to a file synchronously
+fs.writeFileSync(path, 'Hello World!');
+console.log('File written successfully.');
+```
+3. Updating a file: If you want to append content to an existing file, use the
+fs.appendFileSync() method.
+```javascript
+const fs = require('fs');
+const path = 'example.txt';
+// Updating a file synchronously
+fs.appendFileSync(path, '\nThis is an update.');
+console.log('File updated successfully.');
+```
+
+4. Deleting a file: To delete a file, use the fs.unlinkSync() method.
+```javascript
+const fs = require('fs');
+const path = 'example.txt';
+// Deleting a file synchronously using fs.unlinkSync()
+fs.unlinkSync(path);
+console.log('File deleted successfully.');
+```
+
 
