@@ -336,4 +336,56 @@ fs.unlinkSync(path);
 console.log('File deleted successfully.');
 ```
 
+### Using Asynchronous Methods
+We learned about performing CRUD operations using blocking code with the File
+System module, which means while file operations are being performed, our main
+thread is blocked, and it can't perform any other task. Blocking code can make your
+app less responsive and slow. To avoid this, we can use non-blocking or
+asynchronous methods available in the FileSystem module.
+1. Reading a file: To read a file asynchronously, use fs.readFile().
+```javascript
+fs.readFile("data.txt", (err, data) => {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log(data.toString());
+  }
+});
+```
+2. Writing to a file: To write data to a file asynchronously, use fs.writeFile().
+```javascript
+fs.writeFile("employee.txt", "New Employee", (err) => {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log("File is written");
+  }
+});
+```
+3. Updating a file: To append content to a file asynchronously, use
+fs.appendFile().
+```javascript
+fs.appendFile("employee.txt", "\n Another Employee", (err) => {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log("File is updated");
+  }
+});
+```
+
+4. Deleting a file: To delete a file asynchronously, use fs.unlink().
+```javascript
+fs.unlink("employee.txt", (err) => {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log("File is deleted");
+  }
+});
+```
+
+
+
+
 
