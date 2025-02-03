@@ -1,8 +1,15 @@
-//const fs = require("fs");
-import fs from "node:fs"; // "type": "module" in package.json
+//import fs from "node:fs"; // "type": "module" in package.json
+const fs = require("fs");
+const path = require("path");
 
 //Reading data
-fs.readFile("data.txt", (err, data) => {
+const filePath = path.join("src", "home", "data.txt");
+const filePathResolved = path.resolve("src", "home", "data.txt");
+console.log(filePath);
+console.log(filePathResolved); //get absolute path
+console.log(path.extname(filePathResolved));
+
+fs.readFile(filePathResolved, (err, data) => {
   if (err) {
     console.log(err);
   } else {

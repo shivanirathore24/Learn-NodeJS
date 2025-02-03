@@ -385,6 +385,69 @@ fs.unlink("employee.txt", (err) => {
 });
 ```
 
+### Path module
+The Path module in Node.js is a built-in module that provides various methods to
+work with file paths. It can be used to normalize, join, resolve, and manipulate file
+and directory paths.
+
+1. path.join(): This method joins two or more path segments using the
+platform-specific separator and returns the combined path.
+Here is an example:
+```javascript
+const path = require('path');
+const filePath = path.join('folder', 'file.txt');
+console.log(filePath);
+// output: folder/file.txt (on Unix-based systems)
+// output: folder\file.txt (on Windows systems)
+```
+2. path.resolve(): This method resolves the given sequence of paths or path
+segments into an absolute 
+path. It takes multiple arguments as input and
+returns the resolved absolute path.
+Here is an example:
+```javascript
+const path = require('path');
+const absPath = path.resolve('folder', 'file.txt');
+console.log(absPath);
+// output:
+/home/user/folder/file.txt (on Unix-based systems)
+//output:
+\home\user\folder\file.txt (on Windows systems)
+```
+
+3. path.extname(): This method returns the extension of the given file path. It
+takes a file path as input, and returns the extension (including the dot). If there
+is no extension, an empty string is returned.
+Here is an example:
+```javascript
+const path = require('path');
+const ext = path.extname('file.txt');
+console.log(ext); // output: .txt
+```
+
+## Summarising it
+Let’s summarise what we have learned in this module:
+1. Types of modules and how to use them.
+2. Package managers and NPM.
+3. Nodemon and how it can be used for automatic server restarts.
+4. package.json and package-lock.json files.
+5. dependencies and devDependencies
+6. NVM to manage multiple Node.js versions on the same machine.
+7. Reading data from the console using the readline module.
+8. File System module, including synchronous and asynchronous
+methods for file operations.
+9. Path module and its usage.
+
+### Some Additional Resources:
+https://medium.com/better-programming/use-nvm-to-manage-node-js-and-npm-versions-2bd0d0875f9f
+
+https://nodejs.org/api/readline.html
+
+https://nodejs.org/api/fs.html
+
+https://nodejs.org/api/path.html
+
+
 
 
 
