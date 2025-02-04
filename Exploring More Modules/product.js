@@ -12,6 +12,10 @@ const productsList = [
   { name: "Gloves", price: 30, quantity: 2 },
 ];
 
+function printTotalValue(value) {
+  console.log(value);
+}
 // expected result = 100+25+60=185
 const grandTotal = calculateTotal(productsList);
-console.log("Grand Total:", grandTotal);
+printTotalValue(grandTotal);
+

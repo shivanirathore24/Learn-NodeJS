@@ -53,3 +53,43 @@ to server-side resources like the file system, databases, and network
 connections.
 4. Despite these differences, the core principles of debugging remain the same –
 finding and fixing issues in your code.
+
+## Debugging in VS Code
+We have discussed debugging Node.js applications using the built-in Node.js
+debugger. Now we'll explore debugging Node.js applications using Visual Studio
+Code (VSCode), a powerful code editor.
+
+Debugging Process in VS Code
+To debug Node.js applications in VS Code:
+1. Open the products.js file in VS Code.
+2. Go to the Run and Debug panel or press Ctrl+Shift+D and click "create a
+launch.json file".
+![launch.json file](./images/launch_file.png)
+3. Select "Node.js" from the dropdown to create a basic configuration for
+debugging Node.js applications
+![Select Debugger](./images/select_debugger.png)
+4. Set a breakpoint at line 4 by clicking on the left side of the line number.
+![Set Breakpoint](./images/set_breakpoint.png)
+5. Click the green "Launch Program" button or press F5 to start the debugger.
+![Launch Program](./images/launch_program.png)
+6. Add the product and total variables to the watch panel to monitor their values.
+![Watch Panel](./images/watch_panel.png)
+7. The debugger will pause at the breakpoint, allowing you to inspect variables,
+step through code, and observe the call stack.
+
+VS Code offers several debugger options to control the debugging
+process:
+![Debugger Options](./images/debugger_options.png)
+
+1. Continue: This option allows the debugger to continue running the code until
+the next breakpoint or the end of the program is reached.
+2. Step Over: With this option, the debugger moves to the next line of code,
+skipping over function calls. It is useful for quickly moving through code
+without diving into function details.
+3.  Step Into: This option allows the debugger to step into the next function call,
+enabling you to examine the details of the function being called.
+4. Step Out: If the debugger is currently inside a function, the Step Out option
+will cause it to exit the current function and return to the calling code.
+5. Restart: This option restarts the debugging process from the beginning,
+allowing you to re-run the code and analyze it again.
+6. Stop: This option terminates the debugging session and exits the debugger
