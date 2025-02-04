@@ -220,3 +220,71 @@ Explanation:
    console and perform further actions with it.
 6. Finally, we send a response to the client (res) indicating that the data has
    been received successfully.
+
+## Testing API using Postman
+
+### Introduction
+
+1. Postman is a popular API development and testing tool used by developers to
+   make HTTP requests and analyze the responses.
+2. It provides a user-friendly interface for interacting with APIs and simplifies the
+   process of testing and debugging API endpoints.
+3. POSTMAN supports various HTTP methods, including GET, POST, PUT,
+   DELETE, and more, allowing developers to test different aspects of API
+   functionality.
+
+### Installing Postman
+
+- Postman is available as a desktop application for Windows, macOS, and
+  Linux, as well as a Chrome extension.
+- To install the desktop application, visit the official Postman website
+  (https://www.postman.com) and download the version compatible with your
+  operating system.
+- Once downloaded, follow the installation instructions to set up Postman on
+  your machine.
+
+### Making a POST Request with Postman
+
+1. Launch Postman and create a new request by clicking the + button.
+2. Enter the API endpoint URL in the Enter URL field.
+3. Select the HTTP method as "POST" from the dropdown menu.
+4. Add the request payload, as JSON data, in the request body.
+5. Click the "Send" button to execute the POST request.
+6. Postman will display the response and allow you to analyze the API response.
+
+![Testing API using Postman](./images/testing_api_using_postman.png)
+
+VS Code Terminal after POST request:
+![VS Code terminal after POST Request](./images/vscode_terminal_after_postrequest.png)
+
+Code Example:
+```javascript
+const http = require("http");
+const server = http.createServer((req, res) => {
+  if (req.method === "POST") {
+    //expecting data from client
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on("end", () => {
+      console.log("Data recieved:", body);
+      //Perform further actions with the recieved data
+      res.end("Data recieved succesfully");
+    });
+  } else {
+    res.end("Invalid request");
+  }
+});
+server.listen(3100, () => {
+  console.log("Server listening on port 3100");
+});
+```
+
+In the provided code example, we create an HTTP server using the built-in http
+module in Node.js. The server listens for incoming requests and specifically handles
+POST requests. When a POST request is received, the server appends the received
+data chunks and logs the complete data in the 'end' event callback. Further actions
+can be performed with the received data. The server responds back to the client
+indicating the successful reception of data.
