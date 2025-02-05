@@ -258,6 +258,7 @@ VS Code Terminal after POST request:
 ![VS Code terminal after POST Request](./images/vscode_terminal_after_postrequest.png)
 
 Code Example:
+
 ```javascript
 const http = require("http");
 const server = http.createServer((req, res) => {
@@ -288,3 +289,151 @@ POST requests. When a POST request is received, the server appends the received
 data chunks and logs the complete data in the 'end' event callback. Further actions
 can be performed with the received data. The server responds back to the client
 indicating the successful reception of data.
+
+## Creating Custom Events in Node.js
+
+Custom events in Node.js allow developers to define and use their own events in
+applications, providing flexibility and control over event-driven functionality.
+To create custom events, the 'events' module in Node.js provides the EventEmitter
+class, which serves as the foundation for working with events.
+Example: Creating a custom event for an online store:
+
+1. Create a file called order-events.js and add the following code:
+
+```javascript
+const EventEmitter = require("events");
+class Order extends EventEmitter {
+  placeOrder(orderData) {
+    // Emit the 'orderPlaced' event
+    this.emit("orderPlaced", orderData);
+  }
+}
+module.exports = Order;
+```
+
+2. Create a file called index.js and add the following code:
+
+```javascript
+const Order = require("./order-events");
+
+// Create an instance of the Order class
+const order = new Order();
+
+// Listener for sending a confirmation email
+const emailListener = (orderData) => {
+  console.log("Confirmation email sent:", orderData);
+};
+
+// Listener for updating the inventory
+const inventoryListener = (orderData) => {
+  console.log("Inventory updated for order:", orderData);
+};
+
+// Add listeners to the 'orderPlaced' event using addListener()
+order.addListener("orderPlaced", emailListener);
+order.addListener("orderPlaced", inventoryListener);
+
+// Simulate placing an order
+order.placeOrder({
+  orderId: 123,
+  products: ["Product A", "Product B"],
+  total: 100,
+});
+```
+
+In this example, we create a custom event by extending the EventEmitter class with
+the Order class. The placeOrder method simulates placing an order and emits an
+'orderPlaced' event with the order data. We use the addListener() method to add
+listeners for the 'orderPlaced' event. We define separate listener functions
+emailListener and inventoryListener for sending a confirmation email and updating
+the inventory, respectively.
+
+3. When running the index.js file, the output will be:
+   ![Custom Event Output](./images/customevent_output.png)
+
+## Event-Driven Architecture in Node.js
+- Event-Driven Architecture is a core concept in Node.js that allows the flow of
+a program to be determined by events triggered by external factors or other
+parts of the application. External factors in Event-Driven Architecture could
+include user interactions (such as mouse clicks and keyboard inputs), network
+events (such as receiving a message from a server), or system events (such
+as the creation or modification of a file).
+- In this architecture, events are emitted and event listeners react to those
+events, enabling concurrent and asynchronous handling of tasks.
+- The main components of Event-Driven Architecture are events, event
+emitters, and event listeners.
+- When an event occurs, all registered listeners for that event are executed
+independently
+
+![Event Driven Architecture](./images/eventdriven_architecture.png)
+
+- In a social media platform, when a user creates a new post, multiple tasks
+need to be performed concurrently.
+- By emitting a "postCreated" event, different listeners can react to the event
+and handle tasks independently.
+- Example listeners include sending notifications to followers, updating the
+user's timeline, and saving the post to the database
+
+### Advantages of Event-Driven Architecture:
+1. *Scalability:* Supports handling a large number of simultaneous tasks, making it
+suitable for scalable applications.
+2. *Loose coupling:* Components of the application are less dependent on each
+other, resulting in more maintainable and flexible code.
+3. *Better responsiveness:* Concurrent and asynchronous handling of tasks
+ensures the application remains responsive even with a high volume of
+requests.
+4. *Improved performance:* Efficient resource management and concurrent
+handling of multiple tasks lead to improved overall performance.
+
+#### Other real-world use cases for Event-Driven Architecture
+Stock trading application: Events like stock price changes can trigger actions such as
+user notifications, updating trading strategies, and logging historical data.
+
+## Best Practices for Working with Modules in Node.js
+Best practices are important for working with modules and writing maintainable code
+in Node.js. Following these practices ensures a clean and organized codebase,
+making development and collaboration more efficient.
+
+#### Organizing Code into Modules:
+Identify components in your application that can be modularized, such as user authentication, product management, shopping cart, and order processing.Modularizing code improves maintainability, reusability, and separation of concerns.
+
+#### Naming Conventions:
+Use clear and descriptive names for variables, functions, and modules.
+Follow a consistent naming convention throughout the codebase for easier
+readability and understanding.
+
+#### Documentation:
+Document your code with comments to explain the purpose of functions and
+complex code blocks. Write a README file for each module, providing information
+about its functionality and usage. Documentation helps developers understand the
+codebase and facilitates future maintenance and collaboration.
+
+#### Version Control:
+Utilize version control systems like Git to track code changes and collaborate
+effectively. Use branches and pull requests to maintain a structured development
+process and ensure code integrity.
+
+
+## Summarising it
+Let’s summarise what we have learned in this module:
+1. Learned about debugging in Node.js.
+2. Learned about debugging in Visual Studio Code.
+3. Explored sending emails in Node.js.
+4. Studied events in Node.js and how to work with built-in and custom
+events.
+5. Learned how to test APIs using Postman.
+6. Created custom events in Node.js using the events module.
+7. Explored the advantages of using Event-Driven Architecture in Node.js
+applications.
+8. Discussed best practices for working with modules and writing
+maintainable code in Node.js
+
+### Some Additional Resources:
+[How to debug Node.js with the built-in Debugger?](https://www.digitalocean.com/community/tutorials/how-to-debug-node-js-with-the-built-in-debugger-and-chrome-devtools)
+
+[How to use Nodemailer?](https://www.freecodecamp.org/news/use-nodemailer-to-send-emails-from-your-node-js-server/)
+
+[How to code your own event emitter in Node.js ?](https://www.freecodecamp.org/news/how-to-code-your-own-event-emitter-in-node-js-a-step-by-step-guide-e13b7e7908e1/)
+
+[Postman tutorial - How to use for API testing?](https://www.guru99.com/postman-tutorial.html)
+
