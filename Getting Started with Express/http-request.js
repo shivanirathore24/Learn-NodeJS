@@ -11,12 +11,15 @@ server.get("/", (req, res, next) => {
 
 //GET Request
 server.get("/", (req, res) => {
+  // Setting a response header
+  res.set("Content-Type", "text/plain");
   res.send("Welcome to Express Server");
 });
 
 //POST Request
 server.post("/", (req, res) => {
-  res.send("Post request recieved");
+  // Setting status code
+  res.status(201).send("Post request recieved");
 });
 
 //PUT Request

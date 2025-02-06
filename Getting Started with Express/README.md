@@ -222,3 +222,75 @@ res.send('DELETE request received')
 });
 ```
 Note: Use Postman to test all these request methods.
+
+
+
+## HTTP Headers
+HTTP headers are key-value pairs that carry additional information between the
+client and the server in an HTTP request or response. They help define how the data
+should be processed and provide metadata about the request or response.
+
+### Why We Need HTTP Headers
+HTTP headers are necessary to:
+1. Provide metadata about the request or response, such as content type or
+length.
+2. Set cookies to store user-specific data.
+3. Control caching behavior.
+4. Communicate server-specific information to the client.
+
+### How to Use HTTP Headers in Express
+In Express, you can set headers using the res.set() method.
+```javascript
+const express = require("express");
+const app = new express();
+app.get("/", (req, res) => {
+  // Setting a response header
+  res.set("Content-Type", "text/plain");
+  res.send("Request Received");
+});
+app.listen(3000, () => console.log("Listening on port 3000"));
+```
+In Postman, you can view the Content-Type header in the response details.
+- Send a GET request to http://localhost:3000 using Postman.
+- Once you receive the response, you will see a " Headers " section in the
+response details.
+![HTTP Header](./images/http_header.png)
+
+
+
+## HTTP response status codes
+These are used to indicate the completion status of an HTTP request. These status
+codes are classified into five classes, each representing a different category of
+response:
+1. **Informational responses (100 – 199):** These status codes indicate that the
+server has received the request and is continuing to process it.
+2. **Successful responses (200 – 299):** Status codes in this range indicate that
+the request was successfully received, understood, and processed by the
+server.
+3. **Redirection messages (300 – 399):** Redirection status codes inform the
+client that further action is needed to complete the request.
+4. **Client error responses (400 – 499):** Status codes in this range indicate that
+there was an error on the client side, and the server cannot fulfill the request.
+5. **Server error responses (500 – 599):** Server error status codes indicate that
+the server encountered an error while processing the request
+
+### How to Use Status Codes in Express
+In Express, you can set the status code of a response using the res.status() method.
+By default, Express sets the status code to 200 for successful requests and 404 for
+unsuccessful ones.
+```javascript
+const express = require("express");
+const app = new express();
+app.get("/", (req, res) => {
+  // Setting a response header
+  res.set("Content-Type", "text/plain");
+  // Setting status code
+  res.status(201).send("Request Received");
+});
+app.listen(3000, () => console.log("Listening on port 3000"));
+```
+
+In Postman, you can see the status code in the response details. Send a GET
+request to http://localhost:3000 using Postman.
+![HTTP Status-Code](./images/http_statuscode.png)
+
