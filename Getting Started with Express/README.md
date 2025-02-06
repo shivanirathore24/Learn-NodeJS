@@ -25,6 +25,8 @@ middleware, plugins, and modules.
 Social media platforms, e-commerce websites, and online learning platforms can
 benefit from using Express as their backend framework.
 
+
+
 ## Creating a Server using Express
 ### Installing Express
 To start working with Express, we must install it first. To do that, open your terminal
@@ -122,3 +124,43 @@ If you are working with a team or want to ensure that everyone is using the same
 npm ci
 ```
 This command installs the exact versions of dependencies specified in the **`package-lock.json`** file, ensuring consistency across environments.
+
+
+
+## Express Middleware and its Functionality
+![Express middlware](./images/express_middleware.png)
+Middleware functions are a series of functions with access to the request object
+(req), the response object (res), and the next function in the application’s
+request-response cycle. These functions can execute code, modify request and
+response objects, or end the request-response cycle.
+
+### Examples of Middleware Functions
+- Logging requests: Middleware function to log information about incoming
+requests.
+- Parsing request bodies: Middleware function to parse and extract data from
+the request body.
+- Handling authentication: Middleware function to authenticate and authorize
+user requests.
+
+### Example of Using Middleware
+Handling GET Requests with Middleware:
+```javascript
+const express = require("express");
+const app = new express();
+app.get("/", (req, res, next) => {
+  console.log("Middleware 1 executed");
+  next();
+});
+app.get("/", (req, res, next) => {
+  res.send("GET request to the homepage from middleware 2");
+});
+app.listen(3000, () => console.log("Listening on port 3000"));
+```
+Explanation
+- Two route handlers are defined using app.get() both match the root URL (/).
+- The first route handler includes a middleware function that logs the message
+"Middleware 1 executed" to the console and then calls next() to pass control
+to the next middleware or route handler.
+- The second route handler includes a middleware function that sends the
+response "GET request to the homepage from middleware 2" back to the
+client.
