@@ -164,3 +164,27 @@ to the next middleware or route handler.
 - The second route handler includes a middleware function that sends the
 response "GET request to the homepage from middleware 2" back to the
 client.
+
+### Global Middleware
+Global middleware in Express is middleware that is applied to all incoming requests, regardless of the route. It runs for every request before the request reaches the route handler. You use server.use() to apply a middleware globally.
+
+#### Key Uses of server.use():
+
+Global Middleware: To run middleware for every request, regardless of the route. Example:
+```javascript
+server.use(globalMiddleware);
+```
+Route-Specific Middleware: To apply middleware to a specific route or group of routes. Example:
+```javascript
+server.use("/send", specificMiddleware);
+```
+Static Files: To serve static files like images, CSS, and JavaScript. Example:
+```javascript
+server.use(express.static('public'));
+```
+Error Handling: To catch errors in the application. Example:
+```javascript
+server.use((err, req, res, next) => {
+  res.status(500).send("Something went wrong!");
+});
+```
