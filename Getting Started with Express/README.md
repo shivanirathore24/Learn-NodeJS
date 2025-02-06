@@ -188,3 +188,37 @@ server.use((err, req, res, next) => {
   res.status(500).send("Something went wrong!");
 });
 ```
+
+
+## Different Types of Requests in Express
+Express is a powerful framework for handling web requests and responses in
+Node.js. To build a functional web application, we need to handle different types of
+HTTP requests.
+
+### Common HTTP Request Methods
+
+GET: Used to retrieve data from the server.
+```javascript
+app.get('/', (req, res) => {
+res.send('GET request received')
+});
+```
+POST: Used to send data to the server to create new resources.
+```javascript
+app.post('/', (req, res) => {
+res.send('POST request received')
+});
+```
+PUT: Used to update existing resources on the server.
+```javascript
+app.put('/', (req, res) => {
+res.send('PUT request received')
+});
+```
+DELETE: Used to remove resources from the server.
+```javascript
+app.delete('/', (req, res) => {
+res.send('DELETE request received')
+});
+```
+Note: Use Postman to test all these request methods.
