@@ -82,5 +82,104 @@ functionality, and user interfaces.
 - Social media platforms: MVC handles user profiles, posts, comments, and
 interactions.
 
+## Project Set-Up
+
+### 1. Initialize Node.js Project
+
+```bash
+npm init
+```
+
+This creates `package.json` for managing dependencies.
+
+### 2. Create Directory Structure
+
+Create the main source directory (src/) inside your project directory:
+
+```bash
+mkdir src
+```
+
+Inside src/, create three subdirectories for structured project organization:
+
+1. 📁 models/ → Contains database models and schemas.
+2. 🎨 views/ → Stores frontend templates (if applicable).
+3. 🛠️ controllers/ → Manages business logic and request handling.
+
+### 3. Install Express.js:
+
+Express.js is required to set up a web server. Install it using:
+
+```bash
+npm install express.
+```
+
+### 4. Create index.js (Entry Point)
+
+The index.js file serves as the main entry point for your application. Create it and add the following basic server setup:
+
+```javascript
+const express = require("express");
+const server = express();
+const PORT = 3000;
+
+server.get("/", (req, res) => {
+  res.send("Welcome to Inventory App");
+});
+
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+```
+
+### 5. Configure .gitignore
+
+Create a `.gitignore file` and add `node_modules/` to exclude unnecessary files from Git tracking, keeping your repository clean.
+
+### 6. Run Server
+
+#### Way-1: Run the server manually:
+
+```bash
+node index.js
+```
+
+#### Way-2: Automatically restart server on changes:
+
+Install nodemon globally: 
+```bash
+npm install -g nodemon
+```
+- Installs nodemon system-wide.
+- Not tied to any specific project.
+- Doesn't appear in package.json.
+- You can run nodemon from anywhere in the terminal.
+
+
+OR 
+
+Install nodemon locally (--save-dev flag):
+```bash
+npm i -D nodemon (or npm install --save-dev nodemon)
+```
+- Installs nodemon only for the current project.
+- Gets added under devDependencies in package.json; as only needed during development, not in production.
+- To run it, you must use npx nodemon or configure it in package.json.
+
+
+
+Update package.json → Add this inside the "scripts" section:
+
+```json
+"scripts": {
+  "start": "nodemon index.js"
+}
+```
+
+Run the server with:
+
+```bash
+npm start
+```
 
 
