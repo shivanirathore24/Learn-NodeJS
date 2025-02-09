@@ -14,7 +14,7 @@ data (Model), user interface (View), and control logic (Controller). Promotes a
 clear separation of concerns, making the code more modular, maintainable,
 and scalable.
 
-<img src="./images/model_view_controller.png" alt="Model View Controller" width="500" height="300">
+<img src="./images/model_view_controller.png" alt="Model View Controller" width="400" height="300">
 
 - Model: Represents the data and business logic of the application. It
   interacts with the database and performs data operations.
@@ -26,7 +26,7 @@ and scalable.
 
 #### **`2. REST API (Representational State Transfer)`**
 
-<img src="./images/rest_api.png" alt="REST API" width="650" height="300">
+<img src="./images/rest_api.png" alt="REST API" width="650" height="auto">
 
 - It provides cross-platform support.
 - Popular architectural style for designing networked applications.
@@ -51,7 +51,7 @@ The MVC pattern is a popular design pattern used in web development to organize
 and manage code effectively. It helps separate the concerns of an application,
 making it easier to maintain and extend.
 
-<img src="./images/model_view_controller.png" alt="Model View Controller" width="500" height="300">
+<img src="./images/model_view_controller.png" alt="Model View Controller" width="400" height="300">
 
 ### Components of the MVC Pattern
 
@@ -224,3 +224,60 @@ server.listen(3100);
 
 Here we were sending html file directly, next we will use controller as an
 intermediate.
+
+## Creating Controller
+
+Steps to setup a controller:
+
+1. Create a new file called 'product.controller.js' inside the 'controllers' folder.
+
+<img src="./images/create_controller.png" alt="Create Controller"  width="300" height="400">
+
+2. Define a class in the 'product.controller.js' file that sends our 'products.html'
+   file as a response.
+   Example code for product.controller.js:
+
+```javascript
+import path from "path";
+
+export default class ProductController {
+  getProducts(req, res) {
+    console.log(path.resolve());
+    return res.sendFile(
+      path.join(path.resolve(), "src", "views", "products.html")
+    );
+  }
+}
+```
+
+3. In the 'index.js' file, import the 'ProductController' class.
+4. Create an instance of the 'ProductController' class.
+5. Use 'express.static' method to serve the static files present in the 'src/views'
+   folder.
+6. Define a route to handle GET request for '/' and pass the callback method
+   'getProducts' of the 'ProductController' instance.
+7. Listen to a port using 'listen' method of the express instance.
+   Example code for index.js:
+
+```javascript
+import express from "express";
+import ProductController from "./src/controllers/product.controller.js";
+
+const server = express();
+const PORT = 3100;
+server.use(express.static("src/views"));
+
+//Create an instance of ProductController
+const productController = new ProductController();
+server.get("/", productController.getProducts);
+
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+```
+
+8. To see the response, open a web browser and navigate to
+   http://localhost:3100/ in the address bar. This will send a GET request
+   to the server, and the server will respond with the products.html file, which will
+   be displayed in the browser.
+   <img src="./images/view_as_response.png" alt="View as response" width="800" heigth="auto">
