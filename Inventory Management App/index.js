@@ -1,9 +1,13 @@
 const express = require("express");
-const server = express();
-const PORT = 3000;
+const path = require("path");
 
+const server = express();
+const PORT = 3100;
+server.use(express.static("src/views"));
+
+//Here, we ware sending html file directly, next we will use controller as an intermediate.
 server.get("/", (req, res) => {
-  res.send("Welcome to Inventory App");
+  res.sendFile(path.join(path.resolve(), "src", "views", "products.html"));
 });
 
 server.listen(PORT, () => {
