@@ -345,3 +345,131 @@ into your index.js file and utilize the static get() method. Once you have fetch
 product data, you may choose to log it to the console or use it in any other way that
 suits your application's requirements.
 
+## Understanding View Engines
+View Engines are tools that help us generate HTML content dynamically based on
+the data provided. They allow us to use templates with placeholders for data, which
+are then replaced with actual data when the page is rendered. This makes it easier
+to create and maintain web pages, especially when the content changes frequently.
+
+### A real use case
+Imagine your online store's product list needs to be updated regularly based on new
+products or changes in product information. Manually updating the HTML every time
+there's a change is time-consuming and error-prone. View Engines can help us
+generate dynamic HTML content, making it easier to keep our web pages up to date.
+
+### EJS View Engine for Node.js
+EJS, or Embedded JavaScript, is a popular View Engine for Node.js applications. It
+allows us to embed JavaScript code within HTML templates to generate dynamic
+content.
+
+### Installing EJS and Migrating HTML to EJS
+To install EJS, navigate to your project folder in the terminal and run:
+```bash
+npm install ejs
+```
+
+### Changes in `index.js` file of inventory management project
+This code sets up a server using Express and EJS as the view engine to render
+dynamic content. It imports the ProductController from a file and creates an instance
+of it to handle requests for products. Here's what each line does:
+1. Imports the necessary modules and creates a new Express app.
+```javascript
+import express from 'express';
+import ProductController from
+'./src/controllers/product.controller.js';
+import path from 'path';
+const server = express();
+```
+
+2. Sets up the EJS view engine to be used by the app and specifies the directory
+where the views are located.
+```javascript
+server.set('view engine', 'ejs');
+server.set('views', path.join(path.resolve(), 'src', 'views'));
+```
+3. Configures the app to use EJS Layouts, which is a middleware that allows the
+use of templates with multiple views.
+```javascript
+server.use(ejsLayouts);
+```
+4. Serves the static files from the views directory to the browser.
+```javascript
+server.use(express.static('src/views'));
+```
+5. Creates an instance of the ProductController and sets up a route to handle
+GET requests to the root URL. Finally, the server listens on port 3100 for
+incoming requests.
+```javascript
+const productController = new ProductController();
+server.get('/', productController.getProducts);
+server.listen(3100);
+```
+
+### Changes in `products.html` i.e `products.ejs` file  of inventory management project
+```javascript
+<table class="table table-dark">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Price</th>
+            <th scope="col">Image</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% products.forEach( product => { %>
+        <tr>
+            <th><%= product.id %></th>
+            <td><%= product.name %></td>
+            <td><%= product.desc %></td>
+            <td scope="col"><%= product.price %></td>
+            <td>
+                <img src="<%= product.imageUrl %>" />
+            </td>
+        </tr>
+        <%  }); %>
+    </tbody>
+</table>
+```
+- This HTML file is an EJS template used to render dynamic product data on the page.
+The EJS syntax is used to inject data from the server-side JavaScript code into the
+HTML template.
+
+- The syntax uses special tags <% and %> to enclose JavaScript code within the
+HTML file. In this particular example, the forEach loop is used to iterate over an array
+of products and generate table rows with product information. The product object's
+properties such as id, name, desc, price, and imageUrl are accessed using the <%=
+%> tag within the table cells to render them on the page.
+
+ - For example, the line <%= product.id %> accesses the id property of the current
+product object within the loop and inserts its value into the table cell. Similarly, other
+product properties are accessed using <%= %> tags to dynamically generate the
+HTML content on the page.
+
+### Changes in product.controller.js file of inventory management project
+```javascript
+import ProductModel from '../models/product.model.js'
+// Creating ProductController class with getProducts method
+export default class ProductController{
+  // Defining getProducts method
+  getProducts(req, res){
+    // Retrieve products using the ProductModel
+    let products = ProductModel.get();
+    // Use the res.render() method to render the 'products' view, and pass in the products data
+    res.render("products", {products:products});
+  }
+}
+```
+
+#### Explanation:
+This code exports a ProductController class with a getProducts method. Inside the
+getProducts method, it retrieves the products data from the ProductModel using the
+ProductModel.get() method. Finally, the res.render() method is used to render the
+'products' view using EJS. The res.render() method takes two arguments - the name
+of the view to render ('products' in this case), and an object containing the data to be
+passed to the view (the products data in this case). This allows the 'products' view to
+access the products data and use it to dynamically generate the HTML content.
+
+
+
