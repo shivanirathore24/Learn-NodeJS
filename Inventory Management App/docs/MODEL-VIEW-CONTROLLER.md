@@ -281,3 +281,67 @@ server.listen(PORT, () => {
    to the server, and the server will respond with the products.html file, which will
    be displayed in the browser.
    <img src="./images/view_as_response.png" alt="View as response" width="800" heigth="auto">
+
+
+## Creating Model
+Models are the components responsible for managing the data in an application.
+They usually represent real-world objects, like products in our case, and handle
+interactions with databases, APIs, or any other data source. In short, Models are the
+heart of your application's data logic.
+
+### Creating a Product Model
+To create a Product Model, we'll need to define a class that represents the product
+and its properties.
+Here are the steps to create the Product Model:
+1. Create a new file called `product.model.js` in the models folder.
+2. Define a `ProductModel` class with a constructor that takes in 5 parameters:
+`_id`, `_name`, `_desc`, `_price`, and `_imageUrl`. Inside the constructor, set the
+properties of the class based on the passed-in values.
+3. Add a static method called `get()` to the ProductModel class. Inside this
+method, return an array of ProductModel objects with some sample data.
+4. Export the `ProductModel` class from the `product.model.js file`.
+
+Example Code for product.model.js :
+```javascript
+export default class ProductModel {
+  constructor(_id, _name, _desc, _price, _imageUrl) {
+    this.id = _id;
+    this.name = _name;
+    this.desc = _desc;
+    this.price = _price;
+    this.imageUrl = _imageUrl;
+  }
+  static get() {
+    return products;
+  }
+}
+
+var products = [
+  new ProductModel(
+    1,
+    "Product 1",
+    "Description for Product 1",
+    19.99,
+    "https://m.media-amazon.com/images/I/51-nXsSRfZL._SX328_BO1,204,203,200_.jpg"
+  ),
+  new ProductModel(
+    2,
+    "Product 2",
+    "Description for Product 2",
+    29.99,
+    "https://m.media-amazon.com/images/I/51xwGSNX-EL._SX356_BO1,204,203,200_.jpg"
+  ),
+  new ProductModel(
+    3,
+    "Product 3",
+    "Description for Product 3",
+    39.99,
+    "https://m.media-amazon.com/images/I/31PBdo581fL._SX317_BO1,204,203,200_.jpg"
+  ),
+];
+```
+Note: To obtain the product details from the ProductModel class, you can import it
+into your index.js file and utilize the static get() method. Once you have fetched the
+product data, you may choose to log it to the console or use it in any other way that
+suits your application's requirements.
+
