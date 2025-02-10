@@ -1,4 +1,4 @@
-## MODEL VIEW CONTROLLER (MVC)
+## MODEL VIEW CONTROLLER (MVC) PART-I
 
 ## Getting Started with Web Development
 
@@ -470,6 +470,75 @@ ProductModel.get() method. Finally, the res.render() method is used to render th
 of the view to render ('products' in this case), and an object containing the data to be
 passed to the view (the products data in this case). This allows the 'products' view to
 access the products data and use it to dynamically generate the HTML content.
+
+
+## Creating Layout Page
+### Using Express-EJS-Layouts Library
+In web development, it's common for multiple pages to share a common header,
+footer, and navigation menu. Instead of duplicating this code in each page, you can
+create a layout file to keep your code organized and maintain a consistent look and
+feel throughout your website.
+
+To create a layout file in EJS using Express-EJS-Layouts, you can follow these
+steps:
+1. Install `express-ejs-layouts` module using npm:
+```bash
+npm install express-ejs-layouts
+```
+2. In your `index.js` file, require the express-ejs-layouts module:
+```javascript
+const expressLayouts = require('express-ejs-layouts');
+```
+3. Tell your app to use the expressLayouts middleware:
+```javascript
+app.use(expressLayouts);
+```
+4. Create a new file in your views folder called `layout.ejs`. This file will contain the
+common structure for your web pages like navigation menu, header, and
+footer.
+
+Example code:
+```javascript
+<html>
+  <head>
+    <title>
+      <%= title %>
+    </title>
+    <!-- Add your stylesheets and scripts here -->
+  </head>
+  <body>
+    <%- body %> <!-- This will be replaced with the actual page content -->
+  </body>
+</html>
+```
+Here, the <%- body %> placeholder is used to insert page-specific content
+into the layout when we render a view. This allows us to maintain a consistent
+structure across all our pages while still displaying unique content on each
+page.
+
+## Summarising it
+Let’s summarise what we have learned in this module:
+- Learned about different design patterns like MVC, REST, and
+Microservices.
+- Got an overview of the Inventory Management project.
+- Created a View folder and added necessary files for implementing MVC
+architecture.
+- Learned about creating a Controller, which handles incoming requests.
+- Learned about creating a Model, which interacts with the database and
+defines the data structure.
+- Learned about View Engine (template engine) and EJS, which is a
+popular template engine for generating dynamic HTML pages.
+- Learned about creating layouts using the express-ejs-layouts library,
+which helps maintain a consistent structure across all web pages.
+
+### Some Additional Resources:
+[What is the MVC, Creating a [Node.js-Express] MVC Application](https://medium.com/@ipenywis/what-is-the-mvc-creating-a-node-js-express-mvc-application-da10625a4eda)
+
+[what is EJS](https://ejs.co/)
+
+[How to use EJS to template your Node.js application](https://blog.logrocket.com/how-to-use-ejs-template-node-js-application/)
+
+
 
 
 
