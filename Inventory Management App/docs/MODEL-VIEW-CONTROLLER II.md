@@ -76,3 +76,119 @@ Here is how updated layout looks:
 Note: 'req.body' value will be `undefined` we will see how to overcome this problem
 next.
 
+
+## Parsing Data
+Express's internal body parser express.urlencoded is used to parse form data. It is
+a middleware that helps us access form data in the request body.
+
+This middleware is a built-in middleware function in Express. It parses incoming
+requests with JSON payloads and is based on body-parser. It returns middleware
+that only parses JSON and only looks at requests where the Content-Type header
+matches the type option. A new body object containing the parsed data is populated
+on the request object after the middleware (i.e. req.body), or an empty object ({}) if
+there was no body to parse, the Content-Type was not matched, or an error
+occurred.
+
+To use the `express.urlencoded` middleware in the project, we need to add the
+following line of code in our index.js file:
+```javascript
+import express from "express";
+import ProductController from "./src/controllers/product.controller.js";
+import ejsLayouts from "express-ejs-layouts";
+import path from "path";
+
+const server = express();
+const PORT = 3100;
+
+//Parse from data
+server.use(express.urlencoded({ extended: true }));
+
+//Setup view engine settings
+server.set("view engine", "ejs");
+server.set("views", path.join(path.resolve(), "src", "views"));
+
+server.use(ejsLayouts);
+
+//Serves the static files from the views directory to the browser
+server.use(express.static("src/views"));
+
+//Create an instance of ProductController
+const productController = new ProductController();
+server.get("/", productController.getProducts);
+server.get("/new", productController.getAddForm);
+server.post("/", productController.addNewProduct);
+
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+```
+
+
+In the product.controller.js file, we can use `req.body` to get the form data that is
+submitted. To add this data to the products array in 'products.model.js', we need to
+add an `addProduct` method in the 'ProductModel' class.
+```javascript
+export default class ProductModel {
+  constructor(_id, _name, _desc, _price, _imageUrl) {
+    this.id = _id;
+    this.name = _name;
+    this.desc = _desc;
+    this.price = _price;
+    this.imageUrl = _imageUrl;
+  }
+  static get() {
+    return products;
+  }
+
+  static add(productObj) {
+    let newProduct = new ProductModel(
+      products.length + 1,
+      productObj.name,
+      productObj.desc,
+      productObj.price,
+      productObj.imageUrl
+    );
+    products.push(newProduct);
+  }
+}
+
+var products = [
+  new ProductModel(
+    1,
+    "Product 1",
+    "Description for Product 1",
+    19.99,
+    "https://m.media-amazon.com/images/I/51-nXsSRfZL._SX328_BO1,204,203,200_.jpg"
+  )
+];
+```
+
+In the 'product.controller.js' file, add a post request on the `/new` endpoint to access
+the form data and call the `addProduct` method to add the product to the products
+array.
+
+Here is the updated code for the product.controller.js file:
+```javascript
+import ProductModel from "../models/product.model.js";
+
+export default class ProductController {
+  getProducts(req, res) {
+    let products = ProductModel.get();
+    //console.log(products);
+    res.render("products", { products: products });
+  }
+
+  getAddForm(req, res) {
+    return res.render("new-product");
+  }
+
+  addNewProduct(req, res) {
+    //access data from form
+    console.log(req.body);
+    ProductModel.add(req.body);
+    let products = ProductModel.get();
+    return res.render("products", { products });
+  }
+}
+```
+

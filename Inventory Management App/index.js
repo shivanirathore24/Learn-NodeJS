@@ -6,6 +6,9 @@ import path from "path";
 const server = express();
 const PORT = 3100;
 
+//Parse from data
+server.use(express.urlencoded({ extended: true }));
+
 //Setup view engine settings
 server.set("view engine", "ejs");
 server.set("views", path.join(path.resolve(), "src", "views"));
