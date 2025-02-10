@@ -18,6 +18,8 @@ server.use(express.static("src/views"));
 //Create an instance of ProductController
 const productController = new ProductController();
 server.get("/", productController.getProducts);
+server.get("/new", productController.getAddForm);
+server.post("/", productController.addNewProduct);
 
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
