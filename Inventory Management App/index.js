@@ -1,29 +1,27 @@
 import express from "express";
-import ProductController from "./src/controllers/product.controller.js";
+import ProductsController from "./src/controllers/product.controller.js";
 import ejsLayouts from "express-ejs-layouts";
 import path from "path";
 
-const server = express();
+const app = express();
 const PORT = 3100;
 
-//Parse from data
-server.use(express.urlencoded({ extended: true }));
+app.use(ejsLayouts);
+app.use(express.urlencoded({ extended: true }));
 
 //Setup view engine settings
-server.set("view engine", "ejs");
-server.set("views", path.join(path.resolve(), "src", "views"));
-
-server.use(ejsLayouts);
+app.set("view engine", "ejs");
+app.set("views", path.join(path.resolve(), "src", "views"));
 
 //Serves the static files from the views directory to the browser
-server.use(express.static("src/views"));
+app.use(express.static("src/views"));
 
 //Create an instance of ProductController
-const productController = new ProductController();
-server.get("/", productController.getProducts);
-server.get("/new", productController.getAddForm);
-server.post("/", productController.addNewProduct);
+const productsController = new ProductsController();
+app.get("/", productsController.getProducts);
+app.get("/new-product", productsController.getAddProduct);
+app.post("/", productsController.postAddProduct);
 
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

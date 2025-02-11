@@ -192,3 +192,281 @@ export default class ProductController {
 }
 ```
 
+## Additonal: Restructured Code 
+
+### 1. Entry file: 'index.js'
+
+1. Variable Name Change: server → app
+2. Controller Name Change: ProductController → ProductsController
+3. Method Name Changes in Routes:
+    - getAddForm → getAddProduct
+    - addNewProduct → postAddProduct
+
+4. Route Change for New Product Form: "/new" → "/new-product"
+
+#### Before Changes
+
+```javascript
+import express from "express";
+import ProductController from "./src/controllers/product.controller.js";
+import ejsLayouts from "express-ejs-layouts";
+import path from "path";
+
+const server = express();
+const PORT = 3100;
+
+//Parse from data
+server.use(express.urlencoded({ extended: true }));
+
+//Setup view engine settings
+server.set("view engine", "ejs");
+server.set("views", path.join(path.resolve(), "src", "views"));
+
+server.use(ejsLayouts);
+
+//Serves the static files from the views directory to the browser
+server.use(express.static("src/views"));
+
+//Create an instance of ProductController
+const productController = new ProductController();
+server.get("/", productController.getProducts);
+server.get("/new", productController.getAddForm);
+server.post("/", productController.addNewProduct);
+
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+```
+
+#### After Changes
+
+```javascript
+import express from "express";
+import ProductsController from "./src/controllers/product.controller.js";
+import ejsLayouts from "express-ejs-layouts";
+import path from "path";
+
+const app = express();
+const PORT = 3100;
+
+app.use(ejsLayouts);
+//app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+//Setup view engine settings
+app.set("view engine", "ejs");
+app.set("views", path.join(path.resolve(), "src", "views"));
+
+//Serves the static files from the views directory to the browser
+app.use(express.static("src/views"));
+
+//Create an instance of ProductController
+const productsController = new ProductsController();
+app.get("/", productsController.getProducts);
+app.get("/new-product", productsController.getAddProduct);
+app.post("/", productsController.postAddProduct);
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+```
+
+### 2. Controller: 'product.controller.js'
+
+1. Class Name Change: ProductController → ProductsController
+2. Method Name Changes:
+   - getAddForm → getAddProduct
+   - addNewProduct → postAddProduct
+3. Model Method Change: ProductModel.get() → ProductModel.getAll()
+4. Rendered View Change: "products" → "index"
+5. Added next Parameter in Methods:
+   - getProducts(req, res) → getProducts(req, res, next)
+   - getAddProduct(req, res) → getAddProduct(req, res, next)
+   - postAddProduct(req, res) → postAddProduct(req, res, next)
+
+#### Before Changes
+
+```javascript
+import ProductModel from "../models/product.model.js";
+
+export default class ProductController {
+  getProducts(req, res) {
+    let products = ProductModel.get();
+    //console.log(products);
+    res.render("products", { products: products });
+  }
+
+  getAddForm(req, res) {
+    return res.render("new-product");
+  }
+
+  addNewProduct(req, res) {
+    //access data from form
+    console.log(req.body);
+    ProductModel.add(req.body);
+    let products = ProductModel.get();
+    return res.render("products", { products });
+  }
+}
+```
+
+#### After Changes
+
+```javascript
+import ProductModel from "../models/product.model.js";
+
+class ProductsController {
+  getProducts(req, res, next) {
+    let products = ProductModel.getAll();
+    res.render("index", { products: products });
+  }
+
+  getAddProduct(req, res, next) {
+    return res.render("new-product");
+  }
+
+  postAddProduct(req, res, next) {
+    //access data from form
+    console.log(req.body);
+    ProductModel.add(req.body);
+    let products = ProductModel.getAll();
+    return res.render("index", { products });
+  }
+}
+
+export default ProductsController;
+```
+
+### 3. Model: `product.model.js'
+
+1. Method Name Change: get() → getAll()
+2. Constructor Parameter Naming Simplified: \_id, \_name, \_desc, \_price, \_imageUrl → id, name, desc, price, imageUrl
+
+#### Before Changes
+
+```javascript
+export default class ProductModel {
+  constructor(_id, _name, _desc, _price, _imageUrl) {
+    this.id = _id;
+    this.name = _name;
+    this.desc = _desc;
+    this.price = _price;
+    this.imageUrl = _imageUrl;
+  }
+  static get() {
+    return products;
+  }
+
+  static add(productObj) {
+    let newProduct = new ProductModel(
+      products.length + 1,
+      productObj.name,
+      productObj.desc,
+      productObj.price,
+      productObj.imageUrl
+    );
+    products.push(newProduct);
+  }
+}
+
+var products = [
+  new ProductModel(
+    1,
+    "Product 1",
+    "Description for Product 1",
+    19.99,
+    "https://m.media-amazon.com/images/I/51-nXsSRfZL._SX328_BO1,204,203,200_.jpg"
+  ),
+];
+```
+
+#### After Changes
+
+```javascript
+export default class ProductModel {
+  constructor(id, name, desc, price, imageUrl) {
+    this.id = id;
+    this.name = name;
+    this.desc = desc;
+    this.price = price;
+    this.imageUrl = imageUrl;
+  }
+
+  static getAll() {
+    return products;
+  }
+
+  static add(productObj) {
+    let newProduct = new ProductModel(
+      products.length + 1,
+      productObj.name,
+      productObj.desc,
+      productObj.price,
+      productObj.imageUrl
+    );
+    products.push(newProduct);
+  }
+}
+
+var products = [
+  new ProductModel(
+    1,
+    "Product 1",
+    "Description for Product 1",
+    19.99,
+    "https://m.media-amazon.com/images/I/51-nXsSRfZL._SX328_BO1,204,203,200_.jpg"
+  ),
+];
+```
+
+### 4. View: 'product.js' name changes to 'index.js'
+
+```javascript
+<h1 class="mt-5 mb-4">Products</h1>
+<table class="table table-dark">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Price</th>
+            <th scope="col">Image</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% products.forEach(product=> { %>
+            <tr>
+                <th scope="row"><%= product.id %></th>
+                <td><%= product.name %></td>
+                <td><%= product.desc %></td>
+                <td><%= product.price %></td>
+                <td>
+                    <img src="<%= product.imageUrl %>" alt="<%= product.name %>" style="max-width: 100px;">
+                </td>
+            </tr>
+            <% }) %>
+    </tbody>
+</table>
+</div>
+```
+### 5. View: 'product.css' name changes to 'index.css'
+```javascript
+.container{
+    margin: 24px;
+}
+
+img{
+    width: 80px;
+}
+```
+
+### 6. View: 'layout.ejs'
+Updated the href for the "New Product" link in the navbar:
+```javascript
+<!-- Before -->
+<a class="nav-link active" aria-current="page" href="/new">New Product</a>
+
+<!-- After -->
+<a class="nav-link active" aria-current="page" href="/new-product">New Product</a>
+
+```
