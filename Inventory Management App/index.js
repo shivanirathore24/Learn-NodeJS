@@ -2,6 +2,7 @@ import express from "express";
 import ProductsController from "./src/controllers/product.controller.js";
 import ejsLayouts from "express-ejs-layouts";
 import path from "path";
+import validateRequest from "./src/middlewares/validation.middleware.js";
 
 const app = express();
 const PORT = 3100;
@@ -20,7 +21,7 @@ app.use(express.static("src/views"));
 const productsController = new ProductsController();
 app.get("/", productsController.getProducts);
 app.get("/new-product", productsController.getAddProduct);
-app.post("/", productsController.postAddProduct);
+app.post("/", validateRequest, productsController.postAddProduct);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

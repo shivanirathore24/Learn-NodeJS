@@ -535,3 +535,88 @@ based on the validity of the data. The following is the revised code snippet:
 ```
 ### Here is what form view with invalid data input looks like:
 <img src="./images/validating_data.png" alt="Model View Controller"  width="600" height="auto">
+
+## Validation Middleware
+In the current implementation, the validation code for form data is placed in the
+`postAddProduct` method in `product.controller.js`. This is problematic as it violates
+the Single Responsibility Principle. We can also add the validation code in a
+separate method and call it form 'postAddProduct' but this lead to the problem of tight
+coupling. To overcome this issue, we can create a separate middleware function for
+validation.
+
+### Here are the steps to implement Validation Middleware:
+1. Create a new folder named `middleware` in the `src` folder.
+
+<img src="./images/create_middleware.png" alt="Model View Controller"  width="300" height="400">
+
+2.Create a file named `validation.middleware.js` in the middleware folder and
+add a function named `validateRequest` and export it. Move the validation
+code from the `postAddProduct` method to this function.
+
+Here is the `validation.middleware.js` file:
+```javascript
+const validateRequest = (req, res, next) => {
+  // validate data
+  const { name, price, imageUrl } = req.body;
+  let errors = [];
+  if (!name || name.trim() == "") {
+    errors.push("Name is required");
+  }
+  if (!price || parseFloat(price) < 1) {
+    errors.push("Price must be a positive value");
+  }
+  try {
+    const validUrl = new URL(imageUrl);
+  } catch (err) {
+    errors.push("URL is invalid");
+  }
+
+  if (errors.length > 0) {
+    return res.render("new-product", {
+      errorMessage: errors[0],
+    });
+  }
+  next();
+};
+export default validateRequest;
+```
+
+3. In the `index.js file`, import the `validateRequest` function from
+`validation.middleware.js` and pass it as middleware in the `/` route of the
+`server.post` method.
+
+```javascript
+import express from "express";
+import ProductsController from "./src/controllers/product.controller.js";
+import ejsLayouts from "express-ejs-layouts";
+import path from "path";
+import validateRequest from "./src/middlewares/validation.middleware.js";
+
+const app = express();
+const PORT = 3100;
+
+app.use(ejsLayouts);
+app.use(express.urlencoded({ extended: true }));
+
+//Setup view engine settings
+app.set("view engine", "ejs");
+app.set("views", path.join(path.resolve(), "src", "views"));
+
+//Serves the static files from the views directory to the browser
+app.use(express.static("src/views"));
+
+//Create an instance of ProductController
+const productsController = new ProductsController();
+app.get("/", productsController.getProducts);
+app.get("/new-product", productsController.getAddProduct);
+app.post("/", validateRequest, productsController.postAddProduct);
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+```
+
+By implementing the Validation Middleware, we have separated the validation logic
+from the controller, and achieved a better adherence to the Single Responsibility
+Principle.
+
