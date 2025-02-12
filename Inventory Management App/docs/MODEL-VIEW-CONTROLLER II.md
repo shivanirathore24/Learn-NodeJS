@@ -468,5 +468,70 @@ Updated the href for the "New Product" link in the navbar:
 
 <!-- After -->
 <a class="nav-link active" aria-current="page" href="/new-product">New Product</a>
-
 ```
+
+## Validating Data
+Data validation is an important process of ensuring that the input data is correct,
+accurate, and secure. In the context of web development, data validation is crucial to
+prevent potential security risks and to ensure that the application runs smoothly.
+Here is some information and code snippets about data validation in the
+product.controller.js and new-product.ejs files:
+
+### Changes in product.controller.js file
+To validate the incoming form data, the conditions to check for errors are added in
+the postAddProduct method in product.controller.js file. The updated code adds a
+new variable called validURL which uses the URL constructor to check if the
+imageUrl provided in the form is a valid URL. If there are any errors, they are pushed
+into the errors array.
+
+If the errors array is not empty, it means that there are errors in the form data, so the
+new-product.ejs view is rendered with the first error message from the errors array
+using the errorMsg variable. If there are no errors, the index.ejs view is rendered
+with the products variable containing the updated list of products.
+
+#### Code for postAddProduct method:
+```javascript
+postAddProduct(req, res, next) {
+    //validate data
+    const { name, price, imageUrl } = req.body;
+    let errors = [];
+    if (!name || name.trim() == "") {
+      errors.push("Name is required");
+    }
+    if (!price || parseFloat(price) < 1) {
+      errors.push("Price must be a positive value");
+    }
+    try {
+      const validUrl = URL(imageUrl);
+    } catch (err) {
+      errors.push("URL is invalid");
+    }
+    // if(errors.length>0){
+    //   return res.render('new-product', {errorMessage:errors[0],})
+    // } 
+    if (errors.length != 0) {
+      res.render('new-product', { errorMessage: errors[0] })
+    } else {
+      res.render('products', { products: products })
+    }
+
+    //access data from form
+    console.log(req.body);
+    ProductModel.add(req.body);
+    let products = ProductModel.getAll();
+    return res.render("index", { products });
+  }
+```
+### Changes in new-product.ejs file
+The new-product.ejs file can incorporate a conditional statement to determine
+whether to display the the form view with error message or without error message
+based on the validity of the data. The following is the revised code snippet:
+```javascript
+<%if(errorMessage){ %>
+<div class="alert alert-danger" role="alert">
+    <%= errorMessage %>
+</div>
+<%}%>
+```
+### Here is what form view with invalid data input looks like:
+<img src="./images/validating_data.png" alt="Model View Controller"  width="600" height="auto">
