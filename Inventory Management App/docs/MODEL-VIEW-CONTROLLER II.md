@@ -620,3 +620,75 @@ By implementing the Validation Middleware, we have separated the validation logi
 from the controller, and achieved a better adherence to the Single Responsibility
 Principle.
 
+
+## Using Express Valdiator
+Express-validator is a middleware used for data validation in Node.js applications
+built with the Express framework. It is used to validate data coming from HTTP
+requests, such as form data, query parameters, or JSON payloads.
+
+To use express-validator, we need to follow three steps:
+1. Setup rules for validation
+2. Run those rules
+3. Check if there was any validation error
+
+The code in the validateRequest middleware has been updated to use
+express-validator for data validation.
+```javascript
+import { body, validationResult } from "express-validator";
+
+const validateRequest = async (req, res, next) => {
+  console.log(req.body);
+  //1. Setup rules for validation
+  const rules = [
+    body("name").notEmpty().withMessage("Name is required"),
+    body("price")
+      .isFloat({ gt: 0 })
+      .withMessage("Price should be postive value"),
+    body("imageUrl").isURL().withMessage("Invalid url"),
+  ];
+
+  //2. Run those rules
+  await Promise.all(rules.map((rule) => rule.run(req)));
+
+  //3. Check if there are any errors after running the rules
+  var validationErrors = validationResult(req);
+  console.log(validationErrors);
+
+  //4. If errors, return the error message
+  if (!validationErrors.isEmpty()) {
+    return res.render("new-product", {
+      errorMessage: validationErrors.array()[0].msg,
+    });
+  }
+
+  next();
+};
+
+export default validateRequest;
+```
+
+#### The following methods and imports are used in the code:
+- `body`: This method is used to extract the value of a field from the request
+body for validation.
+- `isLength`: This method is used to check the length of a field.
+- `withMessage`: This method is used to specify an error message if the
+validation fails.
+- `isURL`: This method is used to check if a field value is a valid URL.
+- `isInt`: This method is used to check if a field value is an integer.
+- `validationResult`: This method is used to check if there were any validation
+errors after running the validation rules.
+- `notEmpty`: This method is used  to ensures the field is not empty
+- `isFloat({ gt: 0 })`: This method is used checks if it is a number greater than zero.
+
+The updated code uses the body method to extract the name, price, and imageUrl
+fields from the request body. The rules array is then set up using the isLength,
+isURL, and isInt methods. The Promise.all method is used to run all the validation
+rules, and the validationResult method is used to check if there were any validation
+errors.
+
+If there are any validation errors, the code renders the new-product view with the first
+error message. If there are no errors, the code calls the next function to proceed to
+the next middleware.
+
+
+
