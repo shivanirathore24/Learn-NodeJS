@@ -771,4 +771,55 @@ of the product that matches the provided id.
 that index with the updated productObj, effectively updating the details
 of the product in the array.
 
+## Deleting Data
+To add the delete product feature, a `delete` link needs to be added to each product in
+the `index.ejs` file. This link should redirect to the URL "/delete-product/" followed by
+the product's ID
+<img src="./images/delete_product_button.png" alt="Delete Product Button" width="650" height="auto" >
+
+1. In the product.controller.js file, the following changes are made to add the
+deleteProduct() middleware:
+```javascript
+deleteProduct(req, res) {
+    const id = req.params.id;
+    const productFound = ProductModel.getById(id);
+    if (!productFound) {
+      res.status(401).send("Product not found");
+    }
+    ProductModel.delete(id);
+    var products = ProductModel.getAll();
+    res.render("index", { products });
+}
+```
+  - `deleteProduct(req, res)`: This middleware is responsible for handling
+the deletion of a product. It extracts the id parameter from the request's
+URL parameters using `req.params.id`, representing the ID of the
+product to be deleted.
+  - It calls the `delete()` method of ProductModel, passing the id parameter
+to delete the product from the model.
+  - After deleting the product, it retrieves the updated list of products using
+the `getAll()` method of ProductModel.
+  - Finally, it renders the products view, passing the updated list of
+products to be displayed.
+
+2. In the product.model.js file, the following changes are made to the
+ProductModel class:
+```javascript
+static delete(id) {
+  const index = products.findIndex((p) => (p.id = id));
+  products.splice(index, 1);
+}
+```
+  - `static delete(id)`: This static method is added to delete a product from
+the model based on its ID. It takes the `id` as a parameter.
+  - Inside the method, it uses the `findIndex()` method on the products array
+to locate the index of the product with the matching ID (id).
+  - If a matching product is found (index is not -1), it uses the `splice()`
+method to remove the product from the products array at the identified
+index.
+
+
+
+
+
 

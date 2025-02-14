@@ -24,6 +24,7 @@ app.get("/new-product", productsController.getAddProduct);
 app.post("/", validateRequest, productsController.postAddProduct);
 app.get("/update-product/:id", productsController.getUpdateProductView);
 app.post("/update-product", productsController.postUpdateProduct);
+app.get('/delete-product/:id', productsController.deleteProduct);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
