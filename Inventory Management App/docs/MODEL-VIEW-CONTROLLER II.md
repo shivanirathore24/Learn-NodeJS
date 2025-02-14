@@ -690,5 +690,85 @@ If there are any validation errors, the code renders the new-product view with t
 error message. If there are no errors, the code calls the next function to proceed to
 the next middleware.
 
+## Updating Product
+To implement the functionality of updating a product's details, the following steps
+need to be taken:
+1. Add an "Update Product" link in the `index.ejs` view to enable updating the
+product information.
+<img src="./images/update_product_button.png" alt="Update Product Button" width="650" height="auto" >
+2. In the `ProductsController` class of the `product.controller.js` file, add the
+`getUpdateProductView` method. This method retrieves the product details
+based on the provided ID and renders the `update-product` view. If the product
+is not found, it sends a "Product Not Found" message.
+
+```javascript
+ getUpdateProductView(req, res, next) {
+    // 1. if product exists then return view
+    const id = req.params.id;
+    const productFound = ProductModel.getById(id);
+    if (productFound) {
+      res.render("update-product", {
+        product: productFound,
+        errorMessage: null,
+      });
+    }
+    // 2. else return errors.
+    else {
+      res.status(401).send("Product not found");
+    }
+  }
+```
+
+3. Add the `postUpdateProduct` method in the `ProductsController` class. This
+method receives the updated product details through the request body and
+sends them to the ProductModel for updating. Finally, it renders the `index.ejs`
+view to display the updated product list.
+```javascript
+ postUpdateProduct(req, res) {
+    ProductModel.update(req.body);
+    var products = ProductModel.getAll();
+    res.render("index", { products });
+  }
+```
+4. Create a new file named `update-product.ejs` in the views folder. Use the
+product object sent from the `getUpdateProductView` method to autofill the
+`update-product` view with the existing product details.
+
+5. In the `index.js` file, make the following changes to the routing:
+```javascript
+app.get("/update-product/:id", productsController.getUpdateProductView);
+app.post("/update-product", productsController.postUpdateProduct);
+```
+
+  - `app.post("/update-product", productsController.postUpdateProduct)`: This route is responsible for handling the POST request to update the product. It calls the postUpdateProduct method of the ProductsController when this route is
+accessed.
+
+  - `app.get("/update-product/:id", productsController.getUpdateProductView)`: This route handles the GET request to retrieve the update-product view. It includes a route parameter :id, representing the ID of the product to be updated. It calls the getUpdateProductView method of the ProductsController to render the update-product view.
+
+6. In the `products.model.js` file, add the following changes to the ProductModel class:
+```javascript
+static getById(id) {
+  return products.find((p) => p.id == id);
+}
+
+static update(productObj) {
+  const index = products.findIndex((p) => p.id == productObj.id);
+  products[index] = productObj;
+}
+```
+  - `getByID(id)`: This method is added to retrieve a product by its ID. It takes the
+`id` parameter, representing the ID of the product to be retrieved. The method
+performs the following steps:
+    - It uses the `find` function on the products array to find the product that
+matches the provided id.
+    - If a matching product is found, it is returned by the method.
+- `update(productObj)`: This method is added to update the product details. It
+takes the `productObj` parameter, which represents the updated product object
+containing the new details. The method performs the following steps:
+    - It uses the `findIndex` function on the products array to locate the index
+of the product that matches the provided id.
+    - Once the `index` is found, the method replaces the existing product at
+that index with the updated productObj, effectively updating the details
+of the product in the array.
 
 
