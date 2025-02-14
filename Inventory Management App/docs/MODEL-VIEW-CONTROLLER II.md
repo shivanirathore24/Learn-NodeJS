@@ -818,6 +818,62 @@ to locate the index of the product with the matching ID (id).
 method to remove the product from the products array at the identified
 index.
 
+### Confirmation before deletion
+1. To add a confirmation message before deleting a product, the anchor tag used for
+deletion in the index.ejs file is replaced with a delete button. Modify the code in
+index.ejs as follows:
+```javascript
+<button class="btn btn-danger" onclick="deleteProduct('<%= product.id %>')">Delete</button>
+<!-- <a href="/delete-product/<%= product.id %>" class="btn btn-danger">Delete</a> -->
+```
+
+2. In the main.js file, add the following code for the deleteProduct method:
+```javascript
+function deleteProduct(id) {
+    const result = confirm(
+      'Are you sure you want to delete this product ?'
+    );
+    if (result) {
+      fetch('/delete-product/' + id, {
+        method: 'POST',
+      }).then((res) => {
+        if (res.ok) {
+            location.reload();
+            // window.location.href = "/";
+        }
+      });
+    }
+  }
+```
+3. Create a `public` folder in the root directory of the project, which will contain a main.js
+file. This file will handle the frontend JavaScript code for the delete functionality.
+```javascript
+server.use(express.static('public'));
+```
+<img src="./images/create_public.png" alt="Create Public" width="300" height="400">
+
+4. Add the main.js file in script tag in layout.ejs view.
+```javascript
+<script src="main.js"></script>
+```
+5. Lastly, update the route in index.js to handle the POST request for deleting a
+product. Add the following line of code:
+```javascript
+app.post('/delete-product/:id', productsController.deleteProduct);
+```
+This route maps to the deleteProduct method in the productsController, which
+handles the deletion of the product.
+
+<img src="./images/confirm_delete_message.png" alt="Confirm Delete Message" width="650" height="auto" >
+
+By implementing these changes, a confirmation message will be displayed before
+deleting a product, and the deletion will be handled by the deleteProduct method in
+the productsController.
+
+
+
+
+
 
 
 

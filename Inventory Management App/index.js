@@ -7,6 +7,8 @@ import validateRequest from "./src/middlewares/validation.middleware.js";
 const app = express();
 const PORT = 3100;
 
+app.use(express.static('public'));
+
 app.use(ejsLayouts);
 app.use(express.urlencoded({ extended: true }));
 
@@ -24,7 +26,7 @@ app.get("/new-product", productsController.getAddProduct);
 app.post("/", validateRequest, productsController.postAddProduct);
 app.get("/update-product/:id", productsController.getUpdateProductView);
 app.post("/update-product", productsController.postUpdateProduct);
-app.get('/delete-product/:id', productsController.deleteProduct);
+app.post('/delete-product/:id', productsController.deleteProduct);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
