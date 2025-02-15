@@ -1,0 +1,124 @@
+## FILE UPLOAD, SESSIONS AND COOKIES
+
+## File Uploading
+
+To enable the feature of uploading images instead of using image URLs in the inventory
+management app, the following steps should be followed:
+
+### 1. Install Multer
+
+- Multer is a Node.js middleware used for handling `multipart/form-data`, primarily for
+  file uploads.
+- Install Multer by running the command:
+
+```sh
+npm i multer
+```
+
+### 2. Changes in the 'new-product' view and 'update-product' view
+
+- Replace the input field of type "text" for the imageUrl with an input field of type "file"
+  to allow image uploads:
+
+```html
+<input type="file" name="imageUrl" id="imageUrl" accept="images/*" />
+```
+
+- Set the form's `enctype` attribute to `multipart/form-data` since we are now uploading
+  files along with other form data:
+
+```html
+<form action="/" method="post" enctype="multipart/form-data">....</form>
+```
+
+- Add new-product view:
+
+<img src="./images/newproduct_view1.png" alt="Add New-Product View" width="500" height="auto">
+
+### 3. Create an "images" folder in the public folder to store the uploaded images.
+
+<img src="./images/create_images_folder.png" alt="Add New-Product View" width="300" height="auto">
+
+### 4. Implement a 'file-upload middleware' to handle the rules and processing of uploaded images
+Create a file named "file-upload.middleware.js" in the middleware folder.
+Use Multer to configure the storage and file naming:
+
+```javascript
+import multer from "multer";
+
+const storageConfig = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/images/");
+  },
+  filename: (req, file, cb) => {
+    const name = Date.now() + "-" + file.originalname;
+    cb(null, name);
+  },
+});
+
+export const uploadFile = multer({
+  storage: storageConfig,
+});
+```
+
+### 5. Apply the 'file-upload middleware' in the 'index.js' file.
+
+Modify the code in index.js to include the 'file-upload middleware' in the POST route
+for adding a product:
+
+```javascript
+app.post(
+  "/",
+  uploadFile.single("imageUrl"),
+  validateRequest,
+  productsController.postAddProduct
+);
+```
+
+### 6. Update the 'product.controller.js' file to handle the uploaded image.
+
+- In the 'postAddProduct' method, extract the `name`, `desc`, and `price` from the request
+  body, and get the filename of the uploaded image.
+
+```javascript
+const { name, desc, price } = req.body;
+```
+
+- Modify the imageUrl to use the "images" folder and the filename of the uploaded
+  image:
+
+```javascript
+const imageUrl = "images/" + req.file.filename;
+```
+
+- Update the ProductModel's add method to include the `imageUrl` parameter:
+
+```javascript
+ProductModel.add(name, desc, price, imageUrl);
+```
+
+Code:
+
+```javascript
+postAddProduct(req, res, next) {
+    const { name, desc, price } = req.body;
+    const imageUrl = "images/" + req.file.filename;
+    ProductModel.add(name, desc, price, imageUrl);
+    var products = ProductModel.getAll();
+    res.render("index", { products });
+}
+```
+
+### 7. Adjust the 'imageUrl' validation in validation.middleware.js to account for the changes in image handling:
+
+Add a `custom` validation rule to check if the req.file object exists. If not, throw an error
+indicating that the image is required:
+
+```javascript
+body("imageUrl").custom((value, { req }) => {
+  if (!req.file) {
+    throw new Error("Image is required!");
+  }
+  return true;
+});
+```

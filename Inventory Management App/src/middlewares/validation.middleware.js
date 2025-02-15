@@ -8,7 +8,13 @@ const validateRequest = async (req, res, next) => {
     body("price")
       .isFloat({ gt: 0 })
       .withMessage("Price should be postive value"),
-    body("imageUrl").isURL().withMessage("Invalid url"),
+    body("imageUrl").custom((value, { req }) => {
+      if (!req.file) {
+        throw new Error("Image is required!");
+      }
+      return true;
+    }),
+    // body("imageUrl").isURL().withMessage("Invalid url"),
   ];
 
   //2. Run those rules

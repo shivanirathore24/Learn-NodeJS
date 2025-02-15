@@ -12,8 +12,16 @@ class ProductsController {
     });
   }
 
+  // postAddProduct(req, res, next) {
+  //   ProductModel.add(req.body);
+  //   var products = ProductModel.getAll();
+  //   res.render("index", { products });
+  // }
+
   postAddProduct(req, res, next) {
-    ProductModel.add(req.body);
+    const { name, desc, price } = req.body;
+    const imageUrl = "images/" + req.file.filename;
+    ProductModel.add(name, desc, price, imageUrl);
     var products = ProductModel.getAll();
     res.render("index", { products });
   }
