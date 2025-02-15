@@ -1,0 +1,12 @@
+.header {
+    background-color: #000; /* Pure black background */
+    color: #fff; /* White text */
+    padding: 15px; /* Adds some spacing */
+    text-align: center; /* Centers the text */
+    font-size: 1.2rem; /* Slightly larger text */
+    font-weight: bold; /* Makes text stand out */
+    border-bottom: 2px solid #444; /* Adds a subtle border */
+    border-bottom: 3px solid #1f1f1f; /* Slightly darker border for separation */
+}
+
+

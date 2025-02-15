@@ -775,6 +775,7 @@ of the product in the array.
 To add the delete product feature, a `delete` link needs to be added to each product in
 the `index.ejs` file. This link should redirect to the URL "/delete-product/" followed by
 the product's ID
+
 <img src="./images/delete_product_button.png" alt="Delete Product Button" width="650" height="auto" >
 
 1. In the product.controller.js file, the following changes are made to add the
@@ -869,6 +870,81 @@ handles the deletion of the product.
 By implementing these changes, a confirmation message will be displayed before
 deleting a product, and the deletion will be handled by the deleteProduct method in
 the productsController.
+
+
+
+## Styling Views
+By following these steps, you can create a separate CSS file, link it in the `layout.ejs`
+file, and apply specific styles to the header elements in the `new-product.ejs`,
+`update-product.ejs`, and `index.ejs` views.
+1. Create a `css` folder inside the `public` folder. This folder will hold your CSS files.
+2. Inside the css folder, create a `header.css` file that will contain the CSS styles
+for the header.
+
+<img src="./images/create_css_folder.png" alt="Create CSS folder" width="300" height="400">
+
+3. In the `layout.ejs` file, add the following line inside the <head> tag to link the
+header.css file:
+```javascript
+<link rel="stylesheet" href="/css/header.css">
+```
+4. Apply the `header` class` to the new-product.ejs, update-product.ejs, and
+index.ejs files. In these files, you can add the  `header` class to the appropriate
+elements that represent the header of each view. For example:
+```javascript
+<div class="header">
+  <!-- Header content -->
+</div>
+```
+```javascript
+<!-- index.ejs file -->
+<h1 class="mt-5 mb-4 header">Products</h1>
+
+<!-- new-product.ejs file -->
+<h1 class="mt-5 mb-4 header">Add New Product</h1>
+
+<!-- update-prodcut.ejs file -->
+<h1 class="mt-5 mb-4 header">Update Product</h1>
+```
+By applying the header class, the corresponding styles defined in header.css
+will be applied to the header elements in these views.
+
+<img src="./images/products_header.png" alt="Create CSS folder" width="650" height="auto">
+<img src="./images/newproduct_header.png" alt="Create CSS folder" width="650" height="auto">
+<img src="./images/update_product_header.png" alt="Create CSS folder" width="650" height="auto">
+
+
+## Summarising it
+Let’s summarise what we have learned in this module:
+- Learned to create and submit forms using POST requests.
+- Added a new feature to add products and implemented manual
+data validation.
+- Set up validation middleware and used Express Validator for data
+validation.
+- Added features to update and delete products.
+- Explored styling views in an Express application.
+
+### Some Additional Resources:
+[What does express.urlencoded do anyway?](https://nkhilv.medium.com/what-does-express-urlencoded-do-anyway-8bdc4e638e1e)
+
+[Form Data Validation in Node.js with express-validator](https://stackabuse.com/form-data-validation-in-nodejs-with-express-validator/)
+
+[Express Validator Tutorial](https://auth0.com/blog/express-validator-tutorial/)
+
+[Express + EJS: Styles and Partials](https://ncoughlin.com/posts/express-ejs-styles-and-partials/)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
