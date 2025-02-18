@@ -142,3 +142,56 @@ maintain authentication status and other important user data.
 8. Sessions help prevent unauthorized access and protect sensitive information.
 9. Registration and login features can be implemented to create sessions for users.
 10. Sessions enhance application security and enable personalized user experiences.
+
+## Registration Page
+To implement the user registration page we have to make controller, model and view for
+user.
+1. Create a 'user.model.js' file in the models folder to define the `UserModel` class with
+`id`, `name`, `email`, and `password` properties.
+```javascript
+export default class UserModel {
+  constructor(id, name, email, password) {
+    this.id = id;
+    this.name = name;
+    this.email = email;
+    this.password = password;
+  }
+}
+```
+2. Create a 'register.ejs' view in the views folder with a form for user registration.
+```html
+<h1 class="mt-5 mb-4">Register</h1>
+
+<form action="/register" method="post">
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+```
+3. Create a 'user.controller.js' file in the controllers folder with a `UserController` class
+that handles the get request for the registration page.
+```javascript
+export default class UserController {
+  getRegister(req, res) {
+    res.render("register");
+  }
+}
+```
+4. In 'index.js', instantiate a UserController object and add a get request for `/register`
+that renders the 'register.ejs' view
+```javascript
+const userController = new UserController();
+app.get("/register", userController.getRegister);
+```
+
+
