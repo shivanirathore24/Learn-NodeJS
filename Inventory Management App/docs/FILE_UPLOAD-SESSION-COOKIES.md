@@ -194,4 +194,101 @@ const userController = new UserController();
 app.get("/register", userController.getRegister);
 ```
 
+## Login Page
+To implement the user login page we have to make controller, model and view for user.
+1. Create a 'login.ejs' view in the views folder with a form for user login and an optional
+error message display.
+```html
+<h1 class="mt-5 mb-4">Login</h1>
+
+<%if(errorMessage){ %>
+    <div class="alert alert-danger" role="alert">
+        <%= errorMessage %>
+    </div>
+<%}%>
+
+<form action="/login" method="post">
+    <div class="mb-3">
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+```
+2. Update the `UserModel` class in 'user.model.js' to include static methods for adding a
+user and validating user credentials. Use an array (users) to store the user data.
+```javascript
+export default class UserModel {
+  constructor(id, name, email, password) {
+    this.id = id;
+    this.name = name;
+    this.email = email;
+    this.password = password;
+  }
+
+  static add(name, email, password) {
+    const newUser = new UserModel(users.length + 1, name, email, password);
+    users.push(newUser);
+  }
+
+  static isValidUser(email, password) {
+    const result = users.find(
+      (u) => u.email == email && u.password == password
+    );
+    return result;
+  }
+}
+
+const users = [];
+```
+
+3. In 'user.controller.js', add the necessary methods for handling user registration and
+login:
+```javascript
+import UserModel from "../models/user.model.js";
+import ProductModel from "../models/product.model.js";
+
+export default class UserController {
+  getRegister(req, res) {
+    res.render("register");
+  }
+
+  getLogin(req, res) {
+    res.render("login", { errorMessage: null });
+  }
+
+  postRegister(req, res) {
+    const { name, email, password } = req.body;
+    UserModel.add(name, email, password);
+    res.render("login", { errorMessage: null });
+  }
+
+  postLogin(req, res) {
+    const { email, password } = req.body;
+    const user = UserModel.isValidUser(email, password);
+    if (!user) {
+      return res.render("login", {
+        errorMessage: "Invalid Credentials!",
+      });
+    }
+    var products = ProductModel.getAll();
+    res.render("index", { products });
+  }
+}
+```
+4. In 'index.js', add a get request for `/login` that renders the 'login.ejs' view.
+```javascript
+app.get("/login", userController.getLogin);
+```
+
+5. In 'index.js', handle post requests for `/register` and `/login` by calling the corresponding
+methods in the UserController:
+```javascript
+app.post("/register", userController.postRegister);
+app.post("/login", userController.postLogin);
+```
 

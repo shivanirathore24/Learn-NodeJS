@@ -26,6 +26,10 @@ const productsController = new ProductsController();
 const userController = new UserController();
 
 app.get("/register", userController.getRegister);
+app.post("/register", userController.postRegister);
+app.get("/login", userController.getLogin);
+app.post("/login", userController.postLogin);
+
 app.get("/", productsController.getProducts);
 app.get("/new-product", productsController.getAddProduct);
 app.post(
