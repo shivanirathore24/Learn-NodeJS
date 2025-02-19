@@ -292,3 +292,97 @@ app.post("/register", userController.postRegister);
 app.post("/login", userController.postLogin);
 ```
 
+## Securing Application
+When a user visits your application, a unique session ID is generated and stored in a
+cookie on the user's browser. This session ID is sent with every request the user makes to
+your application, allowing the server to identify the user and access their session data.
+To implement the session in our project we need to follow these steps:
+
+1. To implement session authentication, we need to install and use the
+'express-session' package by running:
+```sh
+ npm i express-session
+ ```
+2. Import express-session:
+```javascript
+import session from 'express-session';
+```
+3. In the 'index.js' file, configure the session using the app.use() method and provide
+the necessary options.
+```javascript
+import session from "express-session";
+
+app.use(
+  session({
+    secret: "SecretKey",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  })
+);
+```
+Here is what each option means:
+- `secret`: A string used to sign the session ID cookie to prevent tampering.
+- `resave`: Specifies whether the session should be saved back to the session
+store on each request.
+- `saveUninitialized`: Determines if an uninitialized session should be saved to
+the session store.
+- `cookie`: Configures the session cookie options.
+
+<img src="./images/cookies.png" alt="Cookies" width="650" height="auto">
+
+4. In the `postLogin` method of the UserController in 'user.controller.js', after validating
+the user's credentials, store the user's email in the session.
+```javascript
+postLogin(req, res) {
+    const { email, password } = req.body;
+    const user = UserModel.isValidUser(email, password);
+    if (!user) {
+      return res.render("login", {
+        errorMessage: "Invalid Credentials!",
+      });
+    }
+    req.session.userEmail = email;  //added
+    var products = ProductModel.getAll();
+    res.render("index", { products });
+}
+```
+5. To verify that the session ID is stored in a cookie, follow these steps:
+- Start the project server using: `node index.js` or `npm start` if using nodemon.
+- Register with an email and password, and then log in.
+- Inspect the browser and go to the "Application" tab.
+- Under the "Cookies" section, you will find the sid (session ID) cookie and its
+value.
+
+
+6. To restrict access to certain routes only to logged-in users, create an
+'auth.middleware.js' file in the middlewares folder.
+
+7. In 'index.js', apply the auth middleware to the routes that require authentication.
+```javascript
+import { auth } from "./src/middlewares/auth.middleware.js";
+
+app.get("/", auth, productsController.getProducts);
+app.get("/new-product", auth, productsController.getAddProduct);
+app.post(
+  "/",
+  auth,
+  uploadFile.single("imageUrl"),
+  validateRequest,
+  productsController.postAddProduct
+);
+
+app.get("/update-product/:id", auth, productsController.getUpdateProductView);
+app.post("/update-product", auth, productsController.postUpdateProduct);
+app.post("/delete-product/:id", auth, productsController.deleteProduct);
+```
+
+8. The auth middleware ensures that only logged-in users can access these routes. If
+the user is not logged in, they will be redirected to the login page.
+
+
+
+
+
+
+

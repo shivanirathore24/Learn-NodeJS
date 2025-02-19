@@ -5,11 +5,21 @@ import ejsLayouts from "express-ejs-layouts";
 import path from "path";
 import validateRequest from "./src/middlewares/validation.middleware.js";
 import { uploadFile } from "./src/middlewares/file-upload.middleware.js";
+import session from "express-session";
+import { auth } from "./src/middlewares/auth.middleware.js";
 
 const app = express();
 const PORT = 3100;
 
 app.use(express.static("public"));
+app.use(
+  session({
+    secret: "SecretKey",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  })
+);
 
 app.use(ejsLayouts);
 app.use(express.urlencoded({ extended: true }));
@@ -30,17 +40,18 @@ app.post("/register", userController.postRegister);
 app.get("/login", userController.getLogin);
 app.post("/login", userController.postLogin);
 
-app.get("/", productsController.getProducts);
-app.get("/new-product", productsController.getAddProduct);
+app.get("/", auth, productsController.getProducts);
+app.get("/new-product", auth, productsController.getAddProduct);
 app.post(
   "/",
+  auth,
   uploadFile.single("imageUrl"),
   validateRequest,
   productsController.postAddProduct
 );
-app.get("/update-product/:id", productsController.getUpdateProductView);
-app.post("/update-product", productsController.postUpdateProduct);
-app.post("/delete-product/:id", productsController.deleteProduct);
+app.get("/update-product/:id", auth, productsController.getUpdateProductView);
+app.post("/update-product", auth, productsController.postUpdateProduct);
+app.post("/delete-product/:id", auth, productsController.deleteProduct);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
