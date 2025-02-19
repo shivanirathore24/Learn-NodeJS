@@ -34,19 +34,25 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="/new-product">New Product</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/register">Register</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/login">Login</a>
-                    </li>
+                    <% if(locals.userEmail) { %>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/logout">Logout</a>
+                        </li>
+                    <% } else { %>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/register">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/login">Login</a>
+                        </li>
+                    <% } %>
                 </ul>
             </div>
         </div>
     </nav>
     <div class="container">
         <%- body %>
-    </div>
+    </div>  
 </body>
 
 </html>

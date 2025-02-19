@@ -3,27 +3,22 @@ import ProductModel from "../models/product.model.js";
 class ProductsController {
   getProducts(req, res, next) {
     var products = ProductModel.getAll();
-    res.render("index", { products });
+    res.render("index", { products, userEmail: req.session.userEmail });
   }
 
   getAddProduct(req, res, next) {
     res.render("new-product", {
       errorMessage: null,
+      userEmail: req.session.userEmail,
     });
   }
-
-  // postAddProduct(req, res, next) {
-  //   ProductModel.add(req.body);
-  //   var products = ProductModel.getAll();
-  //   res.render("index", { products });
-  // }
 
   postAddProduct(req, res, next) {
     const { name, desc, price } = req.body;
     const imageUrl = "images/" + req.file.filename;
     ProductModel.add(name, desc, price, imageUrl);
     var products = ProductModel.getAll();
-    res.render("index", { products });
+    res.render("index", { products, userEmail: req.session.userEmail });
   }
 
   getUpdateProductView(req, res, next) {
@@ -34,6 +29,7 @@ class ProductsController {
       res.render("update-product", {
         product: productFound,
         errorMessage: null,
+        userEmail: req.session.userEmail,
       });
     }
     // 2. else return errors.
@@ -45,7 +41,7 @@ class ProductsController {
   postUpdateProduct(req, res) {
     ProductModel.update(req.body);
     var products = ProductModel.getAll();
-    res.render("index", { products });
+    res.render("index", { products, userEmail: req.session.userEmail });
   }
 
   deleteProduct(req, res) {
@@ -56,7 +52,7 @@ class ProductsController {
     }
     ProductModel.delete(id);
     var products = ProductModel.getAll();
-    res.render("index", { products });
+    res.render("index", { products, userEmail: req.session.userEmail });
   }
 }
 

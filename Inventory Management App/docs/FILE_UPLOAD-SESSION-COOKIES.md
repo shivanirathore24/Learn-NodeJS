@@ -381,6 +381,71 @@ app.post("/delete-product/:id", auth, productsController.deleteProduct);
 the user is not logged in, they will be redirected to the login page.
 
 
+## Logout and Clearing Session
+When a user is logged in, we need to remove the login and register links from the layout
+and add a logout link.
+
+1. In the 'layout.ejs' file, modify the navigation section to conditionally render the links
+based on the presence of the userEmail in the session. If 'userEmail' exists, render
+the `logout` link; otherwise, render the `register` and `login` links.
+```html
+  <% if(locals.userEmail) { %>
+      <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/logout">Logout</a>
+      </li>
+  <% } else { %>
+      <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/register">Register</a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/login">Login</a>
+      </li>
+  <% } %>
+```
+
+2. In the ProductsController in 'product.controller.js', when rendering views that require
+the user's information, pass the userEmail value to the view.
+```javascript
+ getAddProduct(req, res, next) {
+    res.render("new-product", {
+      errorMessage: null,
+      userEmail: req.session.userEmail, //added
+    });
+  }
+```
+Similarly, in other methods such as postAddProduct, getUpdateProductView,
+postUpdateProduct, and deleteProduct, pass the userEmail value to the
+corresponding views.
+
+3. In the UserController in 'user.controller.js';, add a logout method to handle the logout
+functionality. In this method, destroy the session using `req.session.destroy()` and
+redirect the user to the login page.
+
+```javascript
+logout(req, res) {
+    //on logout, destroy the session
+    req.session.destroy((err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.redirect("/login");
+      }
+    });
+}
+```
+4. Finally, in the 'index.js file', map the `/logout` route to the logout method in the
+UserController.
+```javascript
+app.get("/logout", userController.logout);
+```
+
+
+
+
+
+
+
+
 
 
 
