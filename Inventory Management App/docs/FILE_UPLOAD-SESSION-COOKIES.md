@@ -534,6 +534,107 @@ In the 'response headers' section, you can find the "Set-Cookie" header, which i
 new or updated cookies sent by the server to the client.
 <img src="./images/cookies_response_header.png" alt="Cookies in Response Header" width="650" height="auto">
 
+## Deleting Cookie
+
+To delete cookies in our application, we can follow these steps:
+
+1. Open the file 'user.controller.js' and locate the logout function.
+2. Inside the logout function, after destroying the session using `req.session.destroy()`,
+   add the following code to delete the specific cookie:
+
+The clearCookie function is called on the response object res and takes the name
+of the cookie to be deleted as an argument. In this case, we are deleting the
+"lastVisit" cookie.
+
+```javascript
+logout(req, res) {
+    //on logout, destroy the session
+    req.session.destroy((err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.redirect("/login");
+      }
+    });
+    res.clearCookie('lastVisit');
+  }
+```
+
+This code ensures that when the user logs out, the "lastVisit" cookie is cleared from
+the client's browser.
+
+Additionally, to avoid setting the "lastVisit" cookie on the logout request, we can make the
+following changes in the index.js file:
+
+1. Locate the root route ("/") where the getProducts function is called.
+2. Add the setLastVisit middleware before the auth middleware to ensure that the
+   "lastVisit" cookie is set only on root route GET requests:
+
+```javascript
+app.get("/", setLastVisit, auth, productsController.getProducts);
+```
+
+By adding setLastVisit as a middleware only for the root route, we can prevent the
+"lastVisit" cookie from being set when the logout request is made.
+
+## Best Practices
+When working with MVC (Model-View-Controller) applications, it is important to follow
+certain best practices to ensure maintainability, readability, and scalability. Here are some
+best practices:
+1. **Separation of Concerns:** Follow the principle of separating different concerns into
+distinct components. The model handles data and business logic, the view handles
+presentation and user interface, and the controller handles the interaction between
+the model and the view. This promotes modularity and makes the code easier to
+understand and maintain.
+2. **DRY (Don't Repeat Yourself):** Avoid duplicating code by using reusable
+components and modularizing the application. For example, use of a layout page
+that can be shared across multiple views to avoid repeating common elements.
+3. **Use of Middlewares:** Middlewares provide a way to decouple complex logic from
+the controller and allow for reusable and configurable components. Middleware can
+be used for various purposes such as authentication, logging, error handling, and
+more. They help in keeping the codebase clean and organized.
+4. **Modularize:** Divide your application into smaller modules or components based on
+their functionality. This promotes code reusability, maintainability, and scalability.
+Each module should have a clear responsibility, such as a user module, order
+module, or product module.
+5. **Naming Conventions:** Use meaningful and descriptive names for functions,
+classes, variables, and files. Follow a consistent naming convention that is easily
+understandable by other developers. This improves code readability and makes it
+easier to collaborate and maintain the codebase.
+6. **Security Implementation:** Implement proper security measures such as
+authentication and authorization. Ensure that user access is authenticated and
+authorized based on their roles and permissions.
+
+## Summarising it
+Let’s summarise what we have learned in this module:
+- Learned how to handle file uploads, specifically for images, using the
+multer library.
+- Explored the concept of sessions and how they can be used to
+maintain user authentication state in an application.
+- Implemented a registration and login functionality to allow users to
+create accounts and authenticate themselves.
+- Secured the application by implementing session-based authentication
+and ensuring that only authenticated users can access protected
+routes.
+- Added a logout feature that destroys the session and clears
+user-related data. This ensures proper session management and user
+privacy.
+- Learned about cookies and used the cookie-parser library to create and
+manipulate cookies in the application.
+- Implemented the deletion of cookies, specifically the "lastVisit" cookie,
+when the user logs out to maintain data privacy.
+- Discussed best practices that were followed while developing the
+inventory management application.
+
+### Some Additional Resources:
+[How to Upload Image Using Multer in Node.js?](https://medium.com/swlh/how-to-upload-image-using-multer-in-node-js-f3aeffb90657)
+
+[How session works in express-session?](https://medium.com/@alysachan830/cookie-and-session-ii-how-session-works-in-express-session-7e08d102deb8)
+
+[Understanding Cookies and Implementing them in Node.js](https://www.webscale.com/engineering-education/)
+
+[Node.js Best Practices](https://github.com/goldbergyoni/nodebestpractices)
+
 
 
 
