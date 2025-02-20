@@ -439,7 +439,20 @@ UserController.
 app.get("/logout", userController.logout);
 ```
 
-
+## Understanding Cookie
+1. When a client connects to a server, a session is created to maintain the state and
+context of the client's interaction with the server.
+2. The server generates a unique session ID for the session and sends it to the client.
+3. The client typically stores this session ID in a cookie. Cookies are small pieces of
+data stored on the client's browser.
+4. With each subsequent request sent by the client to the server, the session ID is
+included in the request, usually through the cookie.
+5. The server uses the session ID to identify the specific session associated with the
+client and retrieves the corresponding session data.
+6. In the context of the inventory management project, an example of utilizing session
+data could be tracking the last visited products by a user.
+7. For example, you can store the IDs or details of the last explored products in the
+user's session data.
 
 
 
