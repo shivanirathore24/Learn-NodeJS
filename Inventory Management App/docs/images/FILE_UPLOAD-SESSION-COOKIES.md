@@ -40,6 +40,7 @@ npm i multer
 <img src="./images/create_images_folder.png" alt="Add New-Product View" width="300" height="auto">
 
 ### 4. Implement a 'file-upload middleware' to handle the rules and processing of uploaded images
+
 Create a file named "file-upload.middleware.js" in the middleware folder.
 Use Multer to configure the storage and file naming:
 
@@ -122,7 +123,6 @@ body("imageUrl").custom((value, { req }) => {
   return true;
 });
 ```
-
 ## Understanding Session
 <img src="./images/session.png" alt="Understanding Session" width="600" height="auto">
 
@@ -193,6 +193,7 @@ that renders the 'register.ejs' view
 const userController = new UserController();
 app.get("/register", userController.getRegister);
 ```
+
 
 ## Login Page
 To implement the user login page we have to make controller, model and view for user.
@@ -380,7 +381,6 @@ app.post("/delete-product/:id", auth, productsController.deleteProduct);
 8. The auth middleware ensures that only logged-in users can access these routes. If
 the user is not logged in, they will be redirected to the login page.
 
-
 ## Logout and Clearing Session
 When a user is logged in, we need to remove the login and register links from the layout
 and add a logout link.
@@ -533,16 +533,6 @@ by the client to the server.
 In the 'response headers' section, you can find the "Set-Cookie" header, which includes any
 new or updated cookies sent by the server to the client.
 <img src="./images/cookies_response_header.png" alt="Cookies in Response Header" width="650" height="auto">
-
-
-
-
-
-
-
-
-
-
 
 
 
