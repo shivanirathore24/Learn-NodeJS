@@ -84,4 +84,6 @@ improving scalability and maintainability.
 
 <img src="./images/restapi_application.png" alt="Applications of REST API" width="550" height="auto">
 
+## Getting Started with API Project
+<img src="./images/e-commerce_api.png" alt="Applications of REST API" width="650" height="auto">
 
