@@ -258,7 +258,7 @@ import productRouter from "./src/features/product/product.routes.js";
 const server = express();
 
 //For all request related to products, redirect to product routes.
-//localhost:3000/api/products
+//localhost:3100/api/products
 server.use("/api/products", productRouter);
 
 // Default Request Handler
@@ -272,5 +272,147 @@ server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 ```
+
+## Product Model
+1. Create the product model class in "product.model.js":
+
+```javascript
+export default class ProductModel{
+    constructor(id, name, desc, price, imageUrl, category, sizes){
+        this.ide=id;
+        this.name=name;
+        this.desc=desc;
+        this.price=price;
+        this.imageUrl=imageUrl;
+        this.category=category;
+        this.sizes=sizes;
+    }
+
+    static GetAll(){
+        return products;
+    }
+} 
+
+var products = [
+    new ProductModel(
+      1,
+      'Product 1',
+      'Description for Product 1',
+      19.99,
+      'https://m.media-amazon.com/images/I/51-nXsSRfZL._SX328_BO1,204,203,200_.jpg',
+      'Cateogory1'
+    ),
+    new ProductModel(
+      2,
+      'Product 2',
+      'Description for Product 2',
+      29.99,
+      'https://m.media-amazon.com/images/I/51xwGSNX-EL._SX356_BO1,204,203,200_.jpg',
+      'Cateogory2',
+      ['M', 'XL']
+    ),
+    new ProductModel(
+      3,
+      'Product 3',
+      'Description for Product 3',
+      39.99,
+      'https://m.media-amazon.com/images/I/31PBdo581fL._SX317_BO1,204,203,200_.jpg',
+      'Cateogory3',
+      ['M', 'XL','S']
+    )];
+```
+Explanation:
+  - The product model is created as a class with properties such as ID,
+name, description, imageUrl, category, price, and sizes.
+  - The constructor initializes these properties when a new product object
+is created.
+  - The static method getAll() returns an array of product objects. These
+objects represent the default products in the system.
+
+
+2. Implementing the API in the product controller:
+```javascript
+import ProductModel from "./product.model.js";
+
+export default class ProductController {
+  getAllProducts(req, res) {
+    // Code for getting all products
+    const products = ProductModel.GetAll();
+    res.status(200).send(products);
+  }
+```
+Explanation:
+- The product controller imports the ProductModel class from the
+product.model.js file.
+- The getAllProducts function is a request handler for the route that
+retrieves all products.
+- Inside the function, it calls the static getAll() method of the
+ProductModel to retrieve the products.
+- The retrieved products are sent as the response using res.send().
+- The status code 200 (OK) is set to indicate a successful response.
+
+3. Setting up the route in the product router:
+```javascript
+import express from 'express';
+import ProductController from './product.controller.js';
+
+const productRouter = express.Router();
+const productController = new ProductController();
+
+productRouter.get('/', productController.getAllProducts);
+productRouter.post('/', productController.addProduct);
+productRouter.get('/:id', (req, res) => {
+// Logic to fetch a single product by its ID
+});
+productRouter.post('/', (req, res) => {
+// Logic to create a new product
+});
+
+export default productRouter;
+```
+Explanation:
+- The product router is created using express.Router().
+- The router is configured to handle a GET request at the root path ("/")
+and call the getAllProducts function from the product controller.
+- The router is exported to be used in the server file.
+
+4. Importing and using the product router in the server:
+```javascript
+// 1. Import Server
+import express from "express";
+import productRouter from "./src/features/product/product.routes.js";
+
+// 2. Create Server
+const server = express();
+
+// For all requests related to product, redirect to product routes
+// localhost:3100/api/products
+server.use("/api/products", productRouter);
+
+// 3. Default Request Handler
+server.get("/", (req, res) => {
+  res.send("Welcome to E-commerce API");
+});
+
+// 4. Speicify port
+const PORT = 3100;
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+```
+Explanation:
+- The product router is imported from the "product.router.js" file.
+- The router is used as middleware with the base path '/api/products'.
+- When a request is made to the server with the path '/api/products', it
+will be handled by the product router.
+- The server listens on the specified port (3100) and logs a message
+when it is running.
+
+5. Testing the API:
+Make a GET request to http://localhost:3100/api/products in a
+browser or using a tool like Postman. The response will be an array of product
+objects as specified in the getAll() function of the product model.
+
+
 
 
