@@ -413,6 +413,42 @@ Make a GET request to http://localhost:3100/api/products in a
 browser or using a tool like Postman. The response will be an array of product
 objects as specified in the getAll() function of the product model.
 
+## Understanding POST-Request
+### 1. POST Requests in product.controller.js
+When a client (like Postman) sends a POST request to your API, the server needs to extract data from the request body. The addProduct method in product.controller.js is responsible for handling such requests.
+```javascript
+addProduct(req, res) {
+    // Code for adding a product
+    console.log(req.body);
+    console.log("This is a post request");
+    res.status(200).send("Post request recieved !");
+}
+```
+
+ ### 2. Installing body-parser
+ Before the server can access `req.body`, it needs to parse incoming JSON data. This is where body-parser comes into play. Without body-parser, req.body would be `undefined`, as Express doesn't process request bodies by default.
+```sh
+npm i body-parser
+```
+### 3. Configuring body-parser in server.js
+Once installed, you need to use body-parser middleware in server.js:
+```javascript
+import express from "express";
+import bodyParser from "body-parser";   //Import body-parser
+
+const server = express();
+server.use(bodyParser.json());  // Enables JSON parsing for incoming requests
+```
+#### Why Use body-parser?
+When a client sends data in JSON format (e.g., from Postman or a frontend app), body-parser.json() ensures that this data is converted into a JavaScript object, making it accessible via req.body.
+
+In Postman:
+
+<img src="./images/postapi_postman.png" alt="POST API in Postman" width="600" height="auto">
+
+In VS Code terminal:
+
+<img src="./images/reqbody_terminal.png" alt="Req.Body Value" width="600" height="auto">
 
 
 
