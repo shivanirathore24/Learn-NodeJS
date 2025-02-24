@@ -185,4 +185,92 @@ Run the server with:
 ```bash
 npm start
 ```
+## Setting Up Routes For Product
+1. The goal is to create APIs related to products in the E-COMMERCE API project.
+2. The APIs to be created for the product module are:
+    - Get all products
+    - Add a product
+    - Get one product
+    - Rate a product
+    - Filter Product
+3. These APIs will be handled in the product controller.
+4. A separate folder for controllers can be created within the product module to
+manage multiple controllers.
+5. The product controller file is created as "product.controller.js" in the product
+folder.
+6. The product routes file is created as "product.routes.js" in the product folder.
+7. Express router module is used to handle paths from the server to controller
+methods.
+8. The product roots file manages the paths to the product controller.
+9. The path "/api/products" is used as a good practice for API paths.
+10. The server file redirects requests related to products to the product roots file.
+11. The product roots file specifies the paths and calls the respective controller
+methods.
+12. Other routes for different modules like user and order can be implemented
+similarly.
+13. Separate route files are recommended for each feature to maintain a modular
+structure.
+
+### Code for product.controller.js file:
+```javascript
+export default class ProductController {
+  getAllProducts(req, res) {
+    // Code for getting all products
+  }
+
+  addProduct(req, res) {
+    // Code for adding a product
+  }
+
+  rateProduct(req, res) {
+    // Code for rating a product
+  }
+
+  getOneProduct(req, res) {
+    // Code for getting one product
+  }
+}
+```
+
+### Code for product.routes.js:
+```javascript
+import express from 'express';
+import ProductController from './product.controller.js';
+
+const productRouter = express.Router();
+const productController = new ProductController();
+
+productRouter.get('/', productController.getAllProducts);
+productRouter.post('/', productController.addProduct);
+productRouter.get('/:id', productController.getOneProduct);
+productRouter.post('/rate', productController.rateProduct);
+
+export default productRouter;
+```
+
+### Code for server.js
+```javascript
+// Import Server
+import express from "express";
+import productRouter from "./src/features/product/product.routes.js";
+
+// Create Server
+const server = express();
+
+//For all request related to products, redirect to product routes.
+//localhost:3000/api/products
+server.use("/api/products", productRouter);
+
+// Default Request Handler
+server.get("/", (req, res) => {
+  res.send("Welcome to E-commerce API");
+});
+
+// Speicify port
+const PORT = 3100;
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+```
+
 
