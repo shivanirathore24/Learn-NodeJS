@@ -451,4 +451,130 @@ In VS Code terminal:
 <img src="./images/reqbody_terminal.png" alt="Req.Body Value" width="600" height="auto">
 
 
+## Add Product API
 
+### 1. Code for fileupload.middleware.js:
+Purpose: Configures multer to handle file uploads.
+#### Key Features:
+  - Stores uploaded files in the ./uploads/ directory.
+  - Renames files by appending a timestamp to avoid conflicts.
+  - upload middleware is exported for use in routes.
+```javascript
+// 1. Import Multer
+import multer from "multer";
+
+// 2. Configure storage with filename and location.
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString + file.originalname);
+  },
+});
+
+export const upload = multer({ storage: storage });
+```
+
+### 2. Code for product.model.js file:
+add(product): Assigns an id to the product and adds it to the products array.
+
+```javascript
+export default class ProductModel {
+  constructor(id, name, desc, price, imageUrl, category, sizes) {
+    this.ide = id;
+    this.name = name;
+    this.desc = desc;
+    this.price = price;
+    this.imageUrl = imageUrl;
+    this.category = category;
+    this.sizes = sizes;
+  }
+
+  static GetAll() {
+    return products;
+  }
+
+  static add(product) {
+    product.id = products.length + 1;
+    products.push(product);
+    return product;
+  }
+}
+
+var products = [
+  new ProductModel(
+    1,
+    "Product 1",
+    "Description for Product 1",
+    19.99,
+    "https://m.media-amazon.com/images/I/51-nXsSRfZL._SX328_BO1,204,203,200_.jpg",
+    "Cateogory1"
+  ),
+  new ProductModel(
+    2,
+    "Product 2",
+    "Description for Product 2",
+    29.99,
+    "https://m.media-amazon.com/images/I/51xwGSNX-EL._SX356_BO1,204,203,200_.jpg",
+    "Cateogory2",
+    ["M", "XL"]
+  ),
+  new ProductModel(
+    3,
+    "Product 3",
+    "Description for Product 3",
+    39.99,
+    "https://m.media-amazon.com/images/I/31PBdo581fL._SX317_BO1,204,203,200_.jpg",
+    "Cateogory3",
+    ["M", "XL", "S"]
+  ),
+];
+```
+
+### 3. Code for product.controller.js:
+Implemented addProduct(req, res):
+  - Extracts product details (name, price, sizes) from the request body.
+  - Converts price to a floating number and sizes to an array.
+  - Assigns the uploaded image filename (req.file.filename).
+  - Calls ProductModel.add() to save the new product.
+  - Returns the newly created product as a response.
+
+```javascript
+import ProductModel from "./product.model.js";
+
+export default class ProductController {
+  getAllProducts(req, res) {
+    const products = ProductModel.GetAll();
+    res.status(200).send(products);
+  }
+
+  addProduct(req, res) {
+    //console.log(req.body);
+    //console.log("This is a post request");
+    const { name, price, sizes } = req.body;
+    const newProduct = {
+      name,
+      price: parseFloat(price),
+      sizes: sizes.split(","),
+      imageUrl: req.file.filename,
+    };
+    const createdRecord = ProductModel.add(newProduct);
+    res.status(201).send(createdRecord);
+  }
+}
+```
+
+### 4. Code for product.routes.js file:
+productRouter.post("/"):
+  - Uses upload.single("imageUrl") to handle single-file image uploads.
+  - Calls productController.addProduct to add a product.
+```javascript
+productRouter.post(
+  "/",
+  upload.single("imageUrl"),
+  productController.addProduct
+);
+```
+### 5. Test API using Postman
+<img src="./images/addProduct_postman.png" alt="Add Product API" width="600" height="auto">
