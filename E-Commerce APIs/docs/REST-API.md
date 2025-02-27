@@ -578,3 +578,49 @@ productRouter.post(
 ```
 ### 5. Test API using Postman
 <img src="./images/addProduct_postman.png" alt="Add Product API" width="600" height="auto">
+
+## Get one Product
+ ### 1. Model function to return single Product:
+- Uses the `find` method to search for a product in the products array.
+- Compares the given `id` with each product's id.
+- Returns the product if found; otherwise, returns undefined.
+ ```javascript
+ static get(id) {
+    const product = products.find((i) => i.id == id);
+    return product;
+  }
+```
+
+### 2. Controller function to handle the GET request for a single product:
+- Extracts `id` from `req.params`.
+- Calls ProductModel.get(id) to fetch the product.
+- If the product exists, responds with a 200 status and the product data.
+- If not found, responds with a 404 status and an error message.
+```javascript
+ getOneProduct(req, res) {
+    //const id = req.params.id;
+    const { id } = req.params;
+    const product = ProductModel.get(id);
+    if (!product) {
+      res.status(404).send("Product not found !");
+    } else {
+      res.status(200).send(product);
+    }
+  }
+```
+
+### 3. Routing the GET request for a single product:
+- Defines a GET route with /:id as a parameter.
+- Calls getOneProduct from the controller when the route is accessed.
+- Ensures the correct handling of product retrieval requests.
+```javascript
+productRouter.get('/:id', controller.getOneProduct);
+```
+### 4. Test API using Postman
+<img src="./images/getOneProduct_postman_1.png" alt="Add Product API" width="600" height="auto">
+
+<img src="./images/getOneProduct_postman_2.png" alt="Add Product API" width="600" height="auto">
+
+Note: The actual implementation may require additional code and
+configuration depending on the framework or libraries used.
+
