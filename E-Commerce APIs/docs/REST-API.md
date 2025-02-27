@@ -624,3 +624,115 @@ productRouter.get('/:id', controller.getOneProduct);
 Note: The actual implementation may require additional code and
 configuration depending on the framework or libraries used.
 
+## Filter Products
+
+### 1. Adding the filter function to the product model:
+- Defines a static filter method to filter products based on minPrice, maxPrice, and category.
+- Uses .filter() to iterate through the products array.
+- Conditions:
+  - ✅ (!minPrice || product.price >= minPrice): If minPrice is provided, it checks if the product price is greater than or equal to minPrice.
+  - ✅ (!maxPrice || product.price <= maxPrice): If maxPrice is provided, it checks if the product price is less than or equal to maxPrice.
+  - ✅ (!category || product.category == category): If category is provided, it checks if the product belongs to that category.
+- Returns the filtered result.
+```javascript
+static filter(minPrice, maxPrice, category){
+    const result = products.filter((product)=>{
+      return(
+      (!minPrice || 
+        product.price >= minPrice) &&
+      (!maxPrice || 
+        product.price <= maxPrice) &&
+      (!category || 
+        product.category == category)
+      );
+    });
+    return result;
+  }
+  ```
+
+### 2. Implementing the filter products method in the controller:
+- Extracts minPrice, maxPrice, and category from req.query.
+- Calls ProductModel.filter(minPrice, maxPrice, category) to get the filtered list.
+- Sends the filtered products as a response with a 200 status code.
+
+```javascript
+ filterProducts(req, res) {
+    const minPrice = req.query.minPrice;
+    const maxPrice = req.query.maxPrice;
+    const category = req.query.category;
+    const result = ProductModel.filter(minPrice, maxPrice, category);
+    res.status(200).send(result);
+  }
+  ```
+#### What is req.query in Express, and when should it be used?
+- Definition: req.query is an object in Express that contains all the query string parameters sent in the URL of a GET request.
+- Usage: It is used to access values from the URL after the ? symbol, typically in query strings like ?minPrice=10&maxPrice=20.
+- ✅ Best for: Filtering, sorting, searching, and pagination.
+
+### 3. Creating the filter API route:
+- Defines a GET API route /filter.
+- Calls productController.filterProducts to handle the filtering logic.
+- Returns products that match the provided filter criteria.
+  
+```javascript
+/* Define specific routes first */
+//localhost:3000/api/products/filter?minPrice=10&maxPrice=20&category=Category1
+productRouter.get("/filter", productController.filterProducts);
+productRouter.get("/", productController.getAllProducts);
+productRouter.post(
+  "/",
+  upload.single("imageUrl"),
+  productController.addProduct
+);
+
+/* Define dynamic route last */
+productRouter.get("/:id", productController.getOneProduct);
+
+```
+
+#### Why should the filter route be defined before the dynamic /:id route in Express?
+#### Reason:
+- In Express, routes are matched in the order they are defined.
+- If you define productRouter.get("/:id") before productRouter.get("/filter"), Express interprets "filter" as a dynamic id instead of a separate route.
+- So, when /filter is requested, Express tries to find a product with id="filter", which does not exist.
+
+#### Fix:
+- ✅ Always define specific routes first, followed by dynamic routes.
+- ✅ Place productRouter.get("/filter", productController.filterProducts); before productRouter.get("/:id", productController.getOneProduct);.
+
+### 4. Test API using Postman
+```sh
+http://localhost:3100/api/products/filter?minPrice=10&maxPrice=20&category=Category1
+```
+<img src="./images/filterProducts_postman_1.png" alt="Filter Products API" width="600" height="auto">
+
+```sh
+http://localhost:3100/api/products/filter?minPrice=10&maxPrice=30
+```
+<img src="./images/filterProducts_postman_2.png" alt="Filter Products API" width="600" height="auto">
+🚀 Now, your API can filter products dynamically based on price and category!
+
+## Summarising it
+Let’s summarise what we have learned in this module:
+1. Explored difficulties encountered with MVC architecture.
+2. Acquired knowledge about various types of APIs and their functionalities.
+3. Gained insights into REST APIs and their practical uses.
+4. Commenced the development of an E-Commerce API project.
+5. Established a well-organized folder structure for the project.
+6. Familiarized oneself with Express Router and established product routes for
+the project.
+7. Designed the product model for the API project.
+8. Successfully incorporated APIs for adding products, retrieving individual
+products, and filtering products.
+
+### Some Additional Resources:
+[Express routing](https://expressjs.com/en/guide/routing.html)
+
+[Multer: Easily upload files with Node.js and Expres](https://blog.logrocket.com/multer-nodejs-express-upload-file/)
+
+
+
+
+
+
+  

@@ -10,13 +10,17 @@ const productRouter = express.Router();
 const productController = new ProductController();
 
 // All the paths to the controller methods.
-// localhost:3000/api/products
+
+/* Define specific routes first */
+//localhost:3000/api/products/filter?minPrice=10&maxPrice=20&category=Category1
+productRouter.get("/filter", productController.filterProducts);
 productRouter.get("/", productController.getAllProducts);
 productRouter.post(
   "/",
   upload.single("imageUrl"),
   productController.addProduct
 );
-productRouter.get("/:id", productController.getOneProduct);
 
+/* Define dynamic route last */
+productRouter.get("/:id", productController.getOneProduct);
 export default productRouter;
