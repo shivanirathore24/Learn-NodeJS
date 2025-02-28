@@ -1,0 +1,9 @@
+ProductController
+1. Get Products - Done.
+2. Add a Product - Done.
+3. Get one Product - Done.
+4. Filter Product - Done.
+5. Rate Product
+6. Add items to Cart
+7. Get items of Cart
+8. Remove items from Cart
