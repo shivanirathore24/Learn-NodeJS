@@ -45,3 +45,197 @@
    applications (e.g., Google or Facebook).
 4. **JWT (JSON Web Token):** Popular authentication method using tokens (more
    details in future videos).
+
+## User APIs
+### Securing REST API Application
+- The first step towards securing the application is by creating two APIs for user
+registration and login.
+- Add two APIs to the user controller: one for sign up and another for sign in.
+- The sign-up API will accept user details such as email, name, password, and
+user type (customer or seller).
+- The sign-in API will require the user to provide their email and password.
+- Create a new folder named "user" inside the existing "features" directory.
+- Within the "user" folder, three files are created: user.model.js,
+user.controller.js, and user.routes.js.
+<img src="./images/user_folder.png" alt="User Folder Structure" width="300" height="auto">
+
+### 1.  user.model.js file
+- The user.model.js file defines a User class with a constructor that takes
+parameters for name, email, password, and user type.
+- A default user is created with the name "Seller User," email
+"seller@ecom.com," password "password1," and user type "seller."
+```javascript
+export class UserModel {
+  constructor(id, name, email, password, type) {
+    this.id = id;
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.type = type;
+  }
+
+  static signUp(name, email, password, type) {
+    const newUser = new UserModel(
+      users.length + 1,
+      name,
+      email,
+      password,
+      type
+    );
+    users.push(newUser);
+    return newUser;
+  }
+
+  static signIn(email, password) {
+    const user = users.find((u) => u.email == email && u.password == password);
+    return user;
+  }
+}
+
+var users = [
+  {
+    id: 1,
+    name: "Seller User",
+    email: "seller@ecom.com",
+    password: "password1",
+    type: "seller",
+  },
+];
+```
+
+### 2. user.controller.js file
+The user.controller.js file is created with a controller class that includes two
+functions: signUp and signIn, which both take request and response
+parameters.
+```javascript
+import { UserModel } from "./user.model.js";
+export default class UserController {
+  signUp(req, res) {
+    const { name, email, password, type } = req.body;
+    const user = UserModel.signUp(name, email, password, type);
+    res.status(201).send(user);
+  }
+
+  signIn(req, res) {
+    const result = UserModel.signIn(req.body.email, req.body.password);
+    if (!result) {
+      return res.status(400).send("Invalid Credentials !");
+    } else {
+      return res.send("Login Successful !");
+    }
+  }
+}
+```
+
+### 3. user.routes.js file
+- In the user.routes.js file, create routes for user sign-up and sign-in.
+- The routes for sign-up and sign-in are both POST requests.
+```javascript
+// Import necessary modules  
+import express from "express";  
+import UserController from "./user.controller.js";  
+
+// Initialize router and user controller  
+const userRouter = express.Router();  
+const userController = new UserController();  
+
+// Define authentication routes  
+userRouter.post("/signup", userController.signUp); // User registration  
+userRouter.post("/signin", userController.signIn); // User login  
+
+export default userRouter;  
+
+```
+
+## Testing User APIs
+We have to test the user sign-up and user sign-in APIs before proceeding to secure
+other routes. Open Postman to perform the testing both sign-up and sign-in requests.
+
+### SignUp API
+- The URL for the sign-up request is specified as
+"localhost:3100/api/users/signup"
+- Set up the request body in Postman for the sign-up API. It should contain the
+user's name, email, password, and type.
+- Send the sign-up request. The response indicates that a new user has been
+created with an ID of 2.
+
+<img src="./images/user_signup_postman.png" alt="User SignUp" width="600" height="auto">
+
+### SignIn API
+- Test the sign-in API. The request body for sign-in only requires the user's
+email and password.
+- Provide a valid email and password, and send the request. The response
+confirms a successful login with the message "Login successful"
+  
+<img src="./images/user_signin_successful.png" alt="User SignIn Successful" width="600" height="auto">
+
+- If incorrect credentials are provided, the response will indicate a bad request
+with the message "Invalid credentials."
+
+<img src="./images/user_signin_invalid.png" alt="User SignIn Invalid" width="600" height="auto">
+
+
+
+## Basic Authentication
+1. Objective: Implement basic authentication to secure the APIs in the application.
+2. Basic authentication mechanism:
+    - Credentials (username and password) provided by the client will be checked
+on each request.
+    - Middleware named "basicAuth" will be used to simplify the authentication
+process and ensure data validation against attacks like SQL injections.
+    - The "express-basic-auth" package will be installed to set up basic
+authentication.
+3. Middleware Implementation:
+    - Create a middleware named "basicAuth" in the "middlewares" folder.
+    - he middleware will compare the received email and password with the user
+data stored in the user model.
+    - If the credentials do not match, an error will be returned.
+    - If the credentials are correct, the middleware will proceed to the next
+middleware.
+    - Secure string comparison will be performed using the "safeCompare" function
+to protect against timing attacks.
+
+#### Code Implementation:
+```javascript
+import { UserModel } from "../features/user/user.model.js";
+
+const basicAuthorizer = (req, res, next) => {
+  // 1. Check if the Authorization header is present in the request
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) {
+    return res.status(401).send("No authorization details found!");
+  }
+  console.log("Authorization Header:", authHeader);
+
+  // 2. Extract the Base64-encoded credentials from the Authorization header
+  // The header format is "Basic <base64encodedCredentials>"
+  const base64Credentials = authHeader.replace("Basic ", "");
+  console.log("Base64 Credentials:", base64Credentials);
+
+  // 3. Decode the Base64-encoded credentials to get the "username:password" format
+  const decodeCreds = Buffer.from(base64Credentials, "base64").toString("utf8");
+  console.log("Decoded Credentials:", decodeCreds); // Expected format: "username:password"
+
+  // 4. Split the decoded string into username and password
+  const creds = decodeCreds.split(":");
+  if (creds.length < 2) {
+    return res.status(401).send("Invalid authorization format");
+  }
+
+  // 5. Validate credentials against the user database
+  const user = UserModel.getAll().find(
+    (u) => u.email === creds[0] && u.password === creds[1]
+  );
+
+  // 6. If a valid user is found, proceed to the next middleware
+  if (user) {
+    console.log("Authorization successful for user:", creds[0]);
+    next();
+  } else {
+    // 7. If credentials are invalid, return a 401 Unauthorized response
+    return res.status(401).send("Incorrect Credentials");
+  }
+};
+
+export default basicAuthorizer;
+```

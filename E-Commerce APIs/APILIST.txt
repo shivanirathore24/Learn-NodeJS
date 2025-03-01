@@ -7,3 +7,7 @@ ProductController
 6. Add items to Cart
 7. Get items of Cart
 8. Remove items from Cart
+
+UserController
+1. Sign Up - Email, Password, TypeOfUser(Customer, Seller).
+2. Sign In - Email, Password.
