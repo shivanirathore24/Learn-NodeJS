@@ -239,3 +239,124 @@ const basicAuthorizer = (req, res, next) => {
 
 export default basicAuthorizer;
 ```
+
+## Basic Authentication
+
+### 1. Model (user.model.js):
+Added static method of UserModel that returns all users (UserModel.getAll()).
+```javascript
+export class UserModel {
+  // Other methods like signUp, signIn.
+  
+  static getAll() { return users; }
+}
+
+```
+
+### 2. Middleware Logic (basicAuthorizer):
+
+1. **Check Authorization Header:** Verify if the Authorization header exists.
+2. **Extract Base64 Credentials:** Remove the "Basic " prefix.
+3. **Decode Credentials:** Convert from Base64 to "username:password" format.
+4. **Validate Format:** Ensure proper splitting into username and password.
+5. **Authenticate User:** Match credentials against the user data (UserModel.getAll()).
+6. **Grant or Deny Access:** If credentials match, call next(); otherwise, send a 401 Unauthorized response.
+
+```javascript
+import { UserModel } from "../features/user/user.model.js";
+
+const basicAuthorizer = (req, res, next) => {
+  // 1. Check if the Authorization header is present in the request
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) {
+    return res.status(401).send("No authorization details found!");
+  }
+  console.log("Authorization Header:", authHeader);
+
+  // 2. Extract the Base64-encoded credentials from the Authorization header
+  // The header format is "Basic <base64encodedCredentials>"
+  const base64Credentials = authHeader.replace("Basic ", "");
+  console.log("Base64 Credentials:", base64Credentials);
+
+  // 3. Decode the Base64-encoded credentials to get the "username:password" format
+  const decodeCreds = Buffer.from(base64Credentials, "base64").toString("utf8");
+  console.log("Decoded Credentials:", decodeCreds); // Expected format: "username:password"
+
+  // 4. Split the decoded string into username and password
+  const creds = decodeCreds.split(":");
+  if (creds.length < 2) {
+    return res.status(401).send("Invalid authorization format");
+  }
+
+  // 5. Validate credentials against the user database
+  const user = UserModel.getAll().find(
+    (u) => u.email === creds[0] && u.password === creds[1]
+  );
+
+  // 6. If a valid user is found, proceed to the next middleware
+  if (user) {
+    console.log("Authorization successful for user:", creds[0]);
+    next();
+  } else {
+    // 7. If credentials are invalid, return a 401 Unauthorized response
+    return res.status(401).send("Incorrect Credentials");
+  }
+};
+
+export default basicAuthorizer;
+```
+### 2. Applying Middleware in server.js
+1. Import `basicAuthorizer` middleware.
+2. Apply basicAuthorizer middleware to protected routes (/api/products).
+3. Leave authentication open for /api/users routes (e.g., for signup/login).
+```javascript
+import basicAuthorizer from "./src/middlewares/basicAuth.middleware.js";
+
+server.use("/api/products", basicAuthorizer, productRouter); 
+```
+
+#### NOTE:
+- Protected Route: Only authorized users can access /api/products.
+- Open Route: All users can access /api/users (for signup/login).
+- Authorization Logic: Only proceeds if credentials are correct.
+
+
+### Testing Basic Authentication
+1. Start the server using the command "node server.js" or "npm start" if using nodemon.
+2. Use Postman for API testing. The "API products" request is selected, which
+has been secured by the authorizers.
+3. Accessing the API without providing any credentials results in a 401
+unauthorized response, indicating the lack of authorization.
+
+<img src="./images/noauth_filterProducts_postman.png" alt="No Authentication " width="650" height="auto">
+
+<img src="./images/noauth_getProducts_postman.png" alt="No Authentication " width="650" height="auto">
+
+4. Basic authentication credentials (username and password) are added to the
+Postman request under the Authorization tab.
+5. The "Basic Auth" option is selected, and the username and password are
+entered.
+6. Upon sending the request with the correct credentials, the data (all the
+products & products based on the filter) is successfully retrieved.
+
+<img src="./images/basicAuth_filterProducts_postman.png" alt="Authentication " width="650" height="auto">
+
+<img src="./images/basicAuth_getProducts_postman.png" alt="Authentication " width="650" height="auto">
+
+7. Request with incorrect credentials returns a 401 unauthorized response.
+
+<img src="./images/basicAuth_invalidEmail_postman.png" alt="Invalid Credentials" width="650" height="auto">
+
+<img src="./images/basicAuth_invalidPassword_postman.png" alt="Invalid Credentials" width="650" height="auto">
+
+8. Basic authentication requires providing username and password with each
+request to the server.
+9. The server verifies the provided credentials for every incoming request,
+granting access if the credentials are correct and returning an error response
+if they are incorrect.
+
+
+
+
+
+

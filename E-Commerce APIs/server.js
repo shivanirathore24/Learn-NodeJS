@@ -3,13 +3,13 @@ import express from "express";
 import bodyParser from "body-parser";
 import productRouter from "./src/features/product/product.routes.js";
 import userRouter from "./src/features/user/user.routes.js";
-
+import basicAuthorizer from "./src/middlewares/basicAuth.middleware.js";
 // 2. Initialize Express server
 const server = express();
 server.use(bodyParser.json());
 
 // 3. Route handling
-server.use("/api/products", productRouter); // Product-related routes
+server.use("/api/products", basicAuthorizer, productRouter); // Product-related routes
 server.use("/api/users", userRouter); // User-related routes
 
 // 4. Default route
