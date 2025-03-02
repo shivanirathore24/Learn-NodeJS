@@ -356,7 +356,54 @@ granting access if the credentials are correct and returning an error response
 if they are incorrect.
 
 
+## Basic Authentication Way-2
+1. Objective: Implement basic authentication to secure the APIs in the application.
+2. Basic authentication mechanism:
+    - Credentials (username and password) provided by the client will be checked
+on each request.
+    - Middleware named "basicAuth" will be used to simplify the authentication
+process and ensure data validation against attacks like SQL injections.
+    - The "express-basic-auth" package will be installed to set up basic
+authentication.
+      ```sh
+      npm i express-basic-auth
+      ```
+3. Middleware Implementation:
+    - Create a middleware named "basicAuth" in the "middlewares" folder.
+    - he middleware will compare the received email and password with the user
+data stored in the user model.
+    - If the credentials do not match, an error will be returned.
+    - If the credentials are correct, the middleware will proceed to the next
+middleware.
+    - Secure string comparison will be performed using the "safeCompare" function
+to protect against timing attacks.
 
+Code Implementation:
+  ```javascript
+  // Import required modules
+  import bAuth from "express-basic-auth"; // Basic Auth middleware
+  import { UserModel } from "../features/user/user.model.js"; // User model
 
+  // Custom function for basic authentication
+  const basicAuthorizer = (username, password) => {
+    const users = UserModel.getAll(); // Get all users
+    const user = users.find((u) => bAuth.safeCompare(username, u.email)); // Find user by email
+    return user && bAuth.safeCompare(password, user.password); // Validate password
+  };
+
+  // Configure and export the middleware
+  const authorizer = bAuth({
+    authorizer: basicAuthorizer, // Use custom authorizer
+    challenge: true, // Enable auth prompt
+  });
+
+  export default authorizer;
+  ```
+
+  4. Usage:
+    - Import the "authorizer" middleware.
+    - Apply the "authorizer" middleware to the relevant API routes that require
+authentication (e.g., products APIs) to enforce authentication for accessing
+those routes.
 
 
