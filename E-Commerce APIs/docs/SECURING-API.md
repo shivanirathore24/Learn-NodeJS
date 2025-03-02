@@ -407,3 +407,51 @@ authentication (e.g., products APIs) to enforce authentication for accessing
 those routes.
 
 
+
+## Understanding JWT
+### Problems with the implementation of basic authentication
+1. No Encryption: The first problem is the lack of encryption in basic
+authentication. While tools like Postman use basic encoding, it can be easily
+decoded, so a strong encryption technique is needed to securely share
+credentials across applications.
+2. Need Strong Password: The second problem is that weak passwords can be
+easily cracked using brute force attacks. Brute force attacks involve trying
+different combinations of characters to guess the password, and passwords
+like "password1" are particularly vulnerable.
+3. Client Needs to Store Credentials: Another problem is that the client
+application needs to store the username and password, typically in the
+browser. This can be risky if the browser is accessed by multiple people
+because anyone can look into the browser's cookies or stored data to find the
+credentials.
+
+### JSON Web Token (JWT) for securing the application
+JWT is a token-based authentication method that creates a token instead of
+requiring credentials on every request. The token is scalable, easy to
+implement, and stateless.
+
+#### Structure of JWT: 
+The token consists of three parts separated by dots: the
+header (algorithm and token type), the payload (user information and
+permissions), and the signature (encrypted information).
+
+<img src="./images/jwt_structure.png" alt="JWT Structure" width="600" height="auto">
+
+- Sensitive data should not be stored in the payload but mentions that user
+permissions are a suitable example of data to include.
+- JWT is recommended because it provides a stateless behavior of
+authentication, allowing the server to verify the token without needing to store
+client information.
+- Visit the [jwt.io](https://jwt.io/) website to explore the details and examples of JWT tokens.
+
+#### Process of using JWT : 
+It involves the client logging in with their credentials
+through the login API, the server verifying the credentials and generating a
+JWT token, and then sending the token back to the client. The client stores
+the token, typically in the browser, and includes it in the authorization header
+when making requests to secure APIs.
+
+<img src="./images/jwt_process.png" alt="JWT Process" width="600" height="auto">
+
+The server verifies the token and provides a response if the verification is
+successful. If the token has been modified or expired, an error with the status
+code 401 is returned.
