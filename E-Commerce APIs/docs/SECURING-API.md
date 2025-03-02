@@ -455,3 +455,66 @@ when making requests to secure APIs.
 The server verifies the token and provides a response if the verification is
 successful. If the token has been modified or expired, an error with the status
 code 401 is returned.
+
+
+## JWT Authentication - 1
+### Implementing JWT authentication in our Express REST API
+application.
+- Install JSON Web Token package, available on npmjs.com, as the tool to
+create and manage JWT tokens for Express.
+- The first step is to install the JSON WebToken package using the command
+  ```sh
+  npm install jsonwebtoken
+  ```
+- Import the 'jsonwebtoken' package as 'jwt' in the code.
+- Use jwt.sign method as mentioned as the function to create the token.
+- In the sign-in API, after calling the model's signIn method, instead of sending
+a "login successful" message, create the token and send it to the client.
+- The sign function of JWT is used to sign the token with the provided
+algorithm, private key, and payload.
+
+#### Changes in user.controller.js file:
+```javascript
+import { UserModel } from "./user.model.js";
+import jwt from "jsonwebtoken";
+export default class UserController {
+  signUp(req, res) {
+    const { name, email, password, type } = req.body;
+    const user = UserModel.signUp(name, email, password, type);
+    res.status(201).send(user);
+  }
+
+  signIn(req, res) {
+    const result = UserModel.signIn(req.body.email, req.body.password);
+    if (!result) {
+      return res.status(400).send("Invalid Credentials !");
+    } else {
+      //1. Create token
+      const token = jwt.sign(
+        { userID: result.id, email: result.email },
+        "N6BUpqT7VL8cI7VbzLHaaS9txwGJWZMR",
+        {
+          expiresIn: "1h",
+        }
+      );
+      //2. Send token.
+      return res.status(200).send(token);
+    }
+  }
+}
+```
+- The payload should not contain sensitive data like passwords but can include
+information such as user ID and authorization permissions.
+- The user ID is stored in the payload using the value result.id.
+- The private key, which is used for signing and verifying the token, should be a
+strong and secure key. Online key generators are recommended for
+generating such keys.
+- Set the "expiresIn" option to one hour, indicating that the token will be invalid
+after that time.
+- After creating the token, return it to the client with a status code of 200 (OK).
+- The modified login API now generates a token and sends it back to the client.
+- The token serves as the client's validation key and can be used to access
+secure routes.
+
+<img src="./images/userSignIn_jwtTokenCreated.png" alt="After User SignIn, JWT Token Created" width="600" height="auto">
+
