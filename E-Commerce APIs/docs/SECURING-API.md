@@ -518,3 +518,113 @@ secure routes.
 
 <img src="./images/userSignIn_jwtTokenCreated.png" alt="After User SignIn, JWT Token Created" width="600" height="auto">
 
+## JWT Authentication - 2
+- Create a new middleware called "jwtAuth.middleware.js"
+- Define the middleware function with the parameters: request, response, and
+next.
+- Reading the token:
+    - Retrieve the token from the client.
+    - Check if the token exists; if not, return an error message (unauthorized
+access) with a status code of 401.
+- Checking token validity:
+    - Import the JSON Web Token (JWT) library.
+    - Use the JWT library's "verify" function to check if the token is valid.
+    - Pass the token and the signing key used during token creation to the
+"verify" function.
+    - Wrap the verification process in a try-catch block to handle errors.
+    - If any error occurs during verification, return an unauthorized access
+error (status code 401).
+    - If the verification is successful, retrieve the payload from the verified
+token.
+    - Print the payload for testing purposes.
+    - If the token is present, not empty, and valid, call the next middleware in
+the pipeline.
+    - Export the JWT Auth middleware to be used in securing specific
+routes.
+Apply the JWT middleware to secure routes.
+    - Replace the existing authorizer with the JWTAuth middleware.
+
+#### jwtAuth.middleware.js file
+
+```javascript
+import jwt from "jsonwebtoken";
+
+const jwtAuth = (req, res, next) => {
+  // 1. Log request headers for debugging
+  console.log(req.headers);
+
+  // 2. Extract the token from the 'Authorization' header
+  const token = req.headers["authorization"]; // Format: 'Bearer <token>'
+
+  // 3. Respond with 'Unauthorized' if no token is provided
+  if (!token) {
+    return res.status(401).send("Unauthorized: No token provided");
+  }
+
+  try {
+    // 4. Verify the token using the secret key and log the decoded payload
+    const payload = jwt.verify(token, "N6BUpqT7VL8cI7VbzLHaaS9txwGJWZMR");
+    console.log(payload);
+  } catch (err) {
+    // 5. Log token verification errors and send 'Unauthorized' response
+    console.error("Token Error: Invalid or expired token", err.message);
+    return res.status(401).send("Unauthorized: Invalid or expired token");
+  }
+
+  // 6. Token is valid, proceed to the next middleware
+  next();
+};
+
+export default jwtAuth;
+```
+
+#### server.js file
+```javascript
+import jwtAuth from "./src/middlewares/jwtAuth.middleware.js";
+
+server.use("/api/products", jwtAuth, productRouter);  //added
+```
+
+### Testing the API
+  - Use Postman to test the API without any authentication, resulting in an
+"unauthorized" response.
+  - Generate a token and include it in the authorization header.
+  - Send the request the response should be successful.
+  - Verify the payload received from the token.
+
+#### During User SignIn, JWT Token Generated:
+<img src="./images/userSignIn_jwtTokenGenerated.png" alt="During User SignIn, JWT Token Generated" width="650" height="auto">
+
+#### JWT Authentication on Filter Products
+<img src="./images/filterProducts_JWTAuthentication.png" alt="JWT Authentication on Filter Products" width="650" height="auto">
+
+#### No Token provided:
+<img src="./images/filterProducts_NoJWToken.png" alt="No Authentication on Filter Products" width="650" height="auto">
+
+#### Wrong JWToken provided:
+<img src="./images/filterProducts_WrongJWToken.png" alt="Wrong JWToken on Filter Products" width="650" height="auto">
+
+#### JWT Authentication on Get Products:
+<img src="./images/getProducts_JWTAuthentication.png" alt="JWT Authentication on Get Products" width="650" height="auto">
+
+## Summarising it
+Let’s summarise what we have learned in this module:
+- Created APIs for rating a product, adding products to a cart, retrieving
+products from the cart, and removing a product from the cart.
+- Learned about reasons for securing the application including controlled
+access and data privacy.
+- Created user API for user registration and login, including sign-up and
+sign-in functionalities.
+- Tested user sign-up and sign-in APIs using Postman.
+- Implemented Basic authentication using middleware to check
+credentials on each request.
+- Learned about JWT (JSON Web Token) as a token-based
+authentication method for securing the application.
+- Implemented JWT authentication in the Express REST API application
+using the jsonwebtoken package
+
+### Some Additional Resources:
+[Production Best Practices: Security](https://expressjs.com/en/advanced/best-practice-security.html)
+
+[Authenication and Authorization in Express.js](https://www.topcoder.com/thrive/articles/authentication-and-authorization-in-express-js-api-using-jwt)
+
