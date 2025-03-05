@@ -4,9 +4,7 @@ import bodyParser from "body-parser";
 import productRouter from "./src/features/product/product.routes.js";
 import userRouter from "./src/features/user/user.routes.js";
 import jwtAuth from "./src/middlewares/jwtAuth.middleware.js";
-//import basicAuthorizer from "./src/middlewares/basicAuth.middleware.js";
-//import authorizer from "./src/middlewares/basicAuth2.middleware.js";
-
+import cartRouter from "./src/features/cartItems/cartItems.routes.js";
 
 // 2. Initialize Express server
 const server = express();
@@ -14,9 +12,8 @@ server.use(bodyParser.json());
 
 // 3. Route handling
 server.use("/api/products", jwtAuth, productRouter); // Product-related routes
-//server.use("/api/products", basicAuthorizer, productRouter); 
-//server.use("/api/products", authorizer, productRouter);
 server.use("/api/users", userRouter); // User-related routes
+server.use("/api/cartItems", jwtAuth, cartRouter); // CartItems-related routes
 
 // 4. Default route
 server.get("/", (req, res) => {

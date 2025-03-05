@@ -146,3 +146,144 @@ To test the API, we will use Postman. The following steps outline the testing pr
 5. Send the request and observe the response.
 
 <img src="./images/customerRating_InProductsAdded.png" alt="Rating added on Product" width="650" height="auto">
+
+
+## Adding Cart Feature
+Implementing an important feature required for an e-commerce application:
+managing the cart. The cart feature allows users to add items to their cart, which is a
+fundamental functionality in e-commerce applications. We will create an API to add
+items to the cart.
+### 1. Creating the Cart Items Model
+1. Create a new folder named "cartItems" to organize the cart-related code.
+2. In the "cartItems" folder, create a model file named "cartItems.model.js" to define
+the
+Cart Item model.
+3. The Cart Item model will have the following properties:
+    - productID: Represents the ID of the product added to the cart.
+    - userID: Represents the ID of the user who added the product to the cart.
+    - quantity: Represents the quantity of the product in the cart.
+4. Export a class named CartItemModel as the default export.
+5. Define a constructor in the CartItemModel class to initialize the productID,
+userID, and quantity properties.
+6. Optionally, you can add some existing cart items as examples by instantiating the
+CartItemModel class with predefined values.
+7. Implement an add function in the CartItemModel class to add new items to the
+cart
+    - The add function takes productID, userID, and quantity as parameters.
+    - Instantiate the CartItemModel class with the provided values and push it into
+  an array of cart items.
+    - Return the newly added cart item.
+
+#### 'cartItems.model.js' file:
+```javascript
+export default class CartItemsModel {
+  constructor(id, productID, userID, quantity) {
+    this.id = id;
+    this.productID = productID;
+    this.userID = userID;
+    this.quantity = quantity;
+  }
+
+  static add(productID, userID, quantity) {
+    const cartItem = new CartItemsModel(
+      cartItems.length + 1,
+      productID,
+      userID,
+      quantity
+    );
+    cartItems.push(cartItem);
+    return cartItem;
+  }
+}
+
+var cartItems = [new CartItemsModel(1, 2, 1, 3)];
+```
+### 2. Creating the Cart Items Controller
+1. In the "cartItems" folder, create a controller file named "cartItemsController.js"
+to handle cart-related operations.
+2. Export a class named `CartItemsController` as the default export.
+3. Implement an `add` method in the `CartItemsController` class to handle the
+addition of items to the cart.
+    - The `add` method takes a `request` and `response` as parameters.
+    - Extract the `productID` and `quantity` from the request's query
+  parameters.
+    - Retrieve the `userID` from the request object's `userID` property
+  (accessed from the token).
+    - Import the `CartItemModel` and call its `add` function with the
+  `productID`, `userID`, and `quantity` parameters.
+    - Return a response with a status code of 201 (Created) and a message
+  indicating that the cart is updated.
+
+#### 'cartItems.controller.js' file:
+```javascript
+import CartItemsModel from "./cartItems.model.js";
+export class CartItemsController {
+  add(req, res) {
+    const { productID, quantity } = req.query;
+    const userID = req.userID;
+    CartItemsModel.add(productID, userID, quantity);
+    res.status(201).send("Cart is updated");
+  }
+}
+```
+
+### 3. Creating the Cart Items Routes
+1. In the "cartItems" folder, create a routes file named "cartItems.routes.js" to
+define the routes related to cart items.
+2. Import the necessary dependencies, such as Express and the
+`CartItemsController`.
+3. Create an instance of the Express Router and assign it to a variable named
+`cartRouter`.
+4. Instantiate the `CartItemsController`.
+5. Set up the route for adding a new item to the cart using the POST method.
+    - Specify the route path as "/add".
+    - Call the `add` method of the `CartItemsController` for this route.
+  6. Export the `cartRouter` as the default export.
+#### 'cartItems.routes.js' file:
+```javascript
+// Manage routes/paths to CartItemsController
+// 1. Import express
+import express, { Router } from "express";
+import { CartItemsController } from "./cartItems.controller.js";
+
+// 2. Initialize Express router
+const cartRouter = express.Router();
+const cartItemsController = new CartItemsController();
+
+// 3. Routes related to the controller methods.
+cartRouter.post("/", cartItemsController.add);
+
+export default cartRouter;
+```
+
+### 4. Setting Up Server Configuration
+1. In the main server file, import the `cartRouter` from the cart items routes file.
+2. Add a middleware for the cart-related APIs to use the `cartRouter`.
+3. Ensure that the cart-related APIs are secured by adding a JWT authentication
+middleware.
+#### Changes in 'server.js' file:
+```javascript
+import cartRouter from "./src/features/cartItems/cartItems.routes.js";
+
+server.use("/api/cartItems", jwtAuth, cartRouter); // CartItems-related routes
+```
+
+### 4. Extracting UserID from JWT token
+#### 💡 Why Is This Important?
+When making a request, For example: http://localhost:3000/api/cartItems?productID=1&quantity=2, the userID is not passed as a query parameter i.e  (?userID=1) in the URL. Instead, it is now extracted from the JWT token and set in the req object.
+
+This ensures that the userID is securely obtained from the authenticated user's token, avoiding reliance on potentially tampered client-side data.
+
+#### Change in 'jwtAuth.middleware.js' file:
+```javascript
+ try {
+    // 4. Verify the token using the secret key and log the decoded payload
+    const payload = jwt.verify(token, "N6BUpqT7VL8cI7VbzLHaaS9txwGJWZMR");
+    req.userID = payload.userID;   //added
+    console.log(payload);
+  } catch (err) {
+    // 5. Log token verification errors and send 'Unauthorized' response
+    console.error("Token Error: Invalid or expired token", err.message);
+    return res.status(401).send("Unauthorized: Invalid or expired token");
+  }
+```

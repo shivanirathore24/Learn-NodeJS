@@ -15,6 +15,7 @@ const jwtAuth = (req, res, next) => {
   try {
     // 4. Verify the token using the secret key and log the decoded payload
     const payload = jwt.verify(token, "N6BUpqT7VL8cI7VbzLHaaS9txwGJWZMR");
+    req.userID = payload.userID;
     console.log(payload);
   } catch (err) {
     // 5. Log token verification errors and send 'Unauthorized' response
