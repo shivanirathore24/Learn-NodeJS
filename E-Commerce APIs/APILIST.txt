@@ -9,5 +9,5 @@ ProductController
 8. Remove items from Cart
 
 UserController
-1. Sign Up - Email, Password, TypeOfUser(Customer, Seller).
-2. Sign In - Email, Password.
+1. Sign Up - Email, Password, TypeOfUser(Customer, Seller) - Done.
+2. Sign In - Email, Password - Done.

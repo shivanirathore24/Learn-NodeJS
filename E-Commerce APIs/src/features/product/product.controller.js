@@ -2,7 +2,7 @@ import ProductModel from "./product.model.js";
 
 export default class ProductController {
   getAllProducts(req, res) {
-    const products = ProductModel.GetAll();
+    const products = ProductModel.getAll();
     res.status(200).send(products);
   }
 
@@ -21,7 +21,16 @@ export default class ProductController {
   }
 
   rateProduct(req, res) {
-    // Code for rating a product
+    console.log(req.query);
+    const userID = req.query.userID;
+    const productID = req.query.productID;
+    const rating = req.query.rating;
+    const error = ProductModel.rateProduct(userID, productID, rating);
+    if (error) {
+      return res.status(400).send(error);
+    } else {
+      return res.status(200).send("Rating has been added !");
+    }
   }
 
   getOneProduct(req, res) {
