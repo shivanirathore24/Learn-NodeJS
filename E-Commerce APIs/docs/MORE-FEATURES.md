@@ -287,3 +287,60 @@ This ensures that the userID is securely obtained from the authenticated user's 
     return res.status(401).send("Unauthorized: Invalid or expired token");
   }
 ```
+
+## Testing Cart Feature
+We will test this API and proceed to create another API to retrieve the items in the
+user's cart.
+### Testing the Add Item to Cart API
+1. Start by running the server to test the API's functionality.
+2. Open Postman and log in with the user credentials.
+3. Create a new request for adding an item to the cart:
+    - Set the request method to POST.
+    - Add the authorization header with the token.
+    - Set the request URL as "/API/cart-items" (or the appropriate endpoint).
+    - Add the required query parameters: "productID" and "quantity".
+    - Example: productID=1, quantity=2.
+4. Send the request and verify that the response shows a "Cart is updated"
+message.
+
+ <img src="./images/customerSignIn_JWTokenCreated.png" alt="User SignIn JWT Token Created" width="650" height="auto">
+
+  <img src="./images/addCartItems.png" alt="Add Cartitems" width="650" height="auto">
+  
+5. At this point, there is no direct way to confirm the update, so we will proceed
+to implement an API for retrieving the cart items.
+
+
+### Implementing the Get Cart Items API
+1. Modify the model to include a function that returns all cart items for a specific
+user.
+    - Create a function called `get` that takes the `userID` as a parameter.
+    - Filter the cart items array based on the provided `userID`.
+    - Return the filtered cart items.
+  ```javascript
+  static get(userID) {
+    return cartItems.filter((i) => i.userID == userID);
+  }
+  ```
+2. In the controller, create a method called `get` to handle retrieving cart items.
+    - The method should take a `request` and `response` as parameters.
+    - Retrieve the `userID` from the token stored in the request object.
+    - Call the `get` function from the model, passing the `userID`.
+    - Return a response with a status code of 200 and send the cart items as the response body
+  ```javascript
+  get(req, res) {
+    const userID = req.userID;
+    const items = CartItemsModel.get(userID);
+    return res.status(200).send(items);
+  }
+  ```
+### Testing the Get Cart Items API
+1. In Postman, create a new request to test the Get Cart Items API.
+2. Set the request method to GET.
+3. Add the authorization header with the token.
+4. Set the request URL to the appropriate endpoint ("/api/cart-items" or similar).
+5. Send the request and verify that the response shows the cart items specific to
+the logged-in user.
+6. The response should only include the cart items belonging to the user with the
+associated user ID.
+  <img src="./images/getCartItems.png" alt="Get User Specific CartItems" width="650" height="auto">
