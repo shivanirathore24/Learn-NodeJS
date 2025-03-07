@@ -412,3 +412,35 @@ confirm that the deleted item is no longer present.
 
 <img src="./images/getCartItems_afterDelete.png" alt="Get User Specific CartItems" width="650" height="auto">
 
+## API Documentation
+We will discuss the importance of API documentation and how it helps clients
+understand and use our APIs effectively. We will explore the OpenAPI specification,
+which provides a standardized means to define and document APIs. Additionally, we
+will introduce Swagger as a popular tool for implementing API documentation.
+### The Need for API Documentation
+1. Clients need clear instructions on how to use APIs.
+2. As developers, we may not know who our clients will be.
+3. API documentation makes it easier for clients to understand and use our APIs.
+
+### OpenAPI Specification
+1. [OpenAPI](https://www.openapis.org/) is a widely adopted specification for documenting APIs.
+2. It provides a standardized way to define APIs and communicate their
+functionality to clients.
+3. OpenAPI allows clients to quickly understand how an API works, configure
+infrastructure, generate client code, and create test cases.
+### Swagger for API Documentation
+1. [Swagger](https://swagger.io/) is an implementation of the OpenAPI specification.
+2. It helps developers create interactive API documentation for their APIs.
+3. Swagger provides a user-friendly interface that allows clients to explore and understand the API's endpoints, request methods, parameters, and responses.
+
+### Example: COVID Vaccination API Documentation
+1. Government of India provided an API for booking COVID vaccination
+appointments.
+2. Applications like Paytm and Arogya Setu implemented this API to enable
+appointment bookings.
+3. The API documentation followed the Swagger format.
+4. Clients could understand the API endpoints, request methods, parameters,
+request/response formats, and error codes through the Swagger
+documentation
+
+<img src="./images/cowin_api_swagger.png" alt="CoWin API Swagger" width="600" height="auto">
