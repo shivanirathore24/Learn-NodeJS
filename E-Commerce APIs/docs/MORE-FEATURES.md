@@ -344,3 +344,71 @@ the logged-in user.
 6. The response should only include the cart items belonging to the user with the
 associated user ID.
   <img src="./images/getCartItems.png" alt="Get User Specific CartItems" width="650" height="auto">
+
+## Deleting Cart Item
+
+We will add another API related to the cart feature, allowing users to delete existing
+cart items.
+Implementing the Delete Cart Item API
+
+1. Create a `delete` function in the model that takes the `cartItemID` and `userID` as a parameter.
+   - Use the `find` method to search for the cart item with the matching ID.
+   - If the cart item is not found, return an error message.
+   - If the cart item is found, find its index using `findIndex`.
+   - Use the `splice` function to remove the cart item from the `cartItems` array.
+
+```javascript
+static delete(cartItemID, userID) {
+    const cartItemIndex = cartItems.findIndex(
+      (i) => i.id == cartItemID && i.userID == userID
+    );
+    if (!cartItemIndex == -1) {
+      return "Item not found!";
+    } else {
+      cartItems.splice(cartItemIndex, 1);
+    }
+}
+```
+
+2. In the controller, create a `delete` method to handle deleting a cart item. 
+    - Accept the `request` and `response` parameters. 
+    - Retrieve the `userID` from the token stored in the request object. 
+    - Retrieve the `cartItemID` from the request parameters. 
+    - Call the `delete` function from the model, passing the `cartItemID` and `userID`. 
+    - Implement a validation to ensure that the user is deleting their own cart items. 
+    - Return an error message if the validation fails. 
+    - Return a response with a status code of 404 (Resource Not Found) if the cart
+   item is not found. 
+    - Return a response with a status code of 200 (Success) and a message
+   stating that the cart item has been removed.
+
+```javascript
+delete(req, res) {
+    const userID = req.userID;
+    const cartItemID = req.params.id;
+    const error = CartItemsModel.delete(cartItemID, userID);
+    if (error) {
+      return res.status(404).send(error);
+    } else {
+      return res.status(200).send("Cart Item is removed !");
+    }
+}
+```
+
+### Testing the Delete Cart Item API
+1. Run the server and ensure that the cart items are present in the application.
+2. In Postman, create a new request for deleting a cart item.
+3. Set the request method to DELETE.
+4. Add the authorization header with the token.
+5. Set the request URL to the appropriate endpoint ("/API/cart-items/:id" or
+similar).
+6. Replace `:id` with the ID of the cart item you want to delete.
+7. Send the request and verify that the response shows a "cart item is removed"
+message.
+<img src="./images/deleteCartItem.png" alt="Delete Cart Item" width="650" height="auto">
+
+8. To verify the deletion, send a GET request to retrieve the cart items and
+confirm that the deleted item is no longer present.
+
+<img src="./images/getCartItems_afterDelete.png" alt="Get User Specific CartItems" width="650" height="auto">
+

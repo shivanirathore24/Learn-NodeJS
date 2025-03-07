@@ -11,5 +11,6 @@ const cartItemsController = new CartItemsController();
 // 3. Routes related to the controller methods.
 cartRouter.post("/", cartItemsController.add);
 cartRouter.get("/", cartItemsController.get);
+cartRouter.delete("/:id", cartItemsController.delete);
 
 export default cartRouter;

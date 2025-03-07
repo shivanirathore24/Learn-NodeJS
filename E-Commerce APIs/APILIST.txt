@@ -3,10 +3,10 @@ ProductController
 2. Add a Product - Done.
 3. Get one Product - Done.
 4. Filter Product - Done.
-5. Rate Product
-6. Add items to Cart
-7. Get items of Cart
-8. Remove items from Cart
+5. Rate Product - Done.
+6. Add items to Cart - Done.
+7. Get items of Cart - Done.
+8. Remove items from Cart - Done.
 
 UserController
 1. Sign Up - Email, Password, TypeOfUser(Customer, Seller) - Done.
