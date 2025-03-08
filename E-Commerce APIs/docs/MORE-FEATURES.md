@@ -270,7 +270,7 @@ server.use("/api/cartItems", jwtAuth, cartRouter); // CartItems-related routes
 
 ### 4. Extracting UserID from JWT token
 #### 💡 Why Is This Important?
-When making a request, For example: http://localhost:3000/api/cartItems?productID=1&quantity=2, the userID is not passed as a query parameter i.e  (?userID=1) in the URL. Instead, it is now extracted from the JWT token and set in the req object.
+When making a request, For example: http://localhost:3100/api/cartItems?productID=1&quantity=2, the userID is not passed as a query parameter i.e  (?userID=1) in the URL. Instead, it is now extracted from the JWT token and set in the req object.
 
 This ensures that the userID is securely obtained from the authenticated user's token, avoiding reliance on potentially tampered client-side data.
 
@@ -444,3 +444,112 @@ request/response formats, and error codes through the Swagger
 documentation
 
 <img src="./images/cowin_api_swagger.png" alt="CoWin API Swagger" width="600" height="auto">
+
+
+## Using Swagger
+
+Implementing Swagger in our Node.js API application. Swagger is a tool that helps
+us generate API documentation and provides a user-friendly interface for clients to
+understand and interact with our APIs.
+
+### Installing Swagger UI Express
+
+- We will use the `swagger-ui-express` package to implement Swagger in our
+  application. (Link)
+- Install the package using the command: `
+```bash
+  npm install swagger-ui-express
+```
+
+### Creating a Swagger JSON File
+
+1. Create a JSON file called `swagger.json` to define the API documentation.
+2. Start by specifying the Swagger version as 2.0.
+3. Provide basic information about your API, including the version, description,
+  and title.
+4. Define the `host` where your API is hosted (e.g., `localhost:3100`).
+5. Specify the paths for your API endpoints (e.g., `/api/products`,
+  `/api/users/signin`).
+6. For each path, define the request methods (e.g., GET, POST) and include a
+  summary and description.
+7. Define the parameters for each request, such as query parameters or request
+  body.
+8. Specify the expected responses for each request, including status codes and
+  descriptions.
+
+#### swagger.json file:
+
+```json
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "description": "API for E-Commerce application",
+    "title": "E-commerce API"
+  },
+  "host": "localhost:3100",
+  "paths": {
+    "/api/users/signin": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Login",
+        "description": "User login to get token",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "User Credentials",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid Credentials !"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### Configuring Swagger in the Express Server
+
+1. Import the `swagger-ui-express` and `swagger.json` files into your Express
+  server.
+2. Create a route (e.g., `/api-docs/` or `/api/docs`) to expose the Swagger UI.
+3. Use the `swagger.serve` middleware to create the Swagger UI.
+4. Configure the Swagger UI using `swagger.setup` and pass the imported
+  `swagger.json` object
+
+```javascript
+import swagger from "swagger-ui-express";
+import apiDocs from "./swagger.json" with { type: "json" };
+
+server.use("/api-docs", swagger.serve, swagger.setup(apiDocs));
+```
+
+### Testing the Swagger UI
+
+- Start the server and navigate to the Swagger UI route (e.g.,
+  `http://localhost:3100/api-docs/`).
+- Verify that the Swagger UI displays your API documentation.
+- Clients can now use the Swagger UI to explore and test your API directly from
+  the browser
+
+<img src="./images/swagger_api_docs1.png" alt="API Docs Swagger" width="700" height="auto">
+
+<img src="./images/swagger_post_api_users_signin.png" alt="Swagger User SignIn" width="700" height="auto">
