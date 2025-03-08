@@ -3,10 +3,33 @@
     "info":{
         "version":"1.0.0",
         "description":"API for E-Commerce application",
-        "title":"E-commerce API"
+        "title":"E-Commerce API"
     },
     "host":"localhost:3100",
+    "securityDefinitions": {
+        "JWT":{
+            "in":"header",
+            "name": "Authorization",
+            "type": "apiKey"
+        }
+    },
     "paths":{
+        "/api/products": {
+            "get":{
+                "tags": ["Products"],
+                "summary":"Get Products",
+                "description":"User will get all products",
+                "security" : [{"JWT": {}}],
+                "responses":{
+                    "200": {
+                        "description":"OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
         "/api/users/signin": {
             "post":{
                 "tags": ["Users"],

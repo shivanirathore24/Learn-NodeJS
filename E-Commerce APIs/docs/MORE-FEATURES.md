@@ -485,7 +485,7 @@ understand and interact with our APIs.
   "info": {
     "version": "1.0.0",
     "description": "API for E-Commerce application",
-    "title": "E-commerce API"
+    "title": "E-Commerce API"
   },
   "host": "localhost:3100",
   "paths": {
@@ -553,3 +553,110 @@ server.use("/api-docs", swagger.serve, swagger.setup(apiDocs));
 <img src="./images/swagger_api_docs1.png" alt="API Docs Swagger" width="700" height="auto">
 
 <img src="./images/swagger_post_api_users_signin.png" alt="Swagger User SignIn" width="700" height="auto">
+
+
+## Testing Swagger
+We have implemented Swagger in our Node.js Express application and created
+documentation for the sign-in API. Now, we will explore how to test our API using the
+Swagger UI.
+
+<img src="./images/swagger_api_docs2.png" alt="API Docs Swagger" width="700" height="auto">
+
+### Testing the Sign-In API
+1. In the Swagger UI, locate the sign-in API documentation.
+2. Click on "Try it out" and enter the predefined credentials.
+
+<img src="./images/swagger_userSignIn_execute.png" alt="Swagger User SignIn Execute" width="700" height="auto">
+
+3. Execute the request and verify the response.
+4. The response should include a token that can be used for subsequent API
+calls.
+
+<img src="./images/swagger_userSignIn_response.png" alt="Swagger User SignIn Response" width="700" height="auto">
+
+
+### Testing the Get-Products API
+1. Authorize: Copy the JWT token from the sign-in response, click "Authorize" at the top, paste the token, click the "Authorize" button, and then close.
+
+<img src="./images/swagger_authorize_jwtToken.png" alt="Swagger Authorize JWT token" width="700" height="auto">
+
+<img src="./images/swagger_authorization_success.png" alt="Swagger Authorization Successful" width="700" height="auto">
+
+2. Execute: Click "Try it out" for the Get Products API and execute.
+
+<img src="./images/swagger_getProducts_execute.png" alt="Swagger Get Products Execute" width="700" height="auto">
+
+3. Verify: If authorization is successful, the response includes all products for future API calls.
+
+<img src="./images/swagger_getProducts_response.png" alt="Swagger Get Products Response" width="700" height="auto">
+
+#### Updated 'swagger.json' file:
+```json
+{
+    "swagger":"2.0",
+    "info":{
+        "version":"1.0.0",
+        "description":"API for E-Commerce application",
+        "title":"E-Commerce API"
+    },
+    "host":"localhost:3100",
+    "securityDefinitions": {
+        "JWT":{
+            "in":"header",
+            "name": "Authorization",
+            "type": "apiKey"
+        }
+    },
+    "paths":{
+        "/api/products": {
+            "get":{
+                "tags": ["Products"],
+                "summary":"Get Products",
+                "description":"User will get all products",
+                "security" : [{"JWT": {}}],
+                "responses":{
+                    "200": {
+                        "description":"OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/users/signin": {
+            "post":{
+                "tags": ["Users"],
+                "summary":"Login",
+                "description":"User login to get token",
+                "parameters":[
+                    {
+                        "in":"body",
+                        "name":"body",
+                        "description":"User Credentials",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email":{
+                                    "type": "string"
+                                },
+                                "password":{
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses":{
+                    "200": {
+                        "description":"OK"
+                    },
+                    "400": {
+                        "description": "Invalid Credentials !"
+                    }
+                }
+            }
+        }
+    }
+}
+```
