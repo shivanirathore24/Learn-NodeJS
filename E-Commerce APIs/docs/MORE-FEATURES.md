@@ -660,3 +660,97 @@ calls.
     }
 }
 ```
+
+
+## OpenAPI 3.0 [formerly Swagger 3.0]
+### Advantages of Swagger 3.0 over 2.0:
+1. Better Structure: OpenAPI 3.0 (formerly Swagger 3.0) has a more modular and flexible approach, making API definitions easier to maintain.
+2. Request Body Handling: It introduces the `requestBody` component, providing better support for different content types and validation.
+3. Improved Authentication: Enhanced support for authentication methods, including JWT, OAuth2, and API keys.
+4. Server Declaration: The `servers` array replaces `host`, `basePath`, and `schemes`, allowing more flexibility and multiple server definitions (example: development, production).
+5. Content Negotiation: Supports different response content types (`application/json`, `application/xml`, etc).
+
+<img src="./images/swagger_api_docs_3.0.png" alt="OpenAPI 3.0 [formerly Swagger 3.0]" width="700" height="auto">
+
+### Changes in the 'swagger.json' file:
+1. Versioning: Changed `"swagger": "2.0"` to `"openapi": "3.0.0"`.
+2. Server URL: Added the `servers` array with the server URL.
+3. Request Body Handling: Replaced the `parameters` approach with `requestBody` for better content type and schema management.
+4. Security Definition: Moved `securityDefinitions` to `components.securitySchemes`.
+
+```json
+{
+    "openapi":"3.0.0",
+    "info":{
+        "version":"1.0.0",
+        "description":"API for E-Commerce Application",
+        "title":"E-Commerce API"
+    },
+    "servers":[
+        {
+             "url": "http://localhost:3100"
+        } 
+    ],
+    "components":{
+        "securitySchemes": {
+            "JWT":{
+                "in":"header",
+                "name": "Authorization",
+                "type": "apiKey"
+            }
+        }
+    },
+    "paths":{
+        "/api/products": {
+            "get":{
+                "tags": ["Products"],
+                "summary":"Get Products",
+                "description":"User will get all products",
+                "security" : [{"JWT": {}}],
+                "responses":{
+                    "200": {
+                        "description":"OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/users/signin": {
+            "post":{
+                "tags": ["Users"],
+                "summary":"Login",
+                "description":"User login to get token",
+                "requestBody":{
+                    "content":
+                    {
+                        "application/json":{
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                "email":{
+                                    "type": "string"
+                                    },
+                                "password":{
+                                    "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                        
+                    }
+                },
+                "responses":{
+                    "200": {
+                        "description":"OK"
+                    },
+                    "400": {
+                        "description": "Invalid Credentials !"
+                    }
+                }
+            }
+        }
+    }
+}
+```
