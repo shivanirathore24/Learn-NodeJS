@@ -754,3 +754,58 @@ calls.
     }
 }
 ```
+
+
+## Handling 404
+Here we will focus on handling an important response, the 404 error, when a user
+requests an API that does not exist in our application.
+### 1. Understanding the Issue
+- When a user sends a request to a non-existent API, the default response
+provided by the server and client (browser) may not be informative or helpful.
+- The default response displays "Cannot GET /api/users/get" which is not
+user-friendly.
+### 2. Providing a Custom Response
+- To address this issue, we need to send a separate message that indicates the
+requested resource does not exist or is not found.
+- We can configure a middleware at the end of all our routes to handle 404
+requests.
+- This middleware will handle requests that do not match any existing paths in
+our application.
+
+### 3. Implementing the 404 Middleware
+- Add the 404 middleware after all existing routes.
+- Use `server.use` to configure the middleware to handle all request methods
+(`use` is used instead of `get`, `post`, etc.).
+- In the middleware, end the response with the appropriate error message and
+set the status code to 404 (Not Found).
+
+#### Added in 'server.js' file:
+```javascript
+// 5.Middleware to handle 404 requests.
+const API_DOCS = "http://localhost:3100/api-docs/";
+server.use((req, res) => {
+  res.status(400).send(`API not found. Please check documentation for more information at <a href="${API_DOCS}">API Documentation</a>`);
+});
+```
+
+### 4. Customizing the Error Message
+- Instead of the default "cannot get" message, send a more descriptive error
+message, such as "API not found."
+- Optionally, provide additional information or guidance to the user, such as
+pointing them to the API documentation for more information.
+- You can specify a link to the documentation path, where users can find all
+available APIs.
+
+<img src="./images/handling_404.png" alt="Handling 404 " width="650" height="auto">
+
+NOTE:
+1. GET requests work in the browser directly.
+2. POST requests require tools like Postman, curl, or a frontend form.
+3. If there's no frontend and you're trying to test the POST request directly in the browser, it won't work. 
+
+For Example: Since the /api/users/ endpoint is expects a POST request (e.g., for user sign-in with an email and password), the GET request from the browser would not work and might trigger your 404 error middleware.
+
+⚠️ Why This Error Occurs:
+- The browser's address bar can only send GET requests, but the /api/users/ route expects a POST request.
+- The headers show "accept" types like text/html and application/xhtml+xml, indicating the browser is - expecting a webpage, not a JSON response.
+The 404 error is likely because your server's POST route isn't being triggered by a GET request.

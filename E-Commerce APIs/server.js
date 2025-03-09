@@ -24,7 +24,13 @@ server.get("/", (req, res) => {
   res.send("Welcome to E-commerce API");
 });
 
-// 5. Start server
+// 5.Middleware to handle 404 requests.
+const API_DOCS = "http://localhost:3100/api-docs/";
+server.use((req, res) => {
+  res.status(400).send(`API not found. Please check documentation for more information at <a href="${API_DOCS}">API Documentation</a>`);
+});
+
+// 6. Start server
 const PORT = 3100;
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
