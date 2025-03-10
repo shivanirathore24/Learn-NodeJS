@@ -1,6 +1,7 @@
 // 1. Import required modules
 import express from "express";
 import swagger from "swagger-ui-express";
+import cors from 'cors';
 import bodyParser from "body-parser";
 import productRouter from "./src/features/product/product.routes.js";
 import userRouter from "./src/features/user/user.routes.js";
@@ -13,6 +14,11 @@ const server = express();
 server.use(bodyParser.json()); // Parse JSON request bodies
 
 // 3. CORS policy configuration
+var corsOptions = {
+  origin: 'http://localhost:5501',
+}
+server.use(cors(corsOptions));
+/*
 server.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", 'http://localhost:5501'); // Allow specific origin
   res.header("Access-Control-Allow-Headers", "*"); // Allow all headers
@@ -21,6 +27,7 @@ server.use((req, res, next) => {
   if (req.method === 'OPTIONS') return res.sendStatus(200); // Handle preflight requests
   next(); // Continue to next middleware
 });
+*/
 
 // 4. Route handling
 server.use("/api-docs", swagger.serve, swagger.setup(apiDocs)); // Serve API documentation
