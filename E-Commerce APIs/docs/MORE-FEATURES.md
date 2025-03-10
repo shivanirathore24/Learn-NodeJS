@@ -809,3 +809,120 @@ For Example: Since the /api/users/ endpoint is expects a POST request (e.g., for
 - The browser's address bar can only send GET requests, but the /api/users/ route expects a POST request.
 - The headers show "accept" types like text/html and application/xhtml+xml, indicating the browser is - expecting a webpage, not a JSON response.
 The 404 error is likely because your server's POST route isn't being triggered by a GET request.
+
+
+## Cross-Origin Resource Sharing [CORS]
+We will focus on an important feature for improving client experience while
+consuming our APIs: Cross-Origin Resource Sharing (CORS).
+### Understanding the Issue
+- When clients, particularly web-based UI clients, try to consume our APIs from
+a different origin (e.g., different port or domain), they may encounter a CORS
+error.
+- CORS stands for Cross-Origin Resource Sharing and is a security feature
+implemented by browsers and servers to prevent cross-origin requests by
+default.
+- Cross-origin requests occur when the server and client are on different origins
+(e.g., different ports or domains).
+
+<img src="./images/cors_error.png" alt="CORS Error" width="750" height="auto">
+
+### CORS Policy and Restrictions
+- The default CORS policy restricts cross-origin requests to ensure API access
+is limited to specific clients for security reasons.
+- APIs may need to be accessed only by specific authorized clients, such as a
+bank's web UI or mobile application, rather than allowing anonymous access.
+
+### Configuring CORS Policy
+- To allow cross-origin requests from specific clients while maintaining security,
+we need to configure the CORS policy on our server.
+- In our case, we want to allow requests from the client running
+
+### E-Commerce Client Using Products API
+Create a file named "index.file" within the "E-COM" folder -> for fetching product data from an API (http://localhost:3100/api/products) using a GET request with an authorization token, then displays the data in an HTML table.
+
+#### How It should Works in Practice:
+1. When the page loads:
+    - The fetch request is sent to the server.
+    - If successful, product data is received.
+2. The data is processed and displayed in the table.
+3. If an error occurs (e.g., network issue, server not running, or invalid token):
+    - The error message is displayed in the console.
+
+#### 'index.html' file:
+```html
+<!-- TO get the desired error, ensure that your server is 
+    running at the specified port -->
+
+    <!DOCTYPE html>
+    <html lang="en">
+    
+      <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" 
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>E-COM Client</title>
+      </head>
+    
+      <body>
+    
+        <h2>Products</h2>
+        <table class = "table">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Desc</th>
+                    <th scope="col">Price</th>
+                </tr>
+            </thead>
+            <tbody id = "productTableBody">
+    
+            </tbody>
+        </table>
+    
+        <script>
+            const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjIsImVtYWlsIjoiY3VzdG9tZXIxQGVjb20uY29tIiwiaWF0IjoxNzQxNTQ0NzIwLCJleHAiOjE3NDE1NDgzMjB9.hEGhceP0NUqKBqaeYjmqOQyHR67MXOkYvLo9uS_UPCs';
+         
+            fetch('http://localhost:3100/api/products', {
+                headers: {
+                    'Authorization': token
+                }
+            })
+              .then(response =>response.json())
+              .then(data => {
+                const tableBody = document.getElementById('productTableBody');
+                data.forEach((item) => {
+                    const row = document.createElement('tr');
+    
+                    const idCell = document.createElement('td');
+                    idCell.textContent = item.id;
+                    row.appendChild(idCell);
+    
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = item.name;
+                    row.appendChild(nameCell);
+    
+                    const descCell = document.createElement('td');
+                    descCell.textContent = item.description;
+                    row.appendChild(descCell);
+    
+                    const priceCell = document.createElement('td');
+                    priceCell.textContent = item.price;
+                    row.appendChild(priceCell);
+    
+                    tableBody.appendChild(row);
+                });
+              }) 
+              .catch(error => console.log('Error:', error));
+         </script>
+      </body>
+    
+    </html>
+```
+
+###  CORS Error
+<img src="./images/cors_error_console.png" alt="CORS Error in Console" width="900" height="auto">
+
+<img src="./images/cors_error_network_tab.png" alt="CORS Error in Network Tab" width="900" height="auto">
