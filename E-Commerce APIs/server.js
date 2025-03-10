@@ -8,30 +8,39 @@ import jwtAuth from "./src/middlewares/jwtAuth.middleware.js";
 import cartRouter from "./src/features/cartItems/cartItems.routes.js";
 import apiDocs from "./swagger.json" with { type: "json" };
 
-
 // 2. Initialize Express server
 const server = express();
-server.use(bodyParser.json());
+server.use(bodyParser.json()); // Parse JSON request bodies
 
-// 3. Route handling
-server.use("/api-docs", swagger.serve, swagger.setup(apiDocs));
-server.use("/api/products", jwtAuth, productRouter); // Product-related routes
-server.use("/api/users", userRouter); // User-related routes
-server.use("/api/cartItems", jwtAuth, cartRouter); // CartItems-related routes
+// 3. CORS policy configuration
+server.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", 'http://localhost:5501'); // Allow specific origin
+  res.header("Access-Control-Allow-Headers", "*"); // Allow all headers
+  res.header("Access-Control-Allow-Methods", "*"); // Allow all methods
 
-// 4. Default route
-server.get("/", (req, res) => {
-  res.send("Welcome to E-commerce API");
+  if (req.method === 'OPTIONS') return res.sendStatus(200); // Handle preflight requests
+  next(); // Continue to next middleware
 });
 
-// 5.Middleware to handle 404 requests.
+// 4. Route handling
+server.use("/api-docs", swagger.serve, swagger.setup(apiDocs)); // Serve API documentation
+server.use("/api/products", jwtAuth, productRouter); // Protected product routes
+server.use("/api/users", userRouter); // Public user routes
+server.use("/api/cartItems", jwtAuth, cartRouter); // Protected cart routes
+
+// 5. Default route
+server.get("/", (req, res) => {
+  res.send("Welcome to E-commerce API"); // Basic welcome message
+});
+
+// 6. Middleware to handle 404 requests
 const API_DOCS = "http://localhost:3100/api-docs/";
 server.use((req, res) => {
-  res.status(400).send(`API not found. Please check documentation for more information at <a href="${API_DOCS}">API Documentation</a>`);
+  res.status(400).send(`API not found. Check <a href="${API_DOCS}">API Documentation</a>`); // Send 404 response
 });
 
-// 6. Start server
+// 7. Start server
 const PORT = 3100;
 server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`); // Log server start
 });

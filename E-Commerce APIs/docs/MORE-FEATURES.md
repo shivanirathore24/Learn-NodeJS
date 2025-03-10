@@ -926,3 +926,71 @@ Create a file named "index.file" within the "E-COM" folder -> for fetching produ
 <img src="./images/cors_error_console.png" alt="CORS Error in Console" width="900" height="auto">
 
 <img src="./images/cors_error_network_tab.png" alt="CORS Error in Network Tab" width="900" height="auto">
+
+## CORS using headers
+We will configure the CORS policy in our server application to allow access to our
+client application.
+### Configuring CORS Policy
+1. CORS policy configuration is done using middlewares.
+2. We will create a middleware to handle CORS policy configuration using
+`server.use`.
+3. The middleware will take the request, response, and next object as
+parameters.
+4. To allow access to our client application, we need to set the
+`access-control-allow-origin` header in the response.
+5. The value of the header should be the URL of our client application (e.g.,
+`http://localhost:5501`).
+6. To allow access from all web browser clients, we can set the value to `*`.
+
+### Handling Pre-flight Requests
+1. Pre-flight requests are verification requests sent by the browser before
+making the actual request.
+2. The browser checks if the server responds with an HTTP OK status (200) to
+the pre-flight request.
+3. To handle pre-flight requests, we can check if `request.method` is
+`OPTIONS`.
+4. If it is an OPTIONS request, we need to send a response with an OK status
+using `response.sendStatus(200)`.
+
+### Allowing Request Headers
+1. If the client application includes specific headers in the request, such as the
+Authorization header, we need to allow those headers in the CORS policy.
+2. We can specify the allowed headers using the `access-control-allow-headers`
+header in the response.
+3. To allow all headers, we can set the value to `*`. Alternatively, we can specify
+specific headers like `Content-Type` or `Authorization`.
+
+### Change in 'server.js' file:
+```javascript
+// 3. CORS policy configuration
+server.use((req,res,next) =>{
+  res.header("Access-Control-Allow-Origin", 'http://localhost:5501'); // Allow only a specific origin
+  //res.header("Access-Control-Allow-Headers", "Content-Type, Authorization"); // Allow specific headers
+  //res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS"); // Allow specific HTTP methods
+  res.header("Access-Control-Allow-Headers", "*"); // Allow all headers
+  res.header("Access-Control-Allow-Methods", "*"); // Allow all methods
+  //return ok for preflight request
+  if(req.method == 'OPTIONS'){
+    return res.sendStatus(200);
+  }
+  next();
+});
+```
+This code sets up Cross-Origin Resource Sharing (CORS) in a server:
+1. Allow Specific Origin: The Access-Control-Allow-Origin header is set to 'http://localhost:5501', meaning only this origin can access server resources.
+2. Allow All Headers: The Access-Control-Allow-Headers header is set to "*", permitting any headers in requests.
+3. Allow All Methods: The Access-Control-Allow-Methods header is set to "*", allowing all HTTP methods (e.g., GET, POST, PUT, DELETE).
+4. Preflight Request Handling: If the request method is OPTIONS (commonly used for preflight checks in CORS), the server responds with 200 OK and skips further middleware.
+5. Proceed to Next Middleware: If not a preflight request, next() is called to continue processing the request.
+
+### Display Products on Client Side
+<img src="./images/Client_getProducts.png" alt="Get Products on Client Side" width="650" height="auto">
+
+Note: To display data from the Get Product API, ensure the token received from the server after user sign-in matches the token used in index.html on the client side. Only then will the products be displayed after authorization.
+
+
+
+
+
+
+
