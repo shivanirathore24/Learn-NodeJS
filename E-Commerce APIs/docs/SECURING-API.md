@@ -328,9 +328,9 @@ has been secured by the authorizers.
 3. Accessing the API without providing any credentials results in a 401
 unauthorized response, indicating the lack of authorization.
 
-<img src="./images/noauth_filterProducts_postman.png" alt="No Authentication " width="650" height="auto">
+<img src="./images/noAuth_filterProducts_postman.png" alt="No Authentication " width="650" height="auto">
 
-<img src="./images/noauth_getProducts_postman.png" alt="No Authentication " width="650" height="auto">
+<img src="./images/noAuth_getProducts_postman.png" alt="No Authentication " width="650" height="auto">
 
 4. Basic authentication credentials (username and password) are added to the
 Postman request under the Authorization tab.

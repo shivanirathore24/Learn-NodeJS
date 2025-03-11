@@ -714,15 +714,15 @@ http://localhost:3100/api/products/filter?minPrice=10&maxPrice=30
 
 ## Summarising it
 Let’s summarise what we have learned in this module:
-1. Explored difficulties encountered with MVC architecture.
-2. Acquired knowledge about various types of APIs and their functionalities.
-3. Gained insights into REST APIs and their practical uses.
-4. Commenced the development of an E-Commerce API project.
-5. Established a well-organized folder structure for the project.
-6. Familiarized oneself with Express Router and established product routes for
+- Explored difficulties encountered with MVC architecture.
+- Acquired knowledge about various types of APIs and their functionalities.
+- Gained insights into REST APIs and their practical uses.
+- Commenced the development of an E-Commerce API project.
+- Established a well-organized folder structure for the project.
+- Familiarized oneself with Express Router and established product routes for
 the project.
-7. Designed the product model for the API project.
-8. Successfully incorporated APIs for adding products, retrieving individual
+- Designed the product model for the API project.
+- Successfully incorporated APIs for adding products, retrieving individual
 products, and filtering products.
 
 ### Some Additional Resources:

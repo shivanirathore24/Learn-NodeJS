@@ -984,9 +984,92 @@ This code sets up Cross-Origin Resource Sharing (CORS) in a server:
 5. Proceed to Next Middleware: If not a preflight request, next() is called to continue processing the request.
 
 ### Display Products on Client Side
-<img src="./images/Client_getProducts.png" alt="Get Products on Client Side" width="650" height="auto">
+<img src="./images/client_getProducts.png" alt="Get Products on Client Side" width="650" height="auto">
 
 Note: To display data from the Get Product API, ensure the token received from the server after user sign-in matches the token used in index.html on the client side. Only then will the products be displayed after authorization.
+
+
+## CORS using library
+Previously we configured the CORS policy in our server application manually using
+response headers. However, there is a popular library available in Node.js that
+simplifies the CORS configuration process. In this video, we will explore how to use
+the CORS library in our application.
+
+### Using the CORS Library
+1. The CORS library is a widely-used Node.js middleware for handling CORS
+policy.
+2. We can install the library using npm by running: 
+```sh 
+npm install cors
+```
+3. To use the library, we need to import it in our server application using `import
+cors from 'cors'`.
+4. Instead of manually configuring the CORS policy, we can use the `cors()`
+function provided by the library as middleware.
+5. This simplifies the configuration process and takes care of handling the
+necessary response headers.
+
+### Default Configuration
+- By default, the CORS library allows access from all origins and includes all
+headers.
+- If we don't specify any options, the library assumes an open CORS policy.
+
+### Configuring Specific Options
+1. If we want to configure specific options for the CORS policy, we can pass an
+options object to the `cors()` function.
+2. The options object can include properties like `origin` and `allowedHeaders`.
+3. We can specify the allowed origins by setting the `origin` property to the
+desired URLs.
+4. To allow specific headers, we can set the `allowedHeaders` property to an
+array of header names or use the `*` wildcart for all headers.
+
+### Updated 'server.js file:
+```javascript
+import cors from 'cors';
+
+// 3. CORS policy configuration
+var corsOptions = {
+  origin: 'http://localhost:5501',
+}
+server.use(cors(corsOptions));
+```
+This code sets up a CORS (Cross-Origin Resource Sharing) policy for an Express server:
+1. Import CORS: Adds middleware to handle Cross-Origin Resource Sharing.
+2. CORS Rules: `corsOptions` restricts access to requests only from `http://localhost:5501`.
+3. Apply to Server: `server.use(cors(corsOptions))` ensures only allowed origins can access server resources, enhancing security.
+
+
+## Summarising it
+Let’s summarise what we have learned in this module:
+- Learned about the process of rating products, which involves allowing
+users to assign ratings.
+- Implement and tested a shopping cart feature enabling users to add
+items they wish to purchase.
+- Implemented delete cart item feature that allows users to remove items
+from their shopping cart, improving the overall user experience.
+- Learned how to create clear and comprehensive documentation for an
+API, which helps other developers understand how to use it effectively.
+- Learned how to utilize Swagger to create interactive and
+machine-readable API documentation.
+- Followed the process of testing the Swagger documentation and
+ensuring it accurately reflects the API's functionality.
+- Learned how to handle HTTP 404 errors, which occur when a
+requested resource is not found on the server.
+- Learned how to set specific HTTP headers to control CORS behavior
+and permissions.
+- Learned how to use a library or framework to simplify the
+implementation of CORS in your web application
+
+### Some Additional Resources:
+[Documenting your Express API with Swagger](https://blog.logrocket.com/documenting-express-js-api-swagger/)
+
+[Cross-Origin Resource Sharing (CORS)](https://blog.logrocket.com/documenting-express-js-api-swagger/)
+
+[A Guide to CORS in Node.js with Express](https://blog.knoldus.com/a-guide-to-cors-in-node-js-with-express/)
+
+
+
+
 
 
 
