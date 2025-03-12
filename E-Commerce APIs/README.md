@@ -9,3 +9,6 @@
 
 ### 🌟 **Additional Features for Enhanced E-Commerce**
 3. [More Features to E-Commerce Application](docs/MORE-FEATURES.md)
+
+### ⚠️ **Handling Errors**
+4. [Robust Error Handling Strategies](docs/HANDLING-ERRORS.md)
