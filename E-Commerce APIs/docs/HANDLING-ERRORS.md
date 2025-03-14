@@ -49,4 +49,60 @@ const loggerMiddleware = async (req, res, next) => {
 export default loggerMiddleware
 ```
 
+## Using Middleware Logger
+We will use the logger middleware and test if the requests are being logged
+properly.
+### Applying Logger Middleware
+- The logger middleware can be applied at different levels: application level, route
+level, or controller level.
+- We apply the logger middleware at the application level using
+`server.use(loggerMiddleware)`.
+### Testing the Logger Middleware
+- We use a tool like Postman to send requests and check if they are being logged.
+- After sending a request, we check the logs to see if the timestamp and log data
+are present.
+- Initially, the log data may display as `[object Object]` because we need to convert
+it to a string.
+
+### Enhancing the Logger Middleware
+1. We modify the logger middleware to convert the request body to a string and log
+the request URL.
+2. The `JSON.stringify()` method is used to convert the request body object to a
+string.
+3. The `appendFile` function is used instead of `writeFile` to preserve existing log
+data.
+4. A new line character (`\n`) is appended before each log entry for readability.
+
+#### Modified logger.middleware.js file:
+```javascript
+import fs from "fs";
+const fsPromise = fs.promises;
+
+async function log(logData) {
+  try {
+    logData = `${new Date().toString()} +  ${logData}\n`;
+    await fsPromise.appendFile("log.txt", logData);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+const loggerMiddleware = async (req, res, next) => {
+  // Exclude logging for /signin and /signup routes
+  if (!req.url.includes("/signin") && !req.url.includes("/signup")) {
+    const logData = `${req.url} - ${JSON.stringify(req.body)}`;
+    await log(logData);
+  }
+  next();
+};
+
+export default loggerMiddleware;
+```
+### Logging Best Practices
+- We should avoid logging sensitive information such as passwords.
+- We can skip logging specific routes or requests, like sign-in requests, to prevent
+logging sensitive data.
+- Applying the logger middleware at the route level allows for more granular control
+over which requests are logged.
+
 
