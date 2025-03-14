@@ -279,7 +279,7 @@ server.listen(PORT, () => {
 ```javascript
 export default class ProductModel{
     constructor(id, name, desc, price, imageUrl, category, sizes){
-        this.ide=id;
+        this.id=id;
         this.name=name;
         this.desc=desc;
         this.price=price;
@@ -482,7 +482,7 @@ add(product): Assigns an id to the product and adds it to the products array.
 ```javascript
 export default class ProductModel {
   constructor(id, name, desc, price, imageUrl, category, sizes) {
-    this.ide = id;
+    this.id = id;
     this.name = name;
     this.desc = desc;
     this.price = price;
@@ -578,6 +578,96 @@ productRouter.post(
 ```
 ### 5. Test API using Postman
 <img src="./images/addProduct_postman.png" alt="Add Product API" width="600" height="auto">
+
+## Fixed Bug: Add Products API
+
+### 1. 'product.controller.js' file:
+```javascript
+ addProduct(req, res) {
+    const { name, desc, price, imageUrl, category, sizes } = req.body;
+    const newProduct = {
+      name,
+      desc: desc || "No description available",
+      price: parseFloat(price),
+      imageUrl: req.file ? req.file.filename : imageUrl,
+      category: category || "Uncategorized",
+      sizes: Array.isArray(sizes)
+        ? sizes
+        : typeof sizes === "string"
+        ? sizes.split(",")
+        : [],
+    };
+    const createdRecord = ProductModel.add(newProduct);
+    res.status(201).send(createdRecord);
+  }
+```
+#### Changes & Reasons:
+1. Added desc (description) field → Provides a default "No description available" if not given.
+2. Added category field → Defaults to "Uncategorized" if not provided.
+3. Improved imageUrl handling → Uses uploaded file (req.file.filename) if available; otherwise, it takes imageUrl from the request body.
+4. Enhanced sizes handling → Ensures sizes is always an array, whether provided as a string ("S,M,L") or an actual array (["S", "M", "L"]).
+
+### 2. 'product.model.js' file:
+#### Before Change:
+```javascript
+static add(product) {
+  product.id = products.length + 1; // 'id' is added here
+  products.push(product); // Then product is pushed
+  return product;
+}
+```
+Why does id appear last?
+- product already exists as an object when passed to add(product).
+- id is added later (product.id = ...), so JavaScript places it at the end of the object.
+- Then, the modified object is pushed into products.
+
+#### After Change:
+```javascript
+static add(product) {
+    product = { id: products.length + 1, ...product }; // Reassign product with id first
+    products.push(product);
+    return product;
+  }  
+```
+
+Why does id appear first here?
+- A new object is created, with id assigned first.
+- The spread operator { id, ...product } ensures id is inserted before other properties.
+- The new structured object is then pushed into products.
+
+### 3. 'fileupload.middleware.js' file:
+```javascript
+// 1. Import Multer
+import multer from "multer";
+
+// 2. Configure storage with filename and location.
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./uploads/");
+  },
+  filename: (req, file, cb) => {
+    //cb(null, new Date().toISOString() + file.originalname);
+    const timestamp = new Date().toISOString().replace(/:/g, "-");  //Change
+    cb(null, timestamp + "-" + file.originalname);
+  },
+});
+
+export const upload = multer({ storage: storage });
+```
+
+#### Why Replace : with - in Filenames on Windows?
+- toISOString() generates a timestamp like 2025-03-14T10:15:17.934Z
+- Windows does not allow colons (:) in filenames because they are reserved for drive paths (e.g., C:\Users\). If you try to save a file with : in its name, it will cause an error like "ENOENT: no such file or directory".
+
+#### Solution: Replace : with -
+- new Date().toISOString().replace(/:/g, "-")
+- Converts 2025-03-14T10:15:17.934Z → 2025-03-14T10-15-17.934Z
+- Ensures filenames are Windows-compatible without breaking the timestamp format. 🚀
+
+### 4. Test API using Postman
+
+<img src="./images/addProduct_api1.png" alt="Add Product API" width="700" height="auto">
+<img src="./images/addProduct_api2.png" alt="Add Product API" width="700" height="auto">
 
 ## Get one Product
  ### 1. Model function to return single Product:

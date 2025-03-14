@@ -7,18 +7,23 @@ export default class ProductController {
   }
 
   addProduct(req, res) {
-    //console.log(req.body);
-    //console.log("This is a post request");
-    const { name, price, sizes } = req.body;
+    const { name, desc, price, imageUrl, category, sizes } = req.body;
     const newProduct = {
       name,
+      desc: desc || "No description available",
       price: parseFloat(price),
-      sizes: sizes.split(","),
-      imageUrl: req.file.filename,
+      imageUrl: req.file ? req.file.filename : imageUrl,
+      category: category || "Uncategorized",
+      sizes: Array.isArray(sizes)
+        ? sizes
+        : typeof sizes === "string"
+        ? sizes.split(",")
+        : [],
     };
     const createdRecord = ProductModel.add(newProduct);
     res.status(201).send(createdRecord);
   }
+    
 
   rateProduct(req, res) {
     console.log(req.query);

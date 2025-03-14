@@ -12,10 +12,16 @@ export default class ProductModel {
   }
 
   static add(product) {
-    product.id = products.length + 1;
+    product = { id: products.length + 1, ...product }; // Reassign product with id first
     products.push(product);
     return product;
   }
+
+  // static add(product) {
+  //   product.id = products.length + 1;
+  //   products.push(product);
+  //   return product;
+  // }
 
   static getAll() {
     return products;
