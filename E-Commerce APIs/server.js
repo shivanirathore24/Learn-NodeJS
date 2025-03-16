@@ -8,7 +8,7 @@ import userRouter from "./src/features/user/user.routes.js";
 import jwtAuth from "./src/middlewares/jwtAuth.middleware.js";
 import cartRouter from "./src/features/cartItems/cartItems.routes.js";
 import apiDocs from "./swagger.json" with { type: "json" };
-import loggerMiddleware from "./src/middlewares/logger.middleware.js";
+import winstonLoggerMiddleware from "./src/middlewares/winstonLogger.middleware.js";
 
 // 2. Initialize Express server
 const server = express();
@@ -32,7 +32,7 @@ server.use((req, res, next) => {
 
 // 4. Route handling
 server.use("/api-docs", swagger.serve, swagger.setup(apiDocs)); // Serve API documentation
-server.use (loggerMiddleware);
+server.use (winstonLoggerMiddleware);
 server.use("/api/products", jwtAuth, productRouter); // Protected product routes
 server.use("/api/users", userRouter); // Public user routes
 server.use("/api/cartItems", jwtAuth, cartRouter); // Protected cart routes

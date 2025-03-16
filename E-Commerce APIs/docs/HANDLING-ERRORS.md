@@ -105,4 +105,61 @@ logging sensitive data.
 - Applying the logger middleware at the route level allows for more granular control
 over which requests are logged.
 
+## Using winston logger
+Using the Winston library to implement a more effective logging system in a Node.js
+and Express API application.The current logging system uses the file system and FS
+promises to log requests from clients.
+### Logger Configuration
+- The first step is to install the Winston library using:
+```sh
+ npm i winston
+ ```
+- The logger is configured using Winston's `createLogger` method and an options
+object.
+- The configuration options include setting the log level (e.g., info, error), log format
+(e.g., JSON), and log transport (e.g., file, console).
+
+#### Changes in logger.middleware.js:
+```javascript
+import winston from "winston";
+
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.json(),
+  defaultMeta: { service: "request-logging" },
+  transports: [new winston.transports.File({ filename: "log.txt" })],
+});
+
+const winstonLoggerMiddleware = async (req, res, next) => {
+  // Exclude logging for /signin and /signup routes
+  if (!req.url.includes("/signin") && !req.url.includes("/signup")) {
+    const logData = `${req.url} - ${JSON.stringify(req.body)}`;
+    //logger is called within the logger middleware to log incoming requests
+    logger.info(logData);  
+  }
+  next();
+};
+
+export default winstonLoggerMiddleware;
+```
+
+### 1️⃣ Code Overview
+This code sets up a request logging middleware using Winston in a Node.js application.
+
+### 2️⃣ Functionality
+#### Creates a logger (winston.createLogger)
+1. level: "info" → Logs info, warn, and error messages (ignores debug).
+2. format: winston.format.json() → Saves logs in JSON format.
+3. defaultMeta: { service: "request-logging" } → Adds "service": "request-logging" to logs.
+4. transports: [...] → Logs are saved to "log.txt".
+#### Middleware (winstonLoggerMiddleware)
+1. Exclude /signin and /signup → Prevents logging of sensitive routes to avoid storing credentials.
+2. Format Log Data → Creates a log entry containing the request URL and request body.
+3. Log the Request (logger.info()) → Saves the formatted log entry to a file (log.txt).
+4. Call next() → Passes control to the next middleware or route handler in the request cycle.
+
+### 3️⃣ Use Case
+1. ✅ Tracks API requests (except login/signup) for debugging & analytics.
+2. ✅  Stores logs in a file (log.txt) for later review.
+3. ✅ Helps with security audits by recording request data.
 
