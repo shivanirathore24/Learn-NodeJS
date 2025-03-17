@@ -163,3 +163,90 @@ This code sets up a request logging middleware using Winston in a Node.js applic
 2. ✅  Stores logs in a file (log.txt) for later review.
 3. ✅ Helps with security audits by recording request data.
 
+## Error Handling in Express
+Proper error handling is an essential feature in any backend application. We will
+learn about handling exceptions and errors in an Express application.
+### Handling Errors in Controllers
+- In JavaScript, we can use the `try-catch` block to handle exceptions.
+- Instead of returning error messages from controllers, we can throw errors using
+the `throw` keyword.
+- By throwing errors, we can catch them in the `catch` block and handle them
+accordingly.
+### Updating the Product Model and Controller code
+- We update the product model code to throw errors instead of returning error
+messages.
+```javascript
+static rateProduct(userID, productID, rating) {
+    // 1. Validate User
+    const user = UserModel.getAll().find((u) => u.id == userID);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    // 1. Validate Product
+    const product = products.find((p) => p.id == productID);
+    if (!product) {
+      throw new Error("Product not found");
+    }
+
+    // 3. Validate Rating Input
+    if (!rating || isNaN(rating)) {
+      throw new Error("Please provide a valid rating.");
+    }
+
+    // 4. Check if there are ratings and if not then add rating array.
+    if (!product.ratings) {
+      product.ratings = [];
+      product.ratings.push({
+        userID: userID,
+        rating: rating,
+      });
+    } else {
+      // 5. Check if user rating is already exists
+      const existingRatingIndex = product.ratings.findIndex(
+        (r) => r.userID == userID
+      );
+
+      if (existingRatingIndex >= 0) {
+        // 6. Update the existing rating
+        product.ratings[existingRatingIndex] = {
+          userID: userID,
+          rating: rating,
+        };
+      } else {
+        // 7. Add new rating if not already rated
+        product.ratings.push({
+          userID: userID,
+          rating: rating,
+        });
+      }
+    }
+  }
+  ```
+
+• Inside controller the `try` block, we call the function that may throw an error, and in
+case of an error, it will be caught in the `catch` block.
+```javascript
+ rateProduct(req, res) {
+    console.log(req.query);
+    const userID = req.query.userID;
+    const productID = req.query.productID;
+    const rating = req.query.rating;
+    try {
+      ProductModel.rateProduct(userID, productID, rating);
+    } catch (err) {
+      return res.status(400).send(err.message);
+    }
+    return res.status(200).send("Rating has been added !");
+ }
+ ```
+- The `catch` block can return the error message back to the client.
+### Handling Different Types of Errors
+- We can throw different types of errors depending on the situation.
+- For example, if a product is not found, we can throw a new error with a "Product
+not found" message.
+- We can also handle errors in asynchronous operations using `try-catch` blocks.
+### Improving Error Messages
+- We should improve error messages to make them more meaningful to the user.
+- In case of a bad request or invalid input, we return the appropriate error message.
+- The error message should provide useful information to the user without exposing
+sensitive details.
