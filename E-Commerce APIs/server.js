@@ -42,13 +42,19 @@ server.get("/", (req, res) => {
   res.send("Welcome to E-commerce API"); // Basic welcome message
 });
 
-// 6. Middleware to handle 404 requests
+// 6. Error handler middleware
+server.use((err, req, res, next)=>{
+  console.log(err);
+  res.status(503).send('Something went wrong, please try later');
+});
+
+// 7. Middleware to handle 404 requests
 const API_DOCS = "http://localhost:3100/api-docs/";
 server.use((req, res) => {
   res.status(400).send(`API not found. Check <a href="${API_DOCS}">API Documentation</a>`); // Send 404 response
 });
 
-// 7. Start server
+// 8. Start server
 const PORT = 3100;
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`); // Log server start

@@ -250,3 +250,117 @@ not found" message.
 - In case of a bad request or invalid input, we return the appropriate error message.
 - The error message should provide useful information to the user without exposing
 sensitive details.
+
+
+## Application Level Error Handling
+- We learned how to handle errors in Express using try-catch blocks and throwing
+user-defined errors.
+- However, there are system-level errors that can occur in our application and need
+to be handled differently.
+- Handling errors at the application level ensures consistent error handling and
+provides a better response to clients
+
+### Differentiating User-Defined Errors and System Errors
+- User-defined errors are errors that we define in our code using the `throw`
+keyword.
+- System errors are exceptions or errors that are not intentionally thrown by us but
+occur due to issues in the application.
+
+### Need for Application Level Error Handling
+- Instead of writing try-catch blocks in every controller function, it's better to have a
+centralized error handler at the application level.
+- An error handler middleware can catch and handle any unhandled errors in the
+application.
+- This error handler middleware provides a more controlled and meaningful
+response to clients.
+
+### Implementing Error Handler Middleware
+- Express provides a default error handler middleware, but we can customize it to
+meet our requirements.
+- By setting up an error handler middleware, we can catch and process errors in a
+centralized manner.
+
+### Customizing Error Messages
+- The default error handler middleware returns the entire stack trace, which is not
+suitable for client consumption.
+- We can customize the error handler middleware to return more meaningful error
+messages to clients.
+- The error handler middleware should focus on providing a clear and
+understandable response to the client, without exposing internal details of the
+application.
+
+### Logging Errors
+- It is important to log errors for debugging and troubleshooting purposes.
+- We can integrate our existing logger middleware with the error handler
+middleware to log errors.
+- This ensures that we have a record of errors and can investigate and address
+them effectively.
+
+#### 1. Lets create Intentionally causing an application error in 'product.controller.js':  
+```javascript
+ rateProduct(req, res) {
+    console.log(req.query);
+    const userID = req.query.userID;
+    const productID = req.query.productID;
+    const rating = req.query.rating;
+    /* Intentional error: Accessing 'req.querys' (undefined) will trigger the error handler middleware. */
+    //const rating = req.querys.rating; 
+    try {
+      ProductModel.rateProduct(userID, productID, rating);
+    } catch (err) {
+      return res.status(400).send(err.message);
+    }
+    return res.status(200).send("Rating has been added !");
+  }
+```
+#### 2. Added Error-Handler middleware in 'server.js':
+```javascript
+// 4. Route handling
+server.use("/api-docs", swagger.serve, swagger.setup(apiDocs)); // Serve API documentation
+server.use (winstonLoggerMiddleware);
+server.use("/api/products", jwtAuth, productRouter); // Protected product routes
+server.use("/api/users", userRouter); // Public user routes
+server.use("/api/cartItems", jwtAuth, cartRouter); // Protected cart routes
+
+// 5. Default route
+server.get("/", (req, res) => {
+  res.send("Welcome to E-commerce API"); // Basic welcome message
+});
+
+// 6. Error handler middleware
+server.use((err, req, res, next)=>{
+  console.log(err);
+  res.status(503).send('Something went wrong, please try later');
+});
+```
+NOTE:
+1. ✅ Error middleware works when placed after routes because Express executes middlewares sequentially.
+2. ❌ If defined before routes, it never gets executed for errors inside routes, as Express does not go back up the stack.
+3. 💡 Fix: Always define the error middleware at the end to catch errors from all previous middlewares and routes. 🚀
+
+```javascript
+// ❌ Error middleware is placed before routes
+server.use((err, req, res, next) => {
+  console.log(err);
+  res.status(503).send('Something went wrong, please try later');
+});
+
+// ✅ Routes are defined later
+server.use("/api/products", jwtAuth, productRouter);
+server.use("/api/users", userRouter);
+server.use("/api/cartItems", jwtAuth, cartRouter);
+```
+
+```javascript
+// ✅ Routes are defined first
+server.use("/api/products", jwtAuth, productRouter);
+server.use("/api/users", userRouter);
+server.use("/api/cartItems", jwtAuth, cartRouter);
+
+// ✅ Error-handling middleware is placed last
+server.use((err, req, res, next) => {
+  console.log(err);
+  res.status(503).send('Something went wrong, please try later');
+});
+```
+

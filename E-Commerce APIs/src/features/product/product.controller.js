@@ -29,6 +29,8 @@ export default class ProductController {
     const userID = req.query.userID;
     const productID = req.query.productID;
     const rating = req.query.rating;
+    /* Intentional error: Accessing 'req.querys' (undefined) will trigger the error handler middleware. */
+    //const rating = req.querys.rating; 
     try {
       ProductModel.rateProduct(userID, productID, rating);
     } catch (err) {
