@@ -364,3 +364,98 @@ server.use((err, req, res, next) => {
 });
 ```
 
+## Customizing Error Handling Middleware
+Here we will focus on customizing our error class and error handler to work with
+different types of error messages and status codes.
+### Extending the Error Class
+- To customize our error handling, we create a new class called `ApplicationError`
+that extends the JavaScript error class.
+This custom error class allows us to add additional properties, such as a status
+code, to provide more information about the error.
+### Customizing Error Messages and Status Codes
+- By extending the error class, we can specify both the error message and the
+status code when throwing an error.
+- For user-defined errors, we can set the appropriate status code (e.g., 400 or 404)
+to indicate the type of error.
+
+#### 1. Created 'applicationError.js' file:
+```javascript
+export class ApplicationError extends Error {
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
+```
+#### 2. Modified 'product.model.js' file:
+```javascript
+static rateProduct(userID, productID, rating) {
+    // 1. Validate User
+    const user = UserModel.getAll().find((u) => u.id == userID);
+    if (!user) {
+      throw new ApplicationError("User not found", 404); //User-defined Error
+    }
+    // 1. Validate Product
+    const product = products.find((p) => p.id == productID);
+    if (!product) {
+      throw new ApplicationError("Product not found", 400);
+    }
+
+    // 3. Validate Rating Input
+    if (!rating || isNaN(rating)) {
+      throw new ApplicationError("Please provide a valid rating", 400);
+    }
+    // more code...
+}
+```
+- Server errors, which are not user-defined, can use a general status code of 500.
+- In the error handler middleware, we can check if the error is an instance of
+`ApplicationError` and return the corresponding status code and message.
+- For other errors that are not instances of `ApplicationError`, we can send a
+generic 500 status code and a generic error message.
+
+#### 3. Modified 'server.js' file:
+```javascript
+// 6. Error handler middleware
+server.use((err, req, res, next)=>{
+  console.log(err);
+  if(err instanceof ApplicationError){
+    res.status(err.code).send(err.message);
+  }
+  //Server Errors.
+  res.status(503).send('Something went wrong, please try later');
+});
+```
+
+#### 4. Modified 'product.controller.js' file:
+```javascript
+ rateProduct(req, res, next) {
+    try {
+      console.log(req.query);
+      const userID = req.query.userID;
+      const productID = req.query.productID;
+      const rating = req.query.rating;
+      //Intentional error: Accessing 'req.querys' (undefined) will trigger the error handler middleware.
+      //const rating = req.querys.rating;
+      ProductModel.rateProduct(userID, productID, rating);
+      return res.status(200).send("Rating has been added !");
+    } catch (err) {
+      console.log("Passing error to middleware")
+      next(err);
+    }
+  } 
+```
+
+### Logging Errors
+- It's important to log errors for debugging and troubleshooting purposes.
+- While we don't need to log every error in the error handler middleware, we should
+log the server errors for further investigation and resolution.
+Testing Customized Error Handling
+- We can test our customized error handling by intentionally causing errors and
+observing the error messages and status codes returned.
+- By providing specific status codes and messages, we can enhance the user
+experience and provide meaningful error responses.
+
+
+
+

@@ -24,20 +24,22 @@ export default class ProductController {
     res.status(201).send(createdRecord);
   }
 
-  rateProduct(req, res) {
-    console.log(req.query);
-    const userID = req.query.userID;
-    const productID = req.query.productID;
-    const rating = req.query.rating;
-    /* Intentional error: Accessing 'req.querys' (undefined) will trigger the error handler middleware. */
-    //const rating = req.querys.rating; 
+
+  rateProduct(req, res, next) {
     try {
+      console.log(req.query);
+      const userID = req.query.userID;
+      const productID = req.query.productID;
+      const rating = req.query.rating;
+      //Intentional error: Accessing 'req.querys' (undefined) will trigger the error handler middleware.
+      //const rating = req.querys.rating;
       ProductModel.rateProduct(userID, productID, rating);
+      return res.status(200).send("Rating has been added !");
     } catch (err) {
-      return res.status(400).send(err.message);
+      console.log("Passing error to middleware")
+      next(err);
     }
-    return res.status(200).send("Rating has been added !");
-  }
+  } 
 
   getOneProduct(req, res) {
     //const id = req.params.id;

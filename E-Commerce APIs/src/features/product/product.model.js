@@ -1,3 +1,4 @@
+import { ApplicationError } from "../../error-handler/applicationError.js";
 import { UserModel } from "../user/user.model.js";
 
 export default class ProductModel {
@@ -47,17 +48,17 @@ export default class ProductModel {
     // 1. Validate User
     const user = UserModel.getAll().find((u) => u.id == userID);
     if (!user) {
-      throw new Error("User not found");  //User-defined Error
+      throw new ApplicationError("User not found", 404); //User-defined Error
     }
     // 1. Validate Product
     const product = products.find((p) => p.id == productID);
     if (!product) {
-      throw new Error("Product not found");
+      throw new ApplicationError("Product not found", 400);
     }
 
     // 3. Validate Rating Input
     if (!rating || isNaN(rating)) {
-      throw new Error("Please provide a valid rating.");
+      throw new ApplicationError("Please provide a valid rating", 400);
     }
 
     // 4. Check if there are ratings and if not then add rating array.

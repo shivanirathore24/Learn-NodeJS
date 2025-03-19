@@ -9,6 +9,7 @@ import jwtAuth from "./src/middlewares/jwtAuth.middleware.js";
 import cartRouter from "./src/features/cartItems/cartItems.routes.js";
 import apiDocs from "./swagger.json" with { type: "json" };
 import winstonLoggerMiddleware from "./src/middlewares/winstonLogger.middleware.js";
+import { ApplicationError } from "./src/error-handler/applicationError.js";
 
 // 2. Initialize Express server
 const server = express();
@@ -45,6 +46,10 @@ server.get("/", (req, res) => {
 // 6. Error handler middleware
 server.use((err, req, res, next)=>{
   console.log(err);
+  if(err instanceof ApplicationError){
+    res.status(err.code).send(err.message);
+  }
+  //Server Errors.
   res.status(503).send('Something went wrong, please try later');
 });
 
