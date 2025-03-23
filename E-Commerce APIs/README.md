@@ -12,3 +12,7 @@
 
 ### ⚠️ **Handling Errors**
 4. [Robust Error Handling Strategies](docs/HANDLING-ERRORS.md)
+
+### 🛢️ **MongoDB: The NoSQL Database** 
+
+5. [Getting Started with Database](docs/DATABASE-OVERVIEW.md)
