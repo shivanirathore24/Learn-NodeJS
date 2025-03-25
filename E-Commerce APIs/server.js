@@ -10,6 +10,7 @@ import cartRouter from "./src/features/cartItems/cartItems.routes.js";
 import apiDocs from "./swagger.json" with { type: "json" };
 import winstonLoggerMiddleware from "./src/middlewares/winstonLogger.middleware.js";
 import { ApplicationError } from "./src/error-handler/applicationError.js";
+import connectToMongoDB from "./config/mongodb.js";
 
 // 2. Initialize Express server
 const server = express();
@@ -63,4 +64,5 @@ server.use((req, res) => {
 const PORT = 3100;
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`); // Log server start
+  connectToMongoDB();
 });
