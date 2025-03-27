@@ -10,7 +10,7 @@ import cartRouter from "./src/features/cartItems/cartItems.routes.js";
 import apiDocs from "./swagger.json" with { type: "json" };
 import winstonLoggerMiddleware from "./src/middlewares/winstonLogger.middleware.js";
 import { ApplicationError } from "./src/error-handler/applicationError.js";
-import connectToMongoDB from "./config/mongodb.js";
+import {connectToMongoDB} from "./config/mongodb.js";
 
 // 2. Initialize Express server
 const server = express();

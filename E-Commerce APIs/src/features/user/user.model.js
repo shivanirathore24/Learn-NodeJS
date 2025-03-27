@@ -1,22 +1,24 @@
+import { getDB } from "../../../config/mongodb.js";
+import { ApplicationError } from "../../error-handler/applicationError.js";
+
 export class UserModel {
-  constructor(id, name, email, password, type) {
-    this.id = id;
+  constructor(name, email, password, type) {
     this.name = name;
     this.email = email;
     this.password = password;
     this.type = type;
   }
 
-  static signUp(name, email, password, type) {
-    const newUser = new UserModel(
-      users.length + 1,
-      name,
-      email,
-      password,
-      type
-    );
-    users.push(newUser);
-    return newUser;
+  static async signUp(name, email, password, type) {
+    try {
+      const db = getDB(); // 1. Get the database
+      const collection = db.collection("users");  // 2. Get the collection
+      const newUser = new UserModel(name, email, password, type);
+      await collection.insertOne(newUser);  // 3.Insert the document
+      return newUser;
+    } catch (err) {
+      throw new ApplicationError("Something went wrong", 503);
+    }
   }
 
   static signIn(email, password) {
@@ -44,10 +46,11 @@ let users = [
     password: "customer1",
     type: "customer",
   },
-  {id: 3,
-  name: "Customer2 User",
-  email: "customer2@ecom.com",
-  password: "customer2",
-  type: "customer",
-}
+  {
+    id: 3,
+    name: "Customer2 User",
+    email: "customer2@ecom.com",
+    password: "customer2",
+    type: "customer",
+  },
 ];

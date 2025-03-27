@@ -84,3 +84,149 @@ like this:
 const url = "mongodb://127.0.0.1:27017/ecomdb";
 ```
 This adjustment can help ensure a smoother connection experience.
+
+## User Operations with MongoDB
+
+### 1. Updated 'mongodb.js' file
+#### Before Changes:
+```javascript
+import {MongoClient} from 'mongodb';
+const url = "mongodb://localhost:27017/ecomdb";
+const connectToMongoDB = () =>{
+    MongoClient.connect(url)
+    .then(client=>{
+        console.log("MongoDB is connected")
+    })
+    .catch(err=>{
+        console.log(err);
+    })
+}
+export default connectToMongoDB;
+```
+#### After Changes:
+```javascript
+import { MongoClient } from "mongodb";
+const url = "mongodb://localhost:27017/ecomdb";
+
+let client;
+export const connectToMongoDB = () => {
+  MongoClient.connect(url)
+    .then((clientInstance) => {
+      client = clientInstance;
+      console.log("MongoDB is connected");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+export const getDB = () => {
+  return client.db();
+};
+```
+- Added let client;: Stores the MongoDB client instance for reuse.
+- Updated .then() callback: Assigns clientInstance to client before logging the connection message.
+- Introduced getDB() function: Returns the database instance using client.db(), enabling access to the database elsewhere in the code.
+
+### 2. Updated 'user.model.js' file
+#### Before Changes:
+```javascript
+export class UserModel {
+  constructor(id, name, email, password, type) {
+    this.id = id;
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.type = type;
+  }
+
+  static signUp(name, email, password, type) {
+    const newUser = new UserModel(
+      users.length + 1,
+      name,
+      email,
+      password,
+      type
+    );
+    users.push(newUser);
+    return newUser;
+  }
+  // More code...
+}
+```
+#### After Changes:
+```javascript
+import { getDB } from "../../../config/mongodb.js";
+import { ApplicationError } from "../../error-handler/applicationError.js";
+
+export class UserModel {
+  constructor(name, email, password, type) {
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.type = type;
+  }
+
+  static async signUp(name, email, password, type) {
+    try {
+      const db = getDB(); // 1. Get the database
+      const collection = db.collection("users");  // 2. Get the collection
+      const newUser = new UserModel(name, email, password, type);
+      await collection.insertOne(newUser);  // 3.Insert the document
+      return newUser;
+    } catch (err) {
+      throw new ApplicationError("Something went wrong", 503);
+    }
+  }
+  // More code...
+}
+```
+- Removed id from the constructor: MongoDB automatically generates _id.
+- Made signUp() asynchronous: Added async to handle database operations properly.
+- Removed manual ID generation: MongoDB automatically assigns a unique _id.
+- Replaced in-memory array with MongoDB: Instead of storing users in a local array, it now fetches the database using getDB() and accesses the "users" collection.
+- Stored user in MongoDB: Used collection.insertOne(newUser) to save the user persistently.
+- Added error handling: Wrapped the code in a try-catch block to catch database errors and return a meaningful ApplicationError.
+
+### 3. Updated 'user.controller.js' file
+#### Before Changes:
+```javascript
+ signUp(req, res) {
+    const { name, email, password, type } = req.body;
+    const user = UserModel.signUp(name, email, password, type);
+    res.status(201).send(user);
+}
+```
+
+#### After Changes:
+```javascript
+async signUp(req, res) {
+    const { name, email, password, type } = req.body;
+    const user = await UserModel.signUp(name, email, password, type);
+    res.status(201).send(user);
+}
+```
+- Made signUp() asynchronous: Added await to handle the async database operation properly.
+- Ensured proper user creation: Now waits for UserModel.signUp() to complete before sending a response.
+
+
+### 4. Updated in 'server.js' file
+#### Before Changes:
+```javascript
+import connectToMongoDB from "./config/mongodb.js";
+```
+#### After Changes:
+```javascript
+import {connectToMongoDB} from "./config/mongodb.js";
+```
+Changed from default import to named import because connectToMongoDB is now exported using export const instead of export default
+
+### 5. Testing in Postman 
+<img src="./images/userOperation_mongoDB_postman.png" alt="User Operation with MongoDB in Postman" width="600" height="auto">
+
+<img src="./images/userOperation_mongoDBCompass.png" alt="User Operation in MongoDB Compass" width="600" height="auto">
+
+
+
+
+
