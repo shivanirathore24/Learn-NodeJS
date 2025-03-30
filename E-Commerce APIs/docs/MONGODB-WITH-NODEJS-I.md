@@ -627,3 +627,193 @@ By wrapping the method inside an arrow function:
 1. ✔ Prevents loss of this context inside class methods.
 2. ✔ Ensures that userController methods work properly.
 3. ✔ Better flexibility for adding extra logic in the future (e.g., logging, validation, error handling).
+
+## Hashing Passwords
+- Hashing passwords is a crucial practice in security to protect sensitive user
+credentials.
+- It involves converting plain-text passwords into irreversible and unique strings
+of characters using cryptographic algorithms.
+- This transformation ensures that attackers cannot easily decipher the original
+passwords even if a database breach occurs.
+### Working with bcrypt
+1. Bcrypt is a widely used password-hashing algorithm that enhances security by
+transforming passwords into irreversible hash values.
+2. Bcrypt is favoured for its key features: salting and multiple rounds of hashing.
+Salting involves adding a random value (salt) to each password before
+hashing, preventing attackers from using precomputed hash tables (rainbow
+tables) to crack passwords.
+3. To install it, run the command: `npm i bcrypt`
+
+### Basic usage
+- After installing it, we have to import it
+```javascript
+import bcrypt from 'bcrypt';
+```
+- The hashPassword function asynchronously generates a secure hash from a
+plain-text password and returns the hash. It utilises the bcrypt.genSalt and
+bcrypt.hash functions.
+```javascript
+async function hashPassword(plainPassword) {
+  const saltRounds = 12;
+  const salt = await bcrypt.genSalt(saltRounds);
+  const hash = await bcrypt.hash(plainPassword, salt);
+  return hash;
+}
+```
+The greater the amount of salt, the more intricate the complexity becomes, so
+it should be kept at a minimum.
+
+- Now we can compare two passwords using .compare method.
+```javascript
+async function authenticateUser(plainPassword, storedHash) {
+  const passwordsMatch = await bcrypt.compare(plainPassword, storedHash);
+  return passwordsMatch; // Returns true if passwords match
+}
+```
+
+## Hashing User's Password 
+### 1. Updated 'user.repository.js' file
+#### Before Change:
+```javascript
+async signIn(email, password) {
+    try {
+      const db = getDB(); // 1. Get the database
+      const collection = db.collection("users"); // 2. Get the collection
+      return await collection.findOne({ email, password }); // 3. Find the document
+    } catch (err) {
+      console.log(err);
+      throw new ApplicationError("Something went wrong", 500);
+    }
+  }
+```
+
+#### After Change:
+```javascript
+ async findByEmail(email) {
+    try {
+      const db = getDB(); // 1. Get the database
+      const collection = db.collection("users"); // 2. Get the collection
+      return await collection.findOne({ email }); // 3. Find the document
+    } catch (err) {
+      console.log(err);
+      throw new ApplicationError("Something went wrong", 500);
+    }
+  }
+```
+Changes in the Code:
+1. Removed signIn(email, password) method:
+    - Previously, this method searched for a user based on both email and password.
+    - This approach is not secure because it directly queries the database with the password, which should ideally be hashed and verified separately.
+2. Added findByEmail(email) method:
+    - This method now searches for a user only by email, without checking the password.
+    - It allows for a more secure authentication flow, where password validation can be handled separately (e.g., using bcrypt for hashing and comparison).
+    - This change improves security and aligns with best practices in authentication.
+
+### 2. Updated 'user.controller.js' file
+#### Before Changes:
+```javascript
+async signUp(req, res) {
+    const { name, email, password, type } = req.body;
+    const user = new UserModel(name, email, password, type);
+    await this.userRepository.signUp(user);
+    res.status(201).send(user);
+  }
+
+  async signIn(req, res, next) {
+    try {
+      const result = await this.userRepository.signIn(
+        req.body.email,
+        req.body.password
+      );
+      if (!result) {
+        return res.status(400).send("Invalid Credentials !");
+      } else {
+        //1. Create token
+        const token = jwt.sign(
+          { userID: result.id, email: result.email }, // Payload data
+          "N6BUpqT7VL8cI7VbzLHaaS9txwGJWZMR", // Secret key for signing
+          {
+            expiresIn: "1h", // Token expiry set to 1 hour
+          }
+        );
+        //2. Send token.
+        return res.status(200).send(token);
+        //return res.send("Login Successful !");
+      }
+    } catch (err) {
+      console.log(err);
+      return res.status(200).send("Something went wrong");
+    }
+  }
+```
+
+#### After Changes:
+```javascript
+ async signUp(req, res) {
+    const { name, email, password, type } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user = new UserModel(name, email, hashedPassword, type);
+    await this.userRepository.signUp(user);
+    res.status(201).send(user);
+  }
+
+  async signIn(req, res, next) {
+    try {
+      // 1. Find user by email
+      const user = await this.userRepository.findByEmail(req.body.email);
+      if (!user) {
+        return res.status(400).send("Invalid Credentials !");
+      } else {
+        // 2. Compare password with hashed password
+        const result = await bcrypt.compare(req.body.password, user.password);
+        if (result) {
+          // 3. Create token
+          const token = jwt.sign(
+            { userID: result.id, email: result.email }, // Payload data
+            "N6BUpqT7VL8cI7VbzLHaaS9txwGJWZMR", // Secret key for signing
+            {
+              expiresIn: "1h", // Token expiry set to 1 hour
+            }
+          );
+          // 4. Send token.
+          return res.status(200).send(token);
+        } else {
+          return res.status(400).send("Invalid Credentials !");
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      return res.status(200).send("Something went wrong");
+    }
+  }
+```
+
+1. Password Hashing in signUp Method:
+    - Previously, passwords were stored in plain text, making them vulnerable if the database was compromised.
+    - Now, bcrypt.hash(password, 12) is used to encrypt the password before storing it in the database.The number 12 represents the salt rounds, adding randomness to the hash for stronger security.
+    - Now, passwords are securely hashed using bcrypt before storing them, adding an extra layer of protection
+2. Secure Password Verification in signIn Method:
+    - Instead of querying both email and password directly, the system first retrieves the user by email.
+    - Then, bcrypt.compare(req.body.password, user.password) is used to check if the entered password matches the stored hashed password.
+    - If the comparison returns true, authentication proceeds; otherwise, it is rejected.
+
+#### Why These Changes?
+1. bcrypt.hash() for Secure Storage:
+    - Encrypts passwords before saving them, preventing exposure in case of a database breach.
+    - Uses salting to ensure even identical passwords have unique hashes.
+2. bcrypt.compare() for Safe Authentication:
+    - Compares the entered password with the hashed one without exposing raw credentials.
+    - Prevents direct password queries, reducing security risks.
+#### Security Benefits:
+1. ✅ Protects user data from breaches.
+2. ✅ Prevents credential leaks and brute-force attacks.
+
+### 3. Testing in Postman
+
+#### User SignUp
+<img src="./images/hashedPassword_Postman.png" alt="User SignUp Hashed Password" width="650" height="auto">
+<img src="./images/hashedPassword_mongoDBCompass.png" alt="User SignUp Hashed Password" width="650" height="auto">
+
+#### User SignIn
+<img src="./images/userSignIn_afterHashedPassword1.png" alt="User SignIn Hashed Password" width="650" height="auto">
+<img src="./images/userSignIn_afterHashedPassword2.png" alt="User SignIn Hashed Password" width="650" height="auto">
