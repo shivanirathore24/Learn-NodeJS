@@ -817,3 +817,84 @@ async signUp(req, res) {
 #### User SignIn
 <img src="./images/userSignIn_afterHashedPassword1.png" alt="User SignIn Hashed Password" width="650" height="auto">
 <img src="./images/userSignIn_afterHashedPassword2.png" alt="User SignIn Hashed Password" width="650" height="auto">
+
+
+## Understanding dotenv
+ 1. dotenv is a popular npm package that simplifies the management of
+ environment variables in Node.js applications.
+ 2. It enables developers to store sensitive configuration information, API keys,
+ and other settings in a .env file, separate from the source code.
+ 3. dotenv loads the variables from the .env file into the environment, making
+ them accessible via the process.env object.
+ 
+ ### Reasons for using dotenv
+ 1. Security: Sensitive data is kept outside of the source code, reducing the risk
+ of accidental exposure.
+ 2. Readability: The separation of configuration data from code improves the
+ clarity and maintainability of the application.
+ 3. Ease of Use: dotenv simplifies the process of loading environment variables,
+ requiring only a single line of code.
+ 4. Portability: Developers can easily share the same codebase across different
+ environments without changing the source code.
+ 5. Configuration: dotenv enhances the configuration process by providing a
+ standardised method to handle environment-specific variables.
+ 
+ ### Using dotenv to Safely Configure MongoDB URL and JWT SecretKey
+ 1. Install it using the command: `npm i dotenv`
+ 2. Create '.env' file in root directory of the app:
+ 
+    <img src="./images/env_gitignore.png" alt="'.env' in '.gitignore'" width="300" height="auto">
+    
+    Ensure your .gitignore file includes it to prevent sensitive information and
+    configuration data from being accidentally pushed to version control systems like Git.
+ 
+ 3. Save the important URLs or keys of passwords in the .env file:
+    ```env
+    DB_URL = mongodb://localhost:27017/ecommerceDB
+    JWT_SECRET = N6BUpqT7VL8cI7VbzLHaaS9txwGJWZMR
+    ```
+ 4. Import dotenv wherever needed and call the .config() method to load environment variables. Here, a separate file env.js is created:
+    ```javascript
+    import dotenv from "dotenv";
+    dotenv.config(); // Load all the environment variables in application
+    ```
+
+ 5. Import env.js at the top of server.js to ensure environment variables are available throughout the application:
+    ```javascript
+    import "./env.js";
+    import express from "express";
+    ```
+
+ 5. Using an Environment Variable (process.env.DB_URL) in 'mongodb.js':
+    - In the first version, the MongoDB connection URL is hardcoded as:
+    ```javascript
+    const url = "mongodb://localhost:27017/ecommerceDB";
+    ```
+    - In the updated version, the connection URL is fetched from an environment variable:     This makes the code more secure and configurable without modifying the source code.
+    ```javascript
+    const url = process.env.DB_URL;
+    ```
+    #### Benefits: Flexibility & Security
+    1. Using process.env.DB_URL allows different environments (development, production) to use different databases without changing the code.    
+    2. Hardcoding credentials is not recommended, as it can expose sensitive information.
+6. Using an Environment Variable (process.env.JWT_SECRET) in 'user.controller.js':
+    #### Before:
+    ```javascript
+    jwt.sign(
+      { userID: result.id, email: result.email },
+      "N6BUpqT7VL8cI7VbzLHaaS9txwGJWZMR", // Hardcoded secret key
+      { expiresIn: "1h" }
+    );
+    ```
+    #### After:
+    ```javascript
+    jwt.sign(
+      { userID: result.id, email: result.email },
+      process.env.JWT_SECRET, // Using environment variable
+      { expiresIn: "1h" }
+    );
+    ```
+    #### Why this change?
+    1. ✅ Security: Avoids exposing the secret key in code.
+    2. ✅ Flexibility: Allows different environments (dev, production) to use different secrets.
+    3. ✅ Best Practice: Credentials should be stored in environment variables, not hardcoded.

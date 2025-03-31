@@ -1,4 +1,5 @@
 // 1. Import required modules
+import "./env.js";
 import express from "express";
 import swagger from "swagger-ui-express";
 import cors from 'cors';
