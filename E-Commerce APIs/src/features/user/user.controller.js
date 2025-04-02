@@ -28,7 +28,7 @@ export default class UserController {
         if (result) {
           // 3. Create token
           const token = jwt.sign(
-            { userID: result.id, email: result.email }, // Payload data
+            { userID: user._id, email: user.email }, // Payload data
             process.env.JWT_SECRET, // Secret key for signing
             {
               expiresIn: "1h", // Token expiry set to 1 hour
@@ -46,5 +46,3 @@ export default class UserController {
     }
   }
 }
-
-

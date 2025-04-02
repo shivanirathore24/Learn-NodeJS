@@ -396,10 +396,13 @@ import { getDB } from "../../../config/mongodb.js";
 import { ApplicationError } from "../../error-handler/applicationError.js";
 
 class UserRepository {
+  constructor() {
+    this.collection = "users";
+  }
   async signUp(newUser) {
     try {
       const db = getDB(); // 1. Get the database
-      const collection = db.collection("users"); // 2. Get the collection
+      const collection = db.collection(this.collection); // 2. Get the collection
       await collection.insertOne(newUser); // 3.Insert the document
       return newUser;
     } catch (err) {
@@ -408,10 +411,10 @@ class UserRepository {
     }
   }
 
-  async signIn(email, password) {
+ async signIn(email, password) {
     try {
       const db = getDB(); // 1. Get the database
-      const collection = db.collection("users"); // 2. Get the collection
+      const collection = db.collection(this.collection); // 2. Get the collection
       return await collection.findOne({ email, password }); // 3. Find the document
     } catch (err) {
       console.log(err);
@@ -482,10 +485,6 @@ export class UserModel {
     this.password = password;
     this.type = type;
   }
-
-  static getAll() {
-    return users;
-  }
 }
 ```
 #### Key Changes
@@ -494,9 +493,14 @@ export class UserModel {
     - The signIn method was also present in UserModel, which searched for a user in a static array.
     - In the updated code, both methods have been removed from UserModel.
 
-2. Now, UserModel Only Contains the Constructor and getAll():
-    - The updated version only defines the user schema (constructor) and keeps getAll() for retrieving static user data.
-    - This means UserModel is now a pure data model, and all logic related to user authentication is likely moved elsewhere (e.g., UserRepository).
+2. UserModel Now Only Contains the Constructor:
+    - The updated version defines only the user schema (constructor) without any methods.
+    - It no longer interacts with the database, making it a pure data model.
+
+
+3. Removed getAll Method:
+    - The getAll method, which retrieved static user data, has been removed.
+    - Now, all user-related queries are likely handled in UserRepository.
 
 #### Why These Changes?
 1. ✔ Separation of Concerns – Now, database interaction is handled separately (possibly in UserRepository).
@@ -769,7 +773,7 @@ async signUp(req, res) {
         if (result) {
           // 3. Create token
           const token = jwt.sign(
-            { userID: result.id, email: result.email }, // Payload data
+            { userID: user._id, email: user.email }, // Payload data
             "N6BUpqT7VL8cI7VbzLHaaS9txwGJWZMR", // Secret key for signing
             {
               expiresIn: "1h", // Token expiry set to 1 hour
@@ -796,6 +800,7 @@ async signUp(req, res) {
     - Instead of querying both email and password directly, the system first retrieves the user by email.
     - Then, bcrypt.compare(req.body.password, user.password) is used to check if the entered password matches the stored hashed password.
     - If the comparison returns true, authentication proceeds; otherwise, it is rejected.
+    - After successful authentication, a JWT token is generated using jwt.sign(), where user._id (instead of result.id) is used as MongoDB stores the unique identifier as _id. Previously, result came from this.userRepository.signIn(), which checked both email and password together. Now, the process is split: first, fetch the user by email (user), then verify the password. Since result is no longer used, we correctly reference user._id to ensure the JWT contains the right user ID, preventing authentication errors.
 
 #### Why These Changes?
 1. bcrypt.hash() for Secure Storage:
@@ -898,3 +903,187 @@ async signUp(req, res) {
     1. ✅ Security: Avoids exposing the secret key in code.
     2. ✅ Flexibility: Allows different environments (dev, production) to use different secrets.
     3. ✅ Best Practice: Credentials should be stored in environment variables, not hardcoded.
+
+## Secure Car Dealership Management with Repository Pattern in Node.js
+In this concise guide, we'll build a secure car dealership management system using
+Node.js, the Repository Pattern, the bcrypt library for password security, and the
+dotenv library for environment variables. Our scenario involves a car dealership
+managing its inventory and sales.
+#### Scenario:
+You are developing a car dealership management system for "Speedy Motors." The
+system should securely store user credentials, manage car inventory, and track
+sales.
+
+### 1. User Authentication:
+
+#### Step 1: Repository Setup -> In 'user.repository.js'
+```javascript
+import { getDB } from '../config/mongodb.js';
+import bcrypt from 'bcrypt';
+import { ApplicationError } from '../../error-handler/applicationError.js';
+
+class UserRepository {
+    async signUp(newUser) {
+        try {
+            const db = await getDB();
+            const collection = db.collection("users");
+            
+            // Hash the password before storing
+            const hashedPassword = await bcrypt.hash(newUser.password, 10);
+            newUser.password = hashedPassword;
+            
+            // Insert user into the collection
+            await collection.insertOne(newUser);
+        } catch (err) {
+            throw new ApplicationError("Database Error", 500);
+        }
+    }
+
+    async signIn(email, password) {
+        try {
+            const db = await getDB();
+            const collection = db.collection("users");
+            
+            const user = await collection.findOne({ email });
+            
+            if (user && await bcrypt.compare(password, user.password)) {
+                return user;
+            } else {
+                return null;
+            }
+        } catch (err) {
+            throw new ApplicationError("Database Error", 500);
+        }
+    }
+}
+
+export default UserRepository;
+```
+
+#### Step 2: Controller and Routes -> In 'user.controller.js'
+```javascript
+import UserRepository from './user.repository.js';
+
+export default class UserController {
+    constructor() {
+        this.userRepository = new UserRepository();
+    }
+
+    async signUp(req, res) {
+        try {
+            const { name, email, password, role } = req.body;
+            const user = { name, email, password, role };
+            
+            const createdUser = await this.userRepository.signUp(user);
+            res.status(201).send({ message: "User registered", user: createdUser });
+        } catch (error) {
+            res.status(500).send({ message: "Error registering user", error: error.message });
+        }
+    }
+
+    async signIn(req, res) {
+        try {
+            const { email, password } = req.body;
+            const user = await this.userRepository.signIn(email, password);
+            
+            if (user) {
+                res.status(200).send({ message: "Sign in successful", user });
+            } else {
+                res.status(401).send({ message: "Invalid credentials" });
+            }
+        } catch (error) {
+            res.status(500).send({ message: "Error signing in", error: error.message });
+        }
+    }
+}
+```
+
+### 2. Car Inventory Management:
+#### Step 1: Repository Setup -> In 'car.repository.js'
+```javascript
+import { getDB } from '../../config/mongodb.js';
+import { ApplicationError } from "../../error-handler/applicationError.js";
+
+class CarRepository {
+    async add(newCar) {
+        try {
+            const db = await getDB();
+            const collection = db.collection("cars");
+            
+            await collection.insertOne(newCar);
+            return newCar;
+        } catch (err) {
+            throw new ApplicationError("Database Error", 500);
+        }
+    }
+
+    async getAll() {
+        try {
+            const db = await getDB();
+            const collection = db.collection("cars");
+            
+            const cars = await collection.find().toArray();
+            return cars;
+        } catch (err) {
+            throw new ApplicationError("Database Error", 500);
+        }
+    }
+    // Other methods for updating, filtering, and more...
+}
+
+export default CarRepository;
+```
+
+#### Step 2: Controller and Routes -> In 'car.controller.js'
+```javascript
+import CarRepository from './car.repository.js';
+
+export default class CarController {
+    constructor() {
+        this.carRepository = new CarRepository();
+    }
+
+    async addCar(req, res) {
+        try {
+            const { make, model, year, price } = req.body;
+            const newCar = { make, model, year, price };
+            
+            const createdCar = await this.carRepository.add(newCar);
+            res.status(201).send({ message: "Car added", car: createdCar });
+        } catch (error) {
+            res.status(500).send({ message: "Error adding car", error: error.message });
+        }
+    }
+
+    async getAllCars(req, res) {
+        try {
+            const cars = await this.carRepository.getAll();
+            res.status(200).send(cars);
+        } catch (error) {
+            res.status(500).send({ message: "Error retrieving cars", error: error.message });
+        }
+    }
+    // Other methods for managing car inventory...
+}
+```
+
+### 3. Environment Variables with dotenv:
+#### 1. Create a .env file:
+```env
+DB_CONNECTION_STRING=mongodb://localhost:27017/mydb
+SECRET_KEY=mysecretkey
+```
+
+#### 2. In config/mongodb.js:
+```javascript
+import dotenv from 'dotenv';
+dotenv.config();
+// Use process.env.DB_CONNECTION_STRING in your code
+```
+
+### Conclusion:
+By implementing the Repository Pattern, secure user authentication using bcrypt,
+and utilizing environment variables with dotenv, we've built a robust car dealership
+management system. This scenario-based approach covers user registration,
+authentication, car inventory, and sales tracking. The approach ensures data
+security, integrity, and scalability in your application

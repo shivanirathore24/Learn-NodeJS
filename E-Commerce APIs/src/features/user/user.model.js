@@ -6,11 +6,15 @@ export class UserModel {
     this.type = type;
   }
 
+  /*
   static getAll() {
     return users;
   }
+  */
 }
 
+/*
+//Hardcoded User Data
 let users = [
   {
     id: 1,
@@ -34,3 +38,4 @@ let users = [
     type: "customer",
   },
 ];
+*/
