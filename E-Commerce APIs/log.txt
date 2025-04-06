@@ -14,3 +14,19 @@ Fri Mar 14 2025 21:10:45 GMT+0530 (India Standard Time) +  /api/cartItems/3 - {}
 {"level":"info","message":"/api/cartItems?productID=1&quantity=6 - {}","service":"request-logging"}
 {"level":"info","message":"/api/cartItems - {}","service":"request-logging"}
 {"level":"info","message":"/api/cartItems/3 - {}","service":"request-logging"}
+{"level":"info","message":"/api/products - {\"name\":\"Prisoners of Geography\",\"desc\":\"How geography shapes global politics by Tim Marshall.\",\"price\":492,\"imageUrl\":\"https://m.media-amazon.com/images/I/81xjhH+H57L._SL1500_.jpg\",\"category\":\"Geography\",\"sizes\":[\"Paperback\",\"Hardcover\",\"Kindle\"]}","service":"request-logging"}
+{"level":"info","message":"/api/products - {\"name\":\"Astrophysics for People in a Hurry\",\"desc\":\"A quick dive into space and time by Neil deGrasse Tyson.\",\"price\":799,\"imageUrl\":\"https://m.media-amazon.com/images/I/71c46ivy5xL._SL1200_.jpg\",\"category\":\"Science\",\"sizes\":[\"Hardcover\",\"Kindle\"]}","service":"request-logging"}
+{"level":"info","message":"/api/products - {\"name\":\"Clean Code\",\"desc\":\"A guide to writing clean and maintainable code by Robert C. Martin.\",\"price\":1999,\"imageUrl\":\"https://m.media-amazon.com/images/I/41bOkXnNBjL._SY445_SX342_.jpg\",\"category\":\"Computers\",\"sizes\":[\"Paperback\",\"Kindle\"]}","service":"request-logging"}
+{"level":"info","message":"/api/products - {\"name\":\"The Power of the Map\",\"desc\":\"Exploring how maps shape our world and perceptions by Denis Wood.\",\"price\":1615,\"imageUrl\":\"https://m.media-amazon.com/images/I/51yePqOJh3L.jpg\",\"category\":\"Geography\",\"sizes\":[\"Paperback\"]}","service":"request-logging"}
+{"level":"info","message":"/api/products - {\"name\":\"The Gene: An Intimate History\",\"desc\":\"A journey into genetics and its future by Siddhartha Mukherjee.\",\"price\":799,\"imageUrl\":\"https://m.media-amazon.com/images/I/71HcXS1+R-L._SL1500_.jpg\",\"category\":\"Science\",\"sizes\":[\"Paperback\",\"Hardcover\",\"Kindle\"]}","service":"request-logging"}
+{"level":"info","message":"/api/products - {\"name\":\"Artificial Intelligence\",\"desc\":\"A modern approach to AI by Stuart Russell and Peter Norvig.\",\"price\":924,\"imageUrl\":\"https://m.media-amazon.com/images/I/61-6TTTBZeL._SL1000_.jpg\",\"category\":\"Computers\",\"sizes\":[\"Hardcover\"]}","service":"request-logging"}
+{"level":"info","message":"/api/products - {}","service":"request-logging"}
+{"level":"info","message":"/api/products/67f242c7f1855373e6469009 - {}","service":"request-logging"}
+{"level":"info","message":"/api/products/filter?minPrice=900&maxPrice=1800 - {}","service":"request-logging"}
+{"level":"info","message":"/api/products/filter?minPrice=900&maxPrice=1500&category=Computers - {}","service":"request-logging"}
+{"level":"info","message":"/api/products/filter?category=Science - {}","service":"request-logging"}
+{"level":"info","message":"/api/products/filter?maxPrice=500 - {}","service":"request-logging"}
+{"level":"info","message":"/api/products/rate?productID=67f242c7f1855373e6469009&rating=4.5 - {}","service":"request-logging"}
+{"level":"info","message":"/api/products - {}","service":"request-logging"}
+{"level":"info","message":"/api/products/rate?productID=67f242c7f1855373e6469009&rating=4 - {}","service":"request-logging"}
+{"level":"info","message":"/api/products - {}","service":"request-logging"}
