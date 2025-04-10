@@ -1582,6 +1582,231 @@ Use the attached image of an added product as a reference to add five more produ
 <img src="./images/duplicateRating_postman.png" alt="Duplicate Product Rating in Postman" width="650" height="auto">
 <img src="./images/duplicateRating_mongoDBCompass.png" alt="Duplicate Product Rating in MongoDB" width="650" height="auto">
 
+## Fix RateProduct Problem
+### Updating with $pull operator
+The $pull operator in MongoDB removes elements from an array that match a
+specified condition. It's often used to remove specific values from arrays within
+documents.
+
+Example:
+```javascript
+db.collection.updateOne(
+  { _id: ObjectId("your_document_id") },
+  { $pull: { arrayField: { $in: ["value1", "value2"] } } }
+);
+```
+In this example, elements matching "value1" and "value2" will be removed from the
+arrayField.
+
+### 1. Updated 'product.controller.js' file
+#### Before Changes:
+```javascript
+rateProduct(req, res, next) {
+  try {
+    console.log(req.query);
+    const userID = req.userID;
+    const productID = req.query.productID;
+    const rating = req.query.rating;
+    this.productRepository.rate(userID, productID, rating);
+    return res.status(200).send("Rating has been added !");
+  } catch (err) {
+    ...
+  }
+}
+```
+- Used req.query to get productID and rating.
+- Called this.productRepository.rate() without await (i.e., not waiting for completion).
+- Entire function was not async, so no await could be used.
+
+#### After Changes:
+```javascript
+async rateProduct(req, res, next) {
+  try {
+    console.log(req.query);
+    const userID = req.userID;
+    const productID = req.body.productID;
+    const rating = req.body.rating;
+    await this.productRepository.rate(userID, productID, rating);
+    return res.status(200).send("Rating has been added !");
+  } catch (err) {
+    ...
+  }
+}
+```
+- Changed method to **async** to use await properly.
+- Switched from req.query → req.body for productID and rating (better for POST/PUT requests).
+- Now uses await for rate() to ensure completion before sending response.
+
+#### NOTE
+✅ Why use req.body instead of req.query?
+1. req.query
+    - Used for query parameters in GET requests.
+    - Values come from the URL, like: 
+      ```json
+      GET /rate?productID=123&rating=4
+      ```
+    - ❌ Not ideal for sending/modifying data (e.g., adding a rating).
+2. req.body
+    - Used for POST, PUT, or PATCH requests — which are intended to create or update data.
+    - Data is sent in the body of the HTTP request, not in the URL.
+    - ✅ More secure and flexible — especially for larger or sensitive data.
+    - Looks like:
+      ```json
+      POST /rate
+      Body: { "productID": "123", "rating": 4 }
+      ```
+### 2. Updated 'product.repository.js' file
+#### Before Changes:
+```javascript
+async rate(userID, productID, rating) {
+  try {
+    const db = getDB();
+    const collection = db.collection(this.collection);
+    await collection.updateOne(
+      {
+        _id: new ObjectId(productID),
+      },
+      {
+        $push: { ratings: { userID: new ObjectId(userID), rating } },
+      }
+    );
+  } catch (err) {
+    console.log(err);
+    throw new ApplicationError("Something went wrong with Data", 500);
+  }
+}
+```
+#### 🔍 What it does:
+- Simply adds a new rating to the ratings array inside a product document.
+- Doesn’t check if the user already rated → so the same user could rate multiple times.
+- Each rating is stored like: `{"userID": "123", "rating": 4 }`
+
+#### ⚙️ MongoDB operator:
+  - $push: Appends a new element to the ratings array.
+
+#### 1. After Changes Way-One: Check & Update if Exists, Else Push
+```javascript
+async rate(userID, productID, rating) {
+  try {
+    const db = getDB(); // Get DB connection
+    const collection = db.collection(this.collection); // Get product collection
+
+    const product = await collection.findOne({ _id: new ObjectId(productID) }); // Find product by ID
+
+    const userRating = product?.ratings?.find((r) => r.userID == userID); // Check if user already rated
+
+    if (userRating) {
+      // Update existing rating
+      await collection.updateOne(
+        {
+          _id: new ObjectId(productID),
+          "ratings.userID": new ObjectId(userID),
+        },
+        {
+          $set: { "ratings.$.rating": rating },
+        }
+      );
+    } else {
+      // Add new rating
+      await collection.updateOne(
+        { _id: new ObjectId(productID) },
+        { $push: { ratings: { userID: new ObjectId(userID), rating } } }
+      );
+    }
+  } catch (err) {
+    console.log(err); // Log error
+    throw new ApplicationError("Something went wrong with Data", 500); // Handle error
+  }
+}
+```
+#### 🔍 What it does:
+  - First checks if the user has already rated the product.
+  - If yes: updates the existing rating using $set.
+  - If no: pushes a new rating using $push.
+  
+#### ✅ Pros:
+  - Ensures only one rating per user.
+  - Clean and efficient.
+  - Avoids duplicate entries.
+
+#### ⚠️ Cons:
+  - Extra read: Needs findOne() before update.
+  - Race conditions: If two updates happen at the same time, data may conflict.
+  - More logic: Requires branching for update vs insert
+
+#### ⚙️ MongoDB operators:
+  - $set: Modifies an existing element in an array.
+  - Positional $ operator: Automatically refers to the first matching element in ratings.userID.
+  - $push: Adds new rating if user hasn’t rated yet.
+  - 💡 For Example:
+    - Before:
+      ```json
+      ratings: [{ userID: "123", rating: 3 }]
+      ```
+    - After:
+      ```json
+      ratings: [{ userID: "123", rating: 4 }]
+      ```
+
+#### 2. After Changes Way-Two: Always Pull Then Push
+```javascript
+async rate(userID, productID, rating) {
+  try {
+    const db = getDB(); // Get DB connection
+    const collection = db.collection(this.collection); // Get product collection
+
+    // Remove existing rating by the user (if any)
+    await collection.updateOne(
+      { _id: new ObjectId(productID) },
+      { $pull: { ratings: { userID: new ObjectId(userID) } } }
+    );
+
+    // Add new rating
+    await collection.updateOne(
+      { _id: new ObjectId(productID) },
+      { $push: { ratings: { userID: new ObjectId(userID), rating } } }
+    );
+  } catch (err) {
+    console.log(err); // Log error
+    throw new ApplicationError("Something went wrong with Data", 500); // Handle error
+  }
+}
+```
+
+#### 🔍 What it does:
+  - Always removes old rating from the array using $pull.
+  - Then adds the new one using $push.
+
+#### ✅ Pros:
+  - Simpler logic – no need to check for existing rating.
+  - Guarantees only one rating per user.
+
+#### ⚠️ Cons:
+  - Double write: Always performs 2 updates ($pull + $push).
+  - Slightly slower: More write operations → higher DB load.
+  - No history: If tracking when rating was first given, this erases that
+
+#### ⚙️ MongoDB operators:
+  - $pull: Removes element(s) matching condition from an array.
+  - $push: Adds a new rating afterward.
+  - 💡 For Example
+    - Before:
+      ```json
+      ratings: [{ userID: "123", rating: 2 }, { userID: "456", rating: 5 }]
+      ```
+    - After:
+      ```json
+      ratings: [{ userID: "456", rating: 5 }, { userID: "123", rating: 4 }]
+      ```
+### 3. Testing in Postman
+#### Updating the existing product rating provided by User-1
+<img src="./images/rateProduct_postman3.png" alt="Rate Product in Postman" width="650" height="auto">
+<img src="./images/rateProduct_mongoDBCompass1.png" alt="Rate Product in MongoDBCompass" width="650" height="auto">
+
+#### New product rating provided by User-2
+<img src="./images/rateProduct_postman4.png" alt="Rate Product in Postman" width="650" height="auto">
+<img src="./images/rateProduct_mongoDBCompass2.png" alt="Rate Product in MongoDBCompass" width="650" height="auto">
+
 ## Summarising it
 Let’s summarise what we have learned in this module:
 - We learned how to establish a connection to the MongoDB database

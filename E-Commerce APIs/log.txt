@@ -30,3 +30,5 @@ Fri Mar 14 2025 21:10:45 GMT+0530 (India Standard Time) +  /api/cartItems/3 - {}
 {"level":"info","message":"/api/products - {}","service":"request-logging"}
 {"level":"info","message":"/api/products/rate?productID=67f242c7f1855373e6469009&rating=4 - {}","service":"request-logging"}
 {"level":"info","message":"/api/products - {}","service":"request-logging"}
+{"level":"info","message":"/api/products/rate - {\"productID\":\"67f242c7f1855373e6469009\",\"rating\":4.6}","service":"request-logging"}
+{"level":"info","message":"/api/products/rate - {\"productID\":\"67f242c7f1855373e6469009\",\"rating\":4.5}","service":"request-logging"}
