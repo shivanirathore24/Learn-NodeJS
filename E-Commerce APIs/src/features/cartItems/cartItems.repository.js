@@ -10,11 +10,17 @@ export default class CartItemsRepository {
     try {
       const db = getDB();
       const collection = db.collection(this.collection);
-      await collection.insertOne({
-        productID: new ObjectId(productID),
-        userID: new ObjectId(userID),
-        quantity,
-      });
+      
+      // Add a new product to the cart or update quantity if it already exists
+      await collection.updateOne(
+        { productID: new ObjectId(productID), userID: new ObjectId(userID) },
+        {
+          $inc: {
+            quantity: quantity,
+          },
+        },
+        { upsert: true } // Insert new document if no match is found
+      );
     } catch (err) {
       console.log(err);
       throw new ApplicationError("Something went wrong with Data", 500);
