@@ -391,3 +391,216 @@ What it does:
 
 <img src="./images/updateCartItem_postman2.png" alt="Mongo Driver" width="650" height="auto">
 <img src="./images/updateCartItem_MongoDBCompass2.png" alt="Mongo Driver" width="650" height="auto">
+
+## Modifying '\_id" in CartItems
+
+### 1. Updated 'mongodb.js' file
+
+#### Before Changes:
+
+```javascript
+import { MongoClient } from "mongodb";
+
+const url = process.env.DB_URL;
+
+let client;
+export const connectToMongoDB = () => {
+  MongoClient.connect(url)
+    .then((clientInstance) => {
+      client = clientInstance;
+      console.log("MongoDB is connected");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+export const getDB = () => {
+  return client.db();
+};
+```
+
+#### After Changes:
+
+```javascript
+import { MongoClient } from "mongodb";
+
+const url = process.env.DB_URL;
+
+let client;
+export const connectToMongoDB = async () => {
+  try {
+    const clientInstance = await MongoClient.connect(url);
+    client = clientInstance;
+    console.log("MongoDB is connected");
+    const db = client.db();
+    await createCounter(db);
+  } catch (err) {
+    console.error("Error connecting to MongoDB:", err);
+    throw err;
+  }
+};
+
+export const getDB = () => {
+  if (!client) {
+    throw new Error("MongoDB client is not connected.");
+  }
+  return client.db();
+};
+
+const createCounter = async (db) => {
+  const existingCounter = await db
+    .collection("counters")
+    .findOne({ _id: "cartItemId" });
+  if (!existingCounter) {
+    console.log("Counter doesn't exist. Creating it...");
+    await db.collection("counters").insertOne({ _id: "cartItemId", value: 0 });
+  } else {
+    console.log("Counter already exists.");
+  }
+};
+```
+
+The MongoDB connection function connectToMongoDB was updated from a basic version to an enhanced version that includes auto-initialization of a counter document in the counters collection.
+
+1. New Functionality Added: createCounter(db)
+   - Purpose: Ensures that the cartItemId counter document exists in the database.
+   - What it does:
+     - Looks for a document with \_id: "cartItemId" in the counters collection.
+     - If it does not exist, it creates one with an initial value of 0.
+     - If it already exists, it logs that no action is needed.
+2. Where It Was Integrated: The createCounter(db) function is now called immediately after a successful connection to MongoDB inside connectToMongoDB()
+   ```javascript
+   const db = client.db();
+   await createCounter(db);
+   ```
+
+#### 🔍 Why This Is Important ?
+
+This change prevents runtime errors when attempting to auto-increment cartItemId values. It ensures the required counter exists before any cart item operations occur in the app.
+
+### 2. Updated 'cartItems.repository.js' file
+
+1. add Method (Updated to Check Existing Item Before Insertion)
+
+#### Before Changes
+
+```javascript
+async add(productID, userID, quantity) {
+    try {
+      const db = getDB();
+      const collection = db.collection(this.collection);
+
+      // Add a new product to the cart or update quantity if it already exists
+      await collection.updateOne(
+        { productID: new ObjectId(productID), userID: new ObjectId(userID) },
+        {
+          $inc: {
+            quantity: quantity,
+          },
+        },
+        { upsert: true } // Insert new document if no match is found
+      );
+    } catch (err) {
+      console.log(err);
+      throw new ApplicationError("Something went wrong with Data", 500);
+    }
+  }
+```
+
+#### After Changes
+
+```javascript
+async add(productID, userID, quantity) {
+    try {
+      const db = getDB();
+      const collection = db.collection(this.collection);
+
+      // Check if the product already exists in the user's cart
+      const existingItem = await collection.findOne({
+        productID: new ObjectId(productID),
+        userID: new ObjectId(userID),
+      });
+
+      if (existingItem) {
+        // If it exists, just update the quantity
+        await collection.updateOne(
+          { _id: existingItem._id },
+          { $inc: { quantity: quantity } }
+        );
+      } else {
+        // If not exists, get the next counter and insert the new item
+        const id = await this.getNextCounter(db);
+        console.log("Generated ID for new item:", id);
+
+        await collection.insertOne({
+          _id: id,
+          productID: new ObjectId(productID),
+          userID: new ObjectId(userID),
+          quantity: quantity,
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      throw new ApplicationError("Something went wrong with database", 500);
+    }
+  }
+```
+
+- Goal: The method now checks if a product already exists in the user's cart.
+- Changes:
+
+  - First, a search for an existing cart item is performed using findOne(). The query checks for a matching productID and userID.
+  - If the item already exists, instead of inserting a new one, the method updates the quantity of the existing item using the $inc operator.
+  - If the item does not exist, the method generates a new counter ID and inserts a new document into the collection with a newly generated \_id.
+
+  This ensures that if a product already exists in the user's cart, only the quantity is updated. If it doesn’t exist, a new entry is inserted with a new ID
+
+2. getNextCounter Method (Newly Added)
+
+```javascript
+async getNextCounter(db) {
+    const resultDocument = await db
+      .collection("counters")
+      .findOneAndUpdate(
+        { _id: "cartItemId" },
+        { $inc: { value: 1 } },
+        { returnDocument: "after" }
+      );
+    console.log("Next counter value:", resultDocument.value);
+    return resultDocument.value;
+  }
+```
+
+- Goal: To generate a unique ID for new cart items by incrementing a counter in the database.
+- Changes:
+
+  - The method now interacts with the counters collection to get the next available value for cartItemId.
+  - It uses findOneAndUpdate to atomically increment the counter value. The returnDocument: "after" option ensures that the updated value is returned.
+  - This updated value is then used as the \_id for new cart items.
+
+  This ensures that each new cart item gets a unique \_id by incrementing a counter.
+
+### 3. Testing in Postman
+
+#### Inserting a Product into the Cart by User-1:
+
+<img src="./images/addCartItem_postman4.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/counters_MongoDBCompass1.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/addCartItem_MongoDBCompass1.png" alt="Mongo Driver" width="650" height="auto">
+
+<img src="./images/addCartItem_postman5.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/counters_MongoDBCompass2.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/addCartItem_MongoDBCompass2.png" alt="Mongo Driver" width="650" height="auto">
+
+#### Updating Quantity of a Product Already in the Cart by User-1:
+
+<img src="./images/updateCartItem_postman3.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/counters_MongoDBCompass3.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/updateCartItem_MongoDBCompass3.png" alt="Mongo Driver" width="650" height="auto">
+
+#### Inserting a Product into the Cart by User-2:
+
+<img src="./images/addCartItem_postman6.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/counters_MongoDBCompass4.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/addCartItem_MongoDBCompass3.png" alt="Mongo Driver" width="650" height="auto">

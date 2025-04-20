@@ -11,3 +11,7 @@ ProductController
 UserController
 1. Sign Up - Email, Password, TypeOfUser(Customer, Seller) - Done.
 2. Sign In - Email, Password - Done.
+
+Modify _id
+1. Counter collection (_id:"cartItemId", value:0)
+2. While adding cart items, increment the counter and the use counter value as id to cartitem document.
