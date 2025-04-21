@@ -63,7 +63,10 @@ class ProductRepository {
         // filterExpression = { $and: [{ category: category }, filterExpression] };
         // filterExpression.category = category;
       }
-      return collection.find(filterExpression).toArray();
+      return collection
+        .find(filterExpression)
+        .project({ name: 1, price: 1, _id: 0, ratings: { $slice: -1 } })
+        .toArray();
     } catch (err) {
       console.log(err);
       throw new ApplicationError("Something went wrong with Data", 500);

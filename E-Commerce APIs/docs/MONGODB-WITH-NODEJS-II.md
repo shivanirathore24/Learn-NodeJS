@@ -305,36 +305,36 @@ cartRouter.delete("/:id", (req, res, next) => {
 
 User-1: After Sign-In, and added two products to the cart.
 
-<img src="./images/addCartItem_postman1.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/addCartItem_postman2.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/addCartItem_postman1.png" alt="Add CartItem Postman" width="650" height="auto">
+<img src="./images/addCartItem_postman2.png" alt="Add CartItem Postman"" width="650" height="auto">
 
 User-2: After Sign-In, added a product to the cart.
 
-<img src="./images/addCartItem_postman3.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/addCartItem_postman3.png" alt="Add CartItem Postman"" width="650" height="auto">
 
 Collection 'cartItems' in MongoDB
 
-<img src="./images/addCartItem_MongoDBCompass.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/addCartItem_MongoDBCompass.png" alt="CartItems Collection MongoDB" width="650" height="auto">
 
 #### 2. Get CartItems
 
 Get CartItems by User-1
 
-<img src="./images/user1_SignIn_postman.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/getCartItems_user1_postman.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/user1_SignIn_postman.png" alt="User-1 Sign-In" width="650" height="auto">
+<img src="./images/getCartItems_user1_postman.png" alt="Get CartItem Postman" width="650" height="auto">
 
 Get cartItems by User-2
 
-<img src="./images/user2_SignIn_postman.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/getCartItems_user2_postman.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/user2_SignIn_postman.png" alt="User-2 Sign-In" width="650" height="auto">
+<img src="./images/getCartItems_user2_postman.png" alt="Get CartItem Postman" width="650" height="auto">
 
 #### 3. Delete CartItems
 
-<img src="./images/deleteCartItem_postman1.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/deleteCartItem_MongoDBCompass.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/deleteCartItem_postman2.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/deleteCartItem_postman1.png" alt="Delete CartItem Postman" width="650" height="auto">
+<img src="./images/deleteCartItem_MongoDBCompass.png" alt="Delete CartItem MongoDB" width="650" height="auto">
+<img src="./images/deleteCartItem_postman2.png" alt="Delete CartItem Postman" width="650" height="auto">
 
-## Update Quantity of CartItem
+## Update Quantity Of CartItem
 
 ### 1. Updated 'cartItems.repository.js' file
 
@@ -384,13 +384,13 @@ What it does:
 
 #### Added a new product to the cart
 
-<img src="./images/updateCartItem_postman1.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/updateCartItem_MongoDBCompass1.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/updateCartItem_postman1.png" alt="Add CartItem Postman" width="650" height="auto">
+<img src="./images/updateCartItem_MongoDBCompass1.png" alt="Add CartItem MongoDB" width="650" height="auto">
 
 #### Updated the quantity of an existing product in the cart
 
-<img src="./images/updateCartItem_postman2.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/updateCartItem_MongoDBCompass2.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/updateCartItem_postman2.png" alt="Update Quantity of CartItem Postman" width="650" height="auto">
+<img src="./images/updateCartItem_MongoDBCompass2.png" alt="Update Quantity of CartItem MongoDB" width="650" height="auto">
 
 ## Modifying '\_id" in CartItems
 
@@ -585,25 +585,25 @@ async getNextCounter(db) {
 
 #### Inserting a Product into the Cart by User-1:
 
-<img src="./images/addCartItem_postman4.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/counters_MongoDBCompass1.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/addCartItem_MongoDBCompass1.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/addCartItem_postman4.png" alt="Add CartItem Postman" width="650" height="auto">
+<img src="./images/counters_MongoDBCompass1.png" alt="Counter Collection" width="650" height="auto">
+<img src="./images/addCartItem_MongoDBCompass1.png" alt="Add CartItem MongoDB" width="650" height="auto">
 
-<img src="./images/addCartItem_postman5.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/counters_MongoDBCompass2.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/addCartItem_MongoDBCompass2.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/addCartItem_postman5.png" alt="Add CartItem Postman" width="650" height="auto">
+<img src="./images/counters_MongoDBCompass2.png" alt="Counter Collection" width="650" height="auto">
+<img src="./images/addCartItem_MongoDBCompass2.png" alt="Add CartItem MongoDB" width="650" height="auto">
 
 #### Updating Quantity of a Product Already in the Cart by User-1:
 
-<img src="./images/updateCartItem_postman3.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/counters_MongoDBCompass3.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/updateCartItem_MongoDBCompass3.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/updateCartItem_postman3.png" alt="Update CartItem Postman" width="650" height="auto">
+<img src="./images/counters_MongoDBCompass3.png" alt="Counter Collection" width="650" height="auto">
+<img src="./images/updateCartItem_MongoDBCompass3.png" alt="Update CartItem MongoDB" width="650" height="auto">
 
 #### Inserting a Product into the Cart by User-2:
 
-<img src="./images/addCartItem_postman6.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/counters_MongoDBCompass4.png" alt="Mongo Driver" width="650" height="auto">
-<img src="./images/addCartItem_MongoDBCompass3.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/addCartItem_postman6.png" alt="Add CartItem Postman" width="650" height="auto">
+<img src="./images/counters_MongoDBCompass4.png" alt="Counter Collection" width="650" height="auto">
+<img src="./images/addCartItem_MongoDBCompass3.png" alt="Add CartItem MongoDB" width="650" height="auto">
 
 ## Indexes in MongoDB
 
@@ -712,7 +712,7 @@ The connectToMongoDB function has been enhanced to include a call to createIndex
 
 ### 2. Indexes created in MongoDB
 
-<img src="./images/indexes_productsCollection.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/indexes_productsCollection.png" alt="Indexes in Products Collection" width="650" height="auto">
 
 ## Understanding Comparison and Logical Operators in MongoDB
 
@@ -802,7 +802,7 @@ if (maxPrice) {
 }
 if (category) {
   filterExpression.category = category;
-  // filterExpression = { $and: [{ category: category }, filterExpression]
+  // filterExpression = { $and: [{ category: category }, filterExpression] };
 }
 ```
 
@@ -826,7 +826,6 @@ if (category) {
   const parsedCategories = JSON.parse(category.replace(/'/g, '"'));
   filterExpression = {
     $and: [{ category: { $in: parsedCategories } }, filterExpression],
-    };
   };
 }
 ```
@@ -842,4 +841,98 @@ What This Change Does:
 
 ### 2. Testing in Postman
 
-<img src="./images/filterProducts_postman5.png" alt="Mongo Driver" width="650" height="auto">
+<img src="./images/filterProducts_postman5.png" alt="Filter Product with Multi-Category" width="650" height="auto">
+
+## Projection Operators in MongoDB
+
+Projection operators are powerful tools in MongoDB that allow you to control which
+fields to include or exclude in query results. They provide flexibility in shaping query
+outputs to match your specific needs. Let's delve into how projection operators work
+and explore real-world use cases.
+
+### Basic Projection
+
+The basic projection involves specifying which fields you want to retrieve from the
+documents in your query results. Here are the key projection operators:
+
+- { field: 1 }: Include the specified field.
+- { \_id: 0 }: Exclude the \_id field.
+
+#### Use Case: Retrieving Specific Fields
+
+Imagine you have a ‘users’ collection with various fields, but you only need the
+username and email of each user.
+
+```javascript
+db.users.find({}, { username: 1, email: 1, _id: 0 });
+```
+
+### Nested Fields Projection
+
+Projection operators work with nested fields as well, allowing you to extract specific
+subfields from documents.
+
+#### Use Case: Extracting Address Information
+
+Consider a ‘customers’ collection with nested address subdocuments. You're
+interested in only the city and state fields.
+
+```javascript
+db.customers.find({}, { "address.city": 1, "address.state": 1, _id: 0 });
+```
+
+### Conditional Projection
+
+Projection operators can be combined with query conditions to project fields
+conditionally.
+
+#### Use Case: Showing Premium Users' Email Addresses
+
+Suppose you have a subscribers collection and want to display email addresses only
+for users with premium subscriptions
+
+```javascript
+db.subscribers.find({ isPremium: true }, { email: 1, _id: 0 });
+```
+
+### 1. Updated 'product.repository.js' file
+
+The only changed part of code is inside the filter method. Specifically, the change involves how the projection is applied to the query result.
+
+#### Old Version:
+
+```javascript
+return collection.find(filterExpression).toArray();
+```
+
+🚫 What This Meant:
+
+- It returned entire product documents, including:
+  - \_id, name, price, category, description, ratings, and any other fields present.
+- The full ratings array (possibly large) was also returned for every product
+
+#### New Version:
+
+```javascript
+return collection
+  .find(filterExpression)
+  .project({ name: 1, price: 1, _id: 0, ratings: { $slice: -1 } })
+  .toArray();
+```
+
+✅ Explanation of Changes:
+
+- .project({ name: 1, price: 1, \_id: 0, ratings: { $slice: -1 } }) is added.
+- This line ensures only specific fields are returned from the query:
+  - name and price: included (1)
+  - \_id: excluded (0)
+  - ratings: only the last rating (most recent) is returned using $slice: -1
+
+💡 Why this is useful:
+- It reduces the amount of data sent to the client, making the response faster and more efficient.
+- Ideal for scenarios like product listing pages where only key details (like name, price, and latest rating) are needed instead of full product data.
+
+### 2. Testing in Postman
+
+<img src="./images/filterProducts_projectionOperator_MongoDBCompass.png" alt="Filter Product in MongoDB" width="650" height="auto">
+<img src="./images/filterProducts_projectionOperator_postman.png" alt="Filter Product using Projection Operator" width="650" height="auto">
