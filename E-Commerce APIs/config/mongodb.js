@@ -10,6 +10,7 @@ export const connectToMongoDB = async () => {
     console.log("MongoDB is connected");
     const db = client.db();
     await createCounter(db);
+    await createIndexes(db);
   } catch (err) {
     console.error("Error connecting to MongoDB:", err);
     throw err;
@@ -33,4 +34,15 @@ const createCounter = async (db) => {
   } else {
     console.log("Counter already exists.");
   }
+};
+
+const createIndexes = async (db) => {
+  try {
+    await db.collection("products").createIndex({ price: 1 });
+    await db.collection("products").createIndex({ name: 1, cattegory: -1 });
+    await db.collection("products").createIndex({ desc: "text" });
+  } catch (err) {
+    console.log(err);
+  }
+  console.log("Indexes are created");
 };

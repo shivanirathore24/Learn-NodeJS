@@ -604,3 +604,112 @@ async getNextCounter(db) {
 <img src="./images/addCartItem_postman6.png" alt="Mongo Driver" width="650" height="auto">
 <img src="./images/counters_MongoDBCompass4.png" alt="Mongo Driver" width="650" height="auto">
 <img src="./images/addCartItem_MongoDBCompass3.png" alt="Mongo Driver" width="650" height="auto">
+
+## Indexes in MongoDB
+
+### Introduction to Indexes
+
+- Indexes are essential for optimizing query performance in MongoDB.
+- In MongoDB, indexes enhance the speed of query execution and can
+  significantly improve overall database performance.
+
+### When Do We Need Indexes?
+
+1. Indexes are crucial when you're dealing with large collections and want to
+   improve the efficiency of queries
+2. High Query Volume: If your application frequently queries specific fields,
+   indexes can significantly speed up these queries.
+3. Sorting and Aggregation: Indexes improve sorting and aggregation
+   operations, common in reporting and analytics scenarios.
+4. Join Operations: Indexes can enhance join-like operations if you're working
+   with related data in different collections.
+
+### Using the createIndex Method
+
+- Step 1: Connect to the MongoDB Server
+
+  - Before creating an index, establish a connection to your MongoDB server
+    using the appropriate driver.
+
+- Step 2: Choose a Collection.
+
+  - Select the collection you want to create an index.
+
+- Step 3: Determine the Index Fields - Identify the fields that should be indexed. For example, we have a
+  “products” collection with a name field.
+
+- Step 4: Use createIndex.
+
+  - Use the createIndex method to create an index on the chosen field:
+
+  ```javascript
+  db.products.createIndex({ name: 1 });
+  ```
+
+Note: The number 1 indicates ascending order. Use -1 for descending order.
+
+### Compound Indexes
+
+Compound indexes involve multiple fields. They can significantly enhance query
+performance for complex queries that involve multiple fields. Let's create a
+compound index for our “products” collection:
+
+- Step 1: Determine Index Fields.
+
+  - Choose the fields that you frequently query or filter together. For instance, let's
+    consider the category and price fields.
+
+- Step 2: Create the Compound Index
+
+  ```javascript
+  db.products.createIndex({ category: 1, price: -1 });
+  ```
+
+### Use Cases for Compound Indexes
+
+Imagine you're building an e-commerce platform. Here are a couple of scenarios
+where the compound index we created could be beneficial:
+
+1. **Filtering by Category and Price Range:** If users often search for products
+   within a specific category and price range, the compound index will speed up
+   these queries.
+2. **Sorting by Price Within a Category:** When users want to see products in a
+   particular category sorted by price, the compound index will optimize this
+   sorting operation.
+
+### 1. Updated 'mongodb.js' file
+
+```javascript
+// added
+const createIndexes = async (db) => {
+  try {
+    await db.collection("products").createIndex({ price: 1 });
+    await db.collection("products").createIndex({ name: 1, cattegory: -1 });
+    await db.collection("products").createIndex({ desc: "text" });
+  } catch (err) {
+    console.log(err);
+  }
+  console.log("Indexes are created");
+};
+```
+
+To ensure that specific indexes are created on the products collection right after the MongoDB connection is established. This improves query performance and enables features like text search.
+
+#### What the `createIndexes` Function Does:
+
+This function creates three indexes on the products collection:
+
+- Single field Index on price field (ascending): Speeds up sorting/filtering by price.
+- Compound index on name and cattegory fields: Enhances queries that involve both fields.
+  - ⚠️ Note: cattegory may be a typo — consider correcting it to category.
+- Text index on desc field: Enables full-text search capabilities on product descriptions.
+
+```javascript
+await createIndexes(db);
+```
+
+The connectToMongoDB function has been enhanced to include a call to createIndexes(db) alongside the existing createCounter(db) call. This ensures that essential indexes on the products collection are automatically created upon establishing a connection to the database.
+
+### 2. Indexes created in MongoDB
+
+<img src="./images/indexes_productsCollection.png" alt="Mongo Driver" width="650" height="auto">
