@@ -42,7 +42,7 @@ export default class UserController {
       }
     } catch (err) {
       console.log(err);
-      return res.status(200).send("Something went wrong");
+      return res.status(500).send("Something went wrong");
     }
   }
 }
