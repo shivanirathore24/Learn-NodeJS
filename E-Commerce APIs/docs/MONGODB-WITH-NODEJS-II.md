@@ -713,3 +713,133 @@ The connectToMongoDB function has been enhanced to include a call to createIndex
 ### 2. Indexes created in MongoDB
 
 <img src="./images/indexes_productsCollection.png" alt="Mongo Driver" width="650" height="auto">
+
+## Understanding Comparison and Logical Operators in MongoDB
+
+Comparison and logical operators are essential tools for querying data in MongoDB.
+They allow you to filter, combine, and manipulate data to retrieve the exact
+information you need.
+
+### Comparison Operators
+
+Comparison operators help you compare values and retrieve documents that match
+specific conditions. Here are some common comparison operators:
+
+- $eq: Equals
+- $ne: Not Equals
+- $gt: Greater Than
+- $lt: Less Than
+- $gte: Greater Than or Equal
+- $lte: Less Than or Equal
+
+#### Use Case:
+
+Imagine you have an e-commerce database with a ‘products’ collection. You want to
+find products with prices between $50 and $100.
+
+```javascript
+db.products.find({ price: { $gte: 50, $lte: 100 } });
+```
+
+### Logical Operators
+
+Logical operators allow you to combine multiple conditions in your queries. Here are
+some common logical operators:
+
+- $and: Logical AND
+- $or: Logical OR
+- $not: Logical NOT
+
+#### Use Case:
+
+Finding Premium or Discounted Products
+Suppose you want to find products that are either premium products (price > $200)
+or products on discount (price < $50).
+
+```javascript
+db.products.find({
+  $or: [
+    { price: { $gt: 200 } }, // Premium products
+    { price: { $lt: 50 } }, // Discounted products
+  ],
+});
+```
+
+### Combining Comparison and Logical Operators
+
+You can combine comparison and logical operators to create more complex queries.
+
+#### Use Case:
+
+Premium Products with High Ratings
+To find premium products (price > $200) with a high rating (rating > 4):
+
+```javascript
+db.products.find({
+  $and: [
+    { price: { $gt: 200 } }, // Premium products
+    { rating: { $gt: 4 } }, // High rating
+  ],
+});
+```
+
+### 1. Updated 'product.repository.js' file
+
+The main changed part in updated ProductRepository class is in the `filter` method, specifically how the `category` filtering is handled.
+
+#### Old version
+
+```javascript
+let filterExpression = {};
+if (minPrice) {
+  filterExpression.price = { $gte: parseFloat(minPrice) };
+}
+if (maxPrice) {
+  filterExpression.price = {
+    ...filterExpression.price,
+    $lte: parseFloat(maxPrice),
+  };
+}
+if (category) {
+  filterExpression.category = category;
+  // filterExpression = { $and: [{ category: category }, filterExpression]
+}
+```
+
+This version assumed `category` is a single string (e.g. "Computers").
+
+#### New version (updated logic):
+
+```javascript
+let filterExpression = {};
+if (minPrice) {
+  filterExpression.price = { $gte: parseFloat(minPrice) };
+}
+if (maxPrice) {
+  filterExpression.price = {
+    ...filterExpression.price,
+    $lte: parseFloat(maxPrice),
+  };
+}
+if (category) {
+  // Replace single quotes with double quotes and parse the JSON string safely
+  const parsedCategories = JSON.parse(category.replace(/'/g, '"'));
+  filterExpression = {
+    $and: [{ category: { $in: parsedCategories } }, filterExpression],
+    };
+  };
+}
+```
+
+What This Change Does:
+
+- Allows multiple categories to be passed as a stringified array, e.g. ["Computers", "Geography"].
+- Converts any single quotes to double quotes so that JSON.parse can safely parse the string.
+- Builds a compound filter using $and:
+  - Ensures the product’s category is one of the parsed categories.
+  - Applies the existing price filters alongside.
+- Now supports multi-category filtering.
+
+### 2. Testing in Postman
+
+<img src="./images/filterProducts_postman5.png" alt="Mongo Driver" width="650" height="auto">

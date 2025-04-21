@@ -55,7 +55,13 @@ class ProductRepository {
         };
       }
       if (category) {
-        filterExpression.category = category;
+        // Replace single quotes with double quotes and parse the JSON string safely
+        const parsedCategories = JSON.parse(category.replace(/'/g, '"'));
+        filterExpression = {
+          $and: [{ category: { $in: parsedCategories } }, filterExpression],
+        };
+        // filterExpression = { $and: [{ category: category }, filterExpression] };
+        // filterExpression.category = category;
       }
       return collection.find(filterExpression).toArray();
     } catch (err) {
