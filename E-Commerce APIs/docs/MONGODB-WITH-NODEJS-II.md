@@ -1225,3 +1225,128 @@ db.products.aggregate([
 5. $size: Calculates the size of an array.
 6. $sort: Sorts the results based on specified fields.
 7. $limit: Limits the result to a specified number of documents.
+
+## Added 'Order' Feature
+
+### 1. Created 'order.model.js' file: (Defines Order Structure / Blueprint)
+
+```javascript
+export default class OrderModel {
+  constructor(userId, totalAmount, timestamp) {
+    this.userId = userId;
+    this.totalAmount = totalAmount;
+    this.timestamp = timestamp;
+  }
+}
+```
+
+- `OrderModel` is a simple class used to structure an order object.
+- It includes:
+  - `userId`: Who placed the order.
+  - `totalAmount`: Total cost of the order.
+  - `timestamp`: When the order was created.
+- This class might later be used to save structured orders to the database.
+
+### 2. Created 'order.controller.js' file: (Handles Logic for Routes)
+
+```javascript
+import OrderRepository from "./order.repository.js";
+
+export default class OrderController {
+  constructor() {
+    this.orderRepository = new OrderRepository();
+  }
+
+  async placeOrder(req, res, next) {
+    try {
+      const userId = req.userId;
+      await this.orderRepository.placeOrder(userId);
+      res.status(201).send("Order is created !");
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send("Something went wrong");
+    }
+  }
+}
+```
+
+- `OrderController` encapsulates the business logic.
+- It uses `OrderRepository` to handle database operations.
+- The `placeOrder` method:
+  - Extracts the `userId` from `req` (set by jwtAuth.middleware.js).
+  - Calls the repository’s method to handle order placement.
+  - Sends a success response or error.
+
+### 3. Created 'order.repository.js' file: (Handles Data Access / DB Operations)
+
+```javascript
+export default class OrderRepository {
+  constructor() {
+    this.collection = "orders";
+  }
+
+  async placeOrder(userId) {
+    // 1. Get cartitems and calculate total amount.
+    // 2. Create an order record.
+    // 3. Reduce the stock.
+    // 4. Clear the cart items.
+  }
+}
+```
+
+- `OrderRepository` handles the direct interaction with the database.
+- In `placeOrder`, the steps mentioned are:
+  - Retrieve cart items for the user.
+  - Calculate the total.
+  - Create and store an order record.
+  - Update product stock.
+  - Clear the user’s cart.
+
+### 4. Created 'order.routes.js' file: (Defines Routes)
+
+```javascript
+import express, { Router } from "express";
+import OrderController from "./order.controller.js";
+
+const orderRouter = express.Router();
+const orderController = new OrderController();
+
+orderRouter.post("/", (req, res, next) => {
+  orderController.placeOrder(req, res, next);
+});
+
+export default orderRouter;
+```
+
+- `express.Router()` is used to create a router instance specific to order-related routes.
+- It defines a `POST` route `/`, which calls the `placeOrder` method from the controller.
+
+The module exports `orderRouter`, allowing it to be integrated into the main app [For Eg: server.use('/orders', orderRouter)].
+
+### 4. Updated 'server.js' file: (Main Request Handling Entry Point)
+
+```javascript
+import orderRouter from "./src/features/order/order.routes.js"; //New Import
+```
+
+```javascript
+server.use("/api/orders", jwtAuth, orderRouter); // Added
+```
+
+The Order module (orderRouter) has been integrated into the Express app with JWT authentication, ensuring that only authenticated users can access order-related endpoints. All order operations are now accessible via the /api/orders route.
+
+### File Flow:
+
+```javascript
+server.js → jwtAuth.middleware.js → order.routes.js → order.controller.js → order.repository.js → (order.model.js) → Response
+```
+
+1. Request → Server (Express)
+2. Server → JWT Authentication Middleware
+3. JWT Middleware → Verifies Token
+4. Token Valid → Route is Triggered (e.g., Order Route)
+5. Route → Controller (e.g., OrderController)
+6. Controller → Repository (e.g., OrderRepository)
+7. Repository → Model (Optional)
+8. Repository → Executes Database Operations
+9. Controller → Sends Response to Clien

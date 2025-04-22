@@ -12,6 +12,7 @@ import apiDocs from "./swagger.json" with { type: "json" };
 import winstonLoggerMiddleware from "./src/middlewares/winstonLogger.middleware.js";
 import { ApplicationError } from "./src/error-handler/applicationError.js";
 import {connectToMongoDB} from "./config/mongodb.js";
+import orderRouter from "./src/features/order/order.routes.js";
 
 // 2. Initialize Express server
 const server = express();
@@ -39,6 +40,7 @@ server.use (winstonLoggerMiddleware);
 server.use("/api/products", jwtAuth, productRouter); // Protected product routes
 server.use("/api/users", userRouter); // Public user routes
 server.use("/api/cartItems", jwtAuth, cartRouter); // Protected cart routes
+server.use('/api/orders', jwtAuth, orderRouter); // Protected order routes
 
 // 5. Default route
 server.get("/", (req, res) => {
