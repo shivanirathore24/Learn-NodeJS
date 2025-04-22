@@ -15,3 +15,15 @@ UserController
 Modify _id
 1. Counter collection (_id:"cartItemId", value:0)
 2. While adding cart items, increment the counter and the use counter value as id to cartitem document.
+
+Aggregation Pipeline
+1. Calculate average price per category
+db.products.aggregate([
+     //Get Average price per category
+    {
+        $group: {
+             _id: "$category",
+            averagePrice: { $avg: "$price" }
+        }
+    } 
+])

@@ -48,3 +48,4 @@ Fri Mar 14 2025 21:10:45 GMT+0530 (India Standard Time) +  /api/cartItems/3 - {}
 {"level":"info","message":"/api/products/filter?minPrice=400&maxPrice=1000&category=Geography - {}","service":"request-logging"}
 {"level":"info","message":"/api/products/filter?minPrice=400&maxPrice=1000&category=[%27Computers%27,%20%27Geography%27] - {}","service":"request-logging"}
 {"level":"info","message":"/api/products/filter?minPrice=900&maxPrice=1700&category=[%27Computers%27,%20%27Geography%27] - {}","service":"request-logging"}
+{"level":"info","message":"/api/products/averagePrice - {}","service":"request-logging"}

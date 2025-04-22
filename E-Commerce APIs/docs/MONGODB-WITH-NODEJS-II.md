@@ -936,3 +936,161 @@ return collection
 
 <img src="./images/filterProducts_projectionOperator_MongoDBCompass.png" alt="Filter Product in MongoDB" width="650" height="auto">
 <img src="./images/filterProducts_projectionOperator_postman.png" alt="Filter Product using Projection Operator" width="650" height="auto">
+
+
+## Aggregation Operators in MongoDB
+
+Aggregation operators are a versatile toolset in MongoDB that allows you to process
+and transform data to gain insights and perform complex operations. They enable
+you to manipulate, reshape, and summarize data within your collections. Let's
+explore how aggregation operators work and delve into practical scenarios.
+
+### Basic Aggregation
+
+The basic aggregation operation involves stages that process documents in
+sequence. Here's an overview of some key aggregation stages:
+
+- $match: Filters documents based on specified criteria.
+- $group: Groups documents by specific fields and performs aggregate
+  calculations.
+- $project: Shapes the output documents by including or excluding fields.
+- $sort: Sorts documents based on specified fields.
+
+#### Use Case: Calculate Average Rating
+
+Consider a ‘products’ collection with name, category, and rating fields. You want to
+calculate the average rating for each category.
+
+```javascript
+db.products.aggregate([
+  {
+    $group: {
+      _id: "$category",
+      avgRating: { $avg: "$rating" },
+    },
+  },
+]);
+```
+
+### Combining Aggregation Stages
+
+You can chain multiple aggregation stages to perform more complex operations.
+
+#### Use Case: Find Top Categories by Average Price
+
+Given the same products collection, you want to find the top categories with the
+highest average price.
+
+```javascript
+db.products.aggregate([
+  {
+    $group: {
+      _id: "$category",
+      avgPrice: { $avg: "$price" },
+    },
+  },
+  {
+    $sort: { avgPrice: -1 },
+  },
+  {
+    $limit: 5,
+  },
+]);
+```
+
+### Aggregation Expressions
+
+Aggregation expressions enable advanced calculations and transformations.
+
+#### Use Case: Calculating Total Revenue
+
+Assuming you have an ‘orders’ collection with quantity and price fields, you want to
+calculate the total revenue.
+
+```javascript
+db.orders.aggregate([
+  {
+    $project: {
+      totalRevenue: { $multiply: ["$quantity", "$price"] },
+    },
+  },
+  {
+    $group: {
+      _id: null,
+      total: { $sum: "$totalRevenue" },
+    },
+  },
+]);
+```
+
+### 1. Updated 'product.controller.js' file
+
+A new method averagePrice(req, res, next) was added to the ProductController class.
+This method calls productRepository.averageProductPricePerCategory() to calculate average price per category and sends the result with a 200 OK status.
+
+```javascript
+// Added
+async averagePrice(req, res, next) {
+  try {
+    const result = await this.productRepository.averageProductPricePerCategory();
+    res.status(200).send(result);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send("Something went wrong");
+  }
+}
+```
+
+### 2. Updated 'product.repository.js' file
+
+The averageProductPricePerCategory() method calculates the average price of products grouped by category.
+
+```javascript
+// Added
+async averageProductPricePerCategory() {
+  try {
+    const db = getDB();
+    return await db
+      .collection(this.collection)
+      .aggregate([
+        {
+          // Stage 1: Get Average price per category
+          $group: {
+            _id: "$category",
+            averagePrice: { $avg: "$price" },
+          },
+        },
+      ])
+      .toArray();
+  } catch (err) {
+    console.log(err);
+    throw new ApplicationError("Something went wrong with Data", 500);
+  }
+}
+```
+
+MongoDB’s .aggregate() method processes data records and returns computed results using a pipeline. Each stage transforms the data.
+
+- "\_id": "$category" — Groups all documents by their category field.
+- "averagePrice": { $avg: "$price" } — Calculates the average price for each group (category).
+
+### 3. Updated 'product.routes.js' file
+
+Added a new GET route /averagePrice that calls productController.averagePrice() to handle average price calculation.
+
+```javascript
+productRouter.get("/averagePrice", (req, res, next) => {
+  productController.averagePrice(req, res);
+});
+```
+
+### 4. Testing in Postman
+
+#### Products Collection
+
+<img src="./images/products_mongoDBCompass3.png" alt="Add Products in MongoDB" width="650" height="auto">
+<img src="./images/products_mongoDBCompass4.png" alt="Add Products in MongoDB" width="650" height="auto">
+
+#### Average Price Per Category
+
+<img src="./images/productsAvgPrice_CategoryWise_postman.png" alt="Add Products in MongoDB" width="650" height="auto">
