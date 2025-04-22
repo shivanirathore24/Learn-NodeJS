@@ -8,22 +8,83 @@ ProductController
 7. Get items of Cart - Done.
 8. Remove items from Cart - Done.
 
+
 UserController
 1. Sign Up - Email, Password, TypeOfUser(Customer, Seller) - Done.
 2. Sign In - Email, Password - Done.
+
 
 Modify _id
 1. Counter collection (_id:"cartItemId", value:0)
 2. While adding cart items, increment the counter and the use counter value as id to cartitem document.
 
+
 Aggregation Pipeline
-1. Calculate average price per category
+Q1: Find the average price per category.
 db.products.aggregate([
-     //Get Average price per category
+    // Get average price per category
     {
         $group: {
-             _id: "$category",
+            _id: "$category",
             averagePrice: { $avg: "$price" }
         }
-    } 
+    }
+]);
+
+Q2: Calculate the average rating of a product.
+db.products.aggregate([
+    {
+        // 1. Unwind the ratings array
+        $unwind: "$ratings"
+    },
+    {
+        // 2. Group by product name and calculate the average rating
+        $group: {
+            _id: "$name",
+            averageRating: { $avg: "$ratings.rating" }
+        }
+    }
+]);
+
+Q3: Find the count of ratings per product.
+db.products.aggregate([
+    {
+        //  Project name of product, and countOfRating
+        $project: {
+            name: 1,
+            countOfRating: {
+                $cond: {
+                    if: { $isArray: "$ratings" },
+                    then: { $size: "$ratings" },
+                    else: 0
+                }
+            }
+        }
+    }
 ])
+
+Q4: Find the product with the highest number of ratings.
+db.products.aggregate([
+    {
+        // 1. Project name of product, and countOfRating
+        $project: {
+            name: 1,
+            countOfRating: {
+                $cond: {
+                    if: { $isArray: "$ratings" },
+                    then: { $size: "$ratings" },
+                    else: 0
+                }
+            }
+        }
+    },
+    {
+        // 2. Sort the collection
+        $sort: { countOfRating: -1 }
+    },
+    {
+        // 3. Limit to just 1 item in result
+        $limit: 1
+    }
+]);
+

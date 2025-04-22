@@ -150,7 +150,7 @@ class ProductRepository {
         .collection(this.collection)
         .aggregate([
           {
-            // Stage 1: Get Average price per category
+            // Get Average price per category
             $group: {
               _id: "$category",
               averagePrice: { $avg: "$price" },

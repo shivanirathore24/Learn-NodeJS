@@ -929,6 +929,7 @@ return collection
   - ratings: only the last rating (most recent) is returned using $slice: -1
 
 💡 Why this is useful:
+
 - It reduces the amount of data sent to the client, making the response faster and more efficient.
 - Ideal for scenarios like product listing pages where only key details (like name, price, and latest rating) are needed instead of full product data.
 
@@ -936,7 +937,6 @@ return collection
 
 <img src="./images/filterProducts_projectionOperator_MongoDBCompass.png" alt="Filter Product in MongoDB" width="650" height="auto">
 <img src="./images/filterProducts_projectionOperator_postman.png" alt="Filter Product using Projection Operator" width="650" height="auto">
-
 
 ## Aggregation Operators in MongoDB
 
@@ -1023,6 +1023,8 @@ db.orders.aggregate([
 ]);
 ```
 
+## Aggregation Pipeline Part-1
+
 ### 1. Updated 'product.controller.js' file
 
 A new method averagePrice(req, res, next) was added to the ProductController class.
@@ -1054,7 +1056,7 @@ async averageProductPricePerCategory() {
       .collection(this.collection)
       .aggregate([
         {
-          // Stage 1: Get Average price per category
+          // Get Average price per category
           $group: {
             _id: "$category",
             averagePrice: { $avg: "$price" },
@@ -1088,24 +1090,138 @@ productRouter.get("/averagePrice", (req, res, next) => {
 
 #### Products Collection
 
-<img src="./images/products_mongoDBCompass3.png" alt="Add Products in MongoDB" width="650" height="auto">
-<img src="./images/products_mongoDBCompass4.png" alt="Add Products in MongoDB" width="650" height="auto">
+<img src="./images/products_mongoDBCompass3.png" alt="Products Collection MongoDB" width="650" height="auto">
+<img src="./images/products_mongoDBCompass4.png" alt="Products Collection MongoDB" width="650" height="auto">
 
 #### Average Price Per Category
 
-<img src="./images/productsAvgPrice_CategoryWise_postman.png" alt="Add Products in MongoDB" width="650" height="auto">
+<img src="./images/productsAvgPrice_CategoryWise_postman.png" alt=" Average Price per Category" width="650" height="auto">
 
 ## Before Preceeding Add Some Ratings
 
 #### User-3 signed up, then signed in, and subsequently added a rating.
-<img src="./images/user3_SignUp_postman.png" alt="Add Products in MongoDB" width="650" height="auto">
-<img src="./images/users_MongoDBCompass.png" alt="Add Products in MongoDB" width="650" height="auto">
-<img src="./images/user3_SignIn_postman.png" alt="Add Products in MongoDB" width="650" height="auto">
-<img src="./images/rateProduct_postman5.png" alt="Add Products in MongoDB" width="650" height="auto">
-<img src="./images/rateProduct_mongoDBCompass3.png" alt="Add Products in MongoDB" width="650" height="auto">
+
+<img src="./images/user3_SignUp_postman.png" alt="User-3 SignUp Postman" width="650" height="auto">
+<img src="./images/users_MongoDBCompass.png" alt="Users Collection MongoDB" width="650" height="auto">
+<img src="./images/user3_SignIn_postman.png" alt="User-3 SignIn Postman" width="650" height="auto">
+<img src="./images/rateProduct_postman5.png" alt="Rate Product Postman" width="650" height="auto">
+<img src="./images/rateProduct_mongoDBCompass3.png" alt=" Rating Added MongoDB" width="650" height="auto">
 
 #### Product collection after various users added ratings to different products
-<img src="./images/products_mongoDBCompass5.png" alt="Add Products in MongoDB" width="650" height="auto">
-<img src="./images/products_mongoDBCompass6.png" alt="Add Products in MongoDB" width="650" height="auto">
-<img src="./images/products_mongoDBCompass7.png" alt="Add Products in MongoDB" width="650" height="auto">
 
+<img src="./images/products_mongoDBCompass5.png" alt="Products Collection MongoDB" width="650" height="auto">
+<img src="./images/products_mongoDBCompass6.png" alt="Products Collection MongoDB" width="650" height="auto">
+<img src="./images/products_mongoDBCompass7.png" alt="Products Collection MongoDB" width="650" height="auto">
+
+## Aggregation Pipeline Part-2
+
+### Q1: Find the average price per category.
+
+```javascript
+db.products.aggregate([
+  // Get average price per category
+  {
+    $group: {
+      _id: "$category",
+      averagePrice: { $avg: "$price" },
+    },
+  },
+]);
+```
+
+- $group: This operator groups documents by the specified field (category) and calculates aggregates (like average, sum, etc.) for each group. Here, it's used to calculate the average price for each category using $avg.
+
+<img src="./images/aggregatePipeline1_MongoShell.png" alt="Aggregate Pipeline MongoShell" width="600" height="auto">
+
+### Q2: Calculate the average rating of a product.
+
+```javascript
+db.products.aggregate([
+  {
+    // 1. Unwind the ratings array
+    $unwind: "$ratings",
+  },
+  {
+    // 2. Group by product name and calculate the average rating
+    $group: {
+      _id: "$name",
+      averageRating: { $avg: "$ratings.rating" },
+    },
+  },
+]);
+```
+
+- $unwind: Flattens an array (here, the ratings array), creating a separate document for each element inside the array.
+- $group: Groups documents by product name and calculates the average of ratings using $avg.
+
+<img src="./images/aggregatePipeline2_MongoShell.png" alt="Aggregate Pipeline MongoShell" width="600" height="auto">
+
+### Q3: Find the count of ratings per product.
+
+```javascript
+db.products.aggregate([
+  {
+    //  Project name of product, and countOfRating
+    $project: {
+      name: 1,
+      countOfRating: {
+        $cond: {
+          if: { $isArray: "$ratings" },
+          then: { $size: "$ratings" },
+          else: 0,
+        },
+      },
+    },
+  },
+]);
+```
+
+- $project: This operator reshapes the documents. Here, it keeps the name field and computes the count of ratings for each product.
+- $cond: A conditional operator used to check if ratings is an array. If true, it counts the number of ratings using $size; otherwise, it returns 0.
+
+<img src="./images/aggregatePipeline3_MongoShell_part1.png" alt="Aggregate Pipeline MongoShell" width="600" height="auto">
+<img src="./images/aggregatePipeline3_MongoShell_part2.png" alt="Aggregate Pipeline MongoShell" width="600" height="auto">
+
+### Q4: Find the product with the highest number of ratings.
+
+```javascript
+db.products.aggregate([
+  {
+    // 1. Project name of product, and countOfRating
+    $project: {
+      name: 1,
+      countOfRating: {
+        $cond: {
+          if: { $isArray: "$ratings" },
+          then: { $size: "$ratings" },
+          else: 0,
+        },
+      },
+    },
+  },
+  {
+    // 2. Sort the collection
+    $sort: { countOfRating: -1 },
+  },
+  {
+    // 3. Limit to just 1 item in result
+    $limit: 1,
+  },
+]);
+```
+
+- $project: Similar to Q3, it includes the name field and calculates the count of ratings.
+- $sort: Sorts the products by the countOfRating field in descending order (highest first).
+- $limit: Limits the output to only the top product with the most ratings.
+
+<img src="./images/aggregatePipeline4_MongoShell.png" alt="Aggregate Pipeline MongoShell" width="600" height="auto">
+
+#### Summary of Operators:
+
+1. $group: Groups documents by a specified field and applies aggregate functions like $avg, $sum, etc.
+2. $unwind: Flattens an array field, creating separate documents for each array element.
+3. $project: Reshapes documents, specifying which fields to include or exclude.
+4. $cond: Performs conditional logic.
+5. $size: Calculates the size of an array.
+6. $sort: Sorts the results based on specified fields.
+7. $limit: Limits the result to a specified number of documents.
