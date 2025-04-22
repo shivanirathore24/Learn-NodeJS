@@ -1094,3 +1094,18 @@ productRouter.get("/averagePrice", (req, res, next) => {
 #### Average Price Per Category
 
 <img src="./images/productsAvgPrice_CategoryWise_postman.png" alt="Add Products in MongoDB" width="650" height="auto">
+
+## Before Preceeding Add Some Ratings
+
+#### User-3 signed up, then signed in, and subsequently added a rating.
+<img src="./images/user3_SignUp_postman.png" alt="Add Products in MongoDB" width="650" height="auto">
+<img src="./images/users_MongoDBCompass.png" alt="Add Products in MongoDB" width="650" height="auto">
+<img src="./images/user3_SignIn_postman.png" alt="Add Products in MongoDB" width="650" height="auto">
+<img src="./images/rateProduct_postman5.png" alt="Add Products in MongoDB" width="650" height="auto">
+<img src="./images/rateProduct_mongoDBCompass3.png" alt="Add Products in MongoDB" width="650" height="auto">
+
+#### Product collection after various users added ratings to different products
+<img src="./images/products_mongoDBCompass5.png" alt="Add Products in MongoDB" width="650" height="auto">
+<img src="./images/products_mongoDBCompass6.png" alt="Add Products in MongoDB" width="650" height="auto">
+<img src="./images/products_mongoDBCompass7.png" alt="Add Products in MongoDB" width="650" height="auto">
+
