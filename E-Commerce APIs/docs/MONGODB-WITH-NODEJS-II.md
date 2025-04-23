@@ -1350,3 +1350,186 @@ server.js → jwtAuth.middleware.js → order.routes.js → order.controller.js 
 7. Repository → Model (Optional)
 8. Repository → Executes Database Operations
 9. Controller → Sends Response to Clien
+
+## Transactions in MongoDB
+
+### 1. Updated 'order.repository.js' file
+
+```javascript
+import { ObjectId } from "mongodb";
+import { getDB } from "../../../config/mongodb.js";
+
+export default class OrderRepository {
+  constructor() {
+    this.collection = "orders";
+  }
+
+  async placeOrder(userId) {
+    // 1. Get cartitems and calculate total amount.
+    await this.getTotalAmount(userId);
+    // 2. Create an order record.
+    // 3. Reduce the stock.
+    // 4. Clear the cart items.
+  }
+  async getTotalAmount(userId) {
+    const db = getDB();
+
+    const items = await db
+      .collection("cartItems")
+      .aggregate([
+        // 1. Filter cart items for the specific user
+        {
+          $match: { userID: new ObjectId(userId) },
+        },
+        // 2. Join with the 'products' collection to get product details
+        {
+          $lookup: {
+            from: "products",
+            localField: "productID",
+            foreignField: "_id",
+            as: "productInfo",
+          },
+        },
+        // 3️. Unwind the productInfo array to make it a flat object
+        {
+          $unwind: "$productInfo",
+        },
+        // 4️. Add a new field 'totalAmount' = price * quantity
+        {
+          $addFields: {
+            totalAmount: {
+              $multiply: ["$productInfo.price", "$quantity"],
+            },
+          },
+        },
+      ])
+      .toArray();
+
+    console.log(items);
+    // console.log("Individual productInfo objects:");
+    // items.forEach((item) => {
+    //   console.log(item.productInfo);
+    // });
+
+    // Calculate the grand total amount for the entire cart
+    const finalTotalAmount = items.reduce(
+      (acc, item) => acc + item.totalAmount,
+      0
+    );
+    console.log("Total amount for user's cart:", finalTotalAmount);
+  }
+}
+```
+
+Implemented the `getTotalAmount(userId)` method and invoked it inside the `placeOrder` method. This function:
+
+1. Fetches the cart items for a user.
+2. Joins the product details (like price).
+3. Calculates the total price per item (price \* quantity).
+4. Aggregates the total amount for the order.
+
+#### Note: Why Step-2 ?
+
+In the cart, only the `productID` and `quantity` are stored — not the `price`. So we need to join the products table to get the price.
+
+#### 1. $match
+
+```javascript
+{
+  $match: {
+    userID: new ObjectId(userId);
+  }
+}
+```
+
+- Purpose: Filters the `cartItems` to include only those that belong to the current user.
+- Why `ObjectId`: Because MongoDB stores `\_id` and `userID` fields as `ObjectId` types, not strings.
+- Analogy: Like `WHERE userID = 'abc123'` in SQL.
+
+#### 2. $lookup
+
+```javascript
+{
+  $lookup: {
+    from: "products",               // collection to join
+    localField: "productID",        // field in cartItems
+    foreignField: "_id",            // field in products
+    as: "productInfo"               // name of the new field (array)
+  }
+}
+```
+
+- Purpose: Joins the `cartItems` collection with the `products` collection.
+- How it works:
+  - For each cart item, it finds the product whose `\_id` matches the productID in the cart.
+  - Adds the matched product as an array in `productInfo`.
+- Analogy: Like a LEFT JOIN in SQL, pulls data from products where `products.\_id === cartItems.productID`
+
+#### 3. $unwind
+
+```javascript
+{
+  $unwind: "$productInfo";
+}
+```
+
+- Purpose: Flattens the `productInfo` array created by `$lookup`.
+- Why needed: `$lookup` returns an array of matching documents, even if there's only one match.
+
+  For Example:
+
+  ```javascript
+  {
+  "\_id": 1,
+  "name": "Shiv",
+  "hobbies": ["Cricket", "Coding", "Music"]
+  }
+  ```
+
+  After applying this stage:
+
+  ```javascript
+  {
+    $unwind: "$hobbies";
+  }
+  ```
+
+  It creates 3 separate documents from one:
+
+  ```javascript
+  { "_id": 1, "name": "Shiv", "hobbies": "Cricket" }
+  { "_id": 1, "name": "Shiv", "hobbies": "Coding" }
+  { "_id": 1, "name": "Shiv", "hobbies": "Music" }
+  ```
+
+- Analogy: Like normalizing nested data.
+
+#### 4. $addFields with $multiply
+
+```javascript
+{
+  $addFields: {
+    totalAmount: {
+      $multiply: ["$productInfo.price", "$quantity"];
+    }
+  }
+}
+```
+
+- Purpose: Adds a new field `totalAmount` to each cart item.
+- `$multiply`: Multiplies price from `productInfo` with the `quantity` in cartItems.
+- Effect:
+  ```javascript
+  totalAmount: 10 * 2 = 20
+  ```
+- Why `addFields`: Because we are adding a computed field, not replacing existing ones.
+
+#### Bonus: .toArray() and reduce()
+
+- `.toArray()`: Executes the aggregation and turns the result into a JS array.
+- `reduce()`: Adds all totalAmount values to get the final order amount.
+
+### 2. Testing in Postman
+
+<img src="./images/cartItems_collection.png" alt="CartItems MongoDB" width="650" height="auto">
+<img src="./images/placeOrder_getTotalAmount.png" alt="PlaceOrder GetTotalAmount" width="650" height="auto">
