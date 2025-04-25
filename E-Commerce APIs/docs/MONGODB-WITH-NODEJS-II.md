@@ -1533,3 +1533,610 @@ In the cart, only the `productID` and `quantity` are stored — not the `price`.
 
 <img src="./images/cartItems_collection.png" alt="CartItems MongoDB" width="650" height="auto">
 <img src="./images/placeOrder_getTotalAmount.png" alt="PlaceOrder GetTotalAmount" width="650" height="auto">
+
+## Transactions Operators in MongoDB Part-2
+
+Transaction operators are essential tools in MongoDB for ensuring data consistency
+and integrity in multi-step operations. Transactions enable you to group multiple
+operations into a single unit of work that either completes entirely or leaves no trace.
+Let's explore how to use transaction operators and understand their real-world
+applications.
+
+### 1. Starting a Session
+
+Starting a Session
+A session is a logical binding for a series of operations. To start a session, you use
+the startSession method.
+
+#### Use Case: E-Commerce Order Processing
+
+Imagine you're processing an order, which involves deducting the product quantity
+and updating the order status. A session ensures these operations succeed together.
+
+```javascript
+const session = client.startSession();
+```
+
+### 2. Starting a Transaction
+
+Transactions are used to group multiple operations as a single atomic unit. You start
+a transaction using the startTransaction method within a session.
+
+#### Use Case: Money Transfer
+
+Suppose you're transferring money between accounts. You want to deduct from one
+account and credit to another, ensuring that both actions are completed or none at
+all.
+
+```javascript
+session.startTransaction();
+```
+
+### 3. Committing a Transaction
+
+To make the changes within a transaction permanent, you commit the transaction
+using the commitTransaction method.
+
+#### Use Case: Reservation System
+
+In a reservation system, you're booking seats for a concert. The reservation is only
+confirmed when payment is successful and the transaction is committed.
+
+```javascript
+session.commitTransaction();
+```
+
+### 4. Aborting a Transaction
+
+If a transaction encounters an issue, you can abort it to discard any changes using
+the abortTransaction method.
+
+#### Use Case: Online Store Checkout
+
+During checkout, if a user's payment fails, you'd want to abort the transaction to
+prevent changes to the order and inventory.
+
+```javascript
+session.abortTransaction();
+```
+
+### 5. Ending a Session
+
+Once you've completed all necessary operations, you can end the session using the
+endSession method.
+
+#### Use Case: User Registration
+
+After a user registers, you might have multiple operations like sending emails,
+creating profiles, and more. An ended session ensures these operations conclude.
+
+```javascript
+session.endSession();
+```
+
+### 6. Closing the Client
+
+To ensure proper resource management, close the client when you're done with all
+operations.
+
+#### Use Case: Application Shutdown
+
+When your application is shutting down or no longer needs the MongoDB
+connection, closing the client ensures graceful termination.
+
+```javascript
+client.close();
+```
+
+Example:
+
+```javascript
+// Import the necessary MongoDB driver
+const { MongoClient } = require("mongodb");
+
+// Connection URL
+const url = "mongodb://localhost:27017";
+
+// Create a new MongoClient
+const client = new MongoClient(url);
+
+// Define the main function
+async function main() {
+  try {
+    // Connect to the MongoDB server
+    await client.connect();
+    console.log("Connected to MongoDB");
+
+    // Start a session
+    const session = client.startSession();
+
+    // Define the database and collection
+    const database = client.db("mydb");
+    const collection = database.collection("transactions");
+
+    // Start a transaction
+    session.startTransaction();
+
+    try {
+      // Insert a document
+      await collection.insertOne({ name: "Transaction 1" });
+      console.log("Document inserted");
+
+      // Update the document
+      await collection.updateOne(
+        { name: "Transaction 1" },
+        { $set: { status: "completed" } }
+      );
+      console.log("Document updated");
+
+      // Commit the transaction
+      await session.commitTransaction();
+      console.log("Transaction committed");
+    } catch (error) {
+      // If there's an error, abort the transaction
+      console.log("Error:", error);
+      console.log("Transaction aborted");
+      await session.abortTransaction();
+    } finally {
+      // End the session
+      session.endSession();
+    }
+  } catch (error) {
+    console.log("Error:", error);
+  } finally {
+    // Close the client
+    await client.close();
+    console.log("MongoDB connection closed");
+  }
+}
+
+// Call the main function
+main();
+```
+
+1. We import the necessary MongoClient from the MongoDB driver.
+2. Define the connection URL (url) to your MongoDB server.
+3. Create a new instance of MongoClient.
+4. Define the main function where all the MongoDB operations take place.
+5. Inside the main function, we start by connecting to the MongoDB server using
+   await `client.connect()`.
+6. We start a session using `const session = client.startSession()`.
+7. Define the database and collection you want to work with using
+   `client.db("mydb") and database.collection("transactions")`.
+8. Begin a transaction with `session.startTransaction()`.
+9. Inside the transaction, we perform two operations: inserting a document and
+   updating its status in the collection.
+10. If the operations within the transaction are successful, we commit the
+    transaction using `session.commitTransaction()`.
+11. If there's an error during the transaction, we handle it by printing the error,
+    aborting the transaction with `session.abortTransaction()`, and then finally
+    ending the session.
+12. After all the transaction handling, we close the MongoDB client connection
+    using await `client.close()`.
+
+### 1. Updated 'order.repository.js' file
+
+#### Old Version:
+
+```javascript
+import { ObjectId } from "mongodb";
+import { getDB } from "../../../config/mongodb.js";
+
+export default class OrderRepository {
+  constructor() {
+    this.collection = "orders";
+  }
+
+  async placeOrder(userId) {
+    // 1. Get cartitems and calculate total amount.
+    await this.getTotalAmount(userId);
+    // 2. Create an order record.
+    // 3. Reduce the stock.
+    // 4. Clear the cart items.
+  }
+  async getTotalAmount(userId) {
+    const db = getDB();
+
+    const items = await db
+      .collection("cartItems")
+      .aggregate([
+        // 1. Filter cart items for the specific user
+        {
+          $match: { userID: new ObjectId(userId) },
+        },
+        // 2. Join with the 'products' collection to get product details
+        {
+          $lookup: {
+            from: "products",
+            localField: "productID",
+            foreignField: "_id",
+            as: "productInfo",
+          },
+        },
+        // 3️. Unwind the productInfo array to make it a flat object
+        {
+          $unwind: "$productInfo",
+        },
+        // 4️. Add a new field 'totalAmount' = price * quantity
+        {
+          $addFields: {
+            totalAmount: {
+              $multiply: ["$productInfo.price", "$quantity"],
+            },
+          },
+        },
+      ])
+      .toArray();
+
+    console.log(items);
+    // console.log("Individual productInfo objects:");
+    // items.forEach((item) => {
+    //   console.log(item.productInfo);
+    // });
+
+    // Calculate the grand total amount for the entire cart
+    const finalTotalAmount = items.reduce(
+      (acc, item) => acc + item.totalAmount,
+      0
+    );
+    console.log("Total amount for user's cart:", finalTotalAmount);
+  }
+}
+```
+
+### New Version:
+
+```javascript
+import { ObjectId } from "mongodb";
+import { getClient, getDB } from "../../../config/mongodb.js";
+import OrderModel from "../order/order.model.js";
+import { ApplicationError } from "../../error-handler/applicationError.js";
+
+export default class OrderRepository {
+  constructor() {
+    this.collection = "orders";
+  }
+
+  async placeOrder(userId) {
+    const client = getClient();
+    const session = client.startSession();
+    try {
+      const db = getDB();
+      session.startTransaction();
+
+      // 1. Get cartitems and calculate total amount.
+      const items = await this.getTotalAmount(userId, session);
+      const finalTotalAmount = items.reduce(
+        (acc, item) => acc + item.totalAmount,
+        0
+      );
+      console.log("Final total amount:", finalTotalAmount);
+
+      // 2. Create an order record.
+      const newOrder = new OrderModel(
+        new ObjectId(userId),
+        finalTotalAmount,
+        new Date()
+      );
+      await db.collection(this.collection).insertOne(newOrder, { session });
+
+      // 3. Reduce the stock.
+      for (let item of items) {
+        await db.collection("products").updateOne(
+          {
+            _id: item.productID,
+          },
+          {
+            $inc: { stock: -item.quantity },
+          },
+          { session }
+        );
+      }
+      //throw new Error("Something is wrong in PlaceOrder");
+
+      // 4. Clear the cart items.
+      await db.collection("cartItems").deleteMany(
+        {
+          userID: new ObjectId(userId),
+        },
+        { session }
+      );
+
+      await session.commitTransaction();
+      return;
+    } catch (err) {
+      await session.abortTransaction();
+      console.log(err);
+      throw new ApplicationError(`Order Failed !`, 500);
+    } finally {
+      session.endSession();
+    }
+  }
+
+  async getTotalAmount(userId, session) {
+    const db = getDB();
+
+    const items = await db
+      .collection("cartItems")
+      .aggregate(
+        [
+          // 1. Filter cart items for the specific user
+          {
+            $match: { userID: new ObjectId(userId) },
+          },
+          // 2. Join with the 'products' collection to get product details
+          {
+            $lookup: {
+              from: "products",
+              localField: "productID",
+              foreignField: "_id",
+              as: "productInfo",
+            },
+          },
+          // 3️. Unwind the productInfo array to make it a flat object
+          {
+            $unwind: "$productInfo",
+          },
+          // 4️. Add a new field 'totalAmount' = price * quantity
+          {
+            $addFields: {
+              totalAmount: {
+                $multiply: ["$productInfo.price", "$quantity"],
+              },
+            },
+          },
+        ],
+        { session }
+      )
+      .toArray();
+
+    console.log(items);
+    return items;
+  }
+}
+```
+
+1. `placeOrder(userId)` function
+
+   1. Start a MongoDB Session & Transaction
+
+   ```javascript
+   const client = getClient();
+   const session = client.startSession();
+   session.startTransaction();
+   ```
+
+   - A session is started to group multiple database operations.
+   - A transaction ensures that if one operation fails, all other changes are rolled back — maintaining data integrity.
+
+   2. Get Cart Items and Calculate Total Amount
+
+   ```javascript
+   const items = await this.getTotalAmount(userId, session);
+   const finalTotalAmount = items.reduce(
+     (acc, item) => acc + item.totalAmount,
+     0
+   );
+   ```
+
+   - Calls getTotalAmount() to fetch cart items and their prices.
+   - Calculates the total cost of the entire cart.
+
+   3. Create an Order Record
+
+   ```javascript
+   const newOrder = new OrderModel(
+     new ObjectId(userId),
+     finalTotalAmount,
+     new Date()
+   );
+   await db.collection(this.collection).insertOne(newOrder, { session });
+   ```
+
+   - Creates an order document with: User ID, Total amount, Timestamp
+   - Inserts the order into the orders collection.
+
+   4. Reduce Stock for Each Product
+
+   ```javascript
+   for (let item of items) {
+     await db
+       .collection("products")
+       .updateOne(
+         { _id: item.productID },
+         { $inc: { stock: -item.quantity } },
+         { session }
+       );
+   }
+   ```
+
+   - Loops through each cart item.
+   - Reduces the stock in the products collection based on the quantity ordered.
+
+   5. Clear Cart Items
+
+   ```javascript
+   await db
+     .collection("cartItems")
+     .deleteMany({ userID: new ObjectId(userId) }, { session });
+   ```
+
+   - Deletes all cart items for the user after the order is successfully placed.
+
+   6. Commit or Abort Transaction
+
+   ```javascript
+   await session.commitTransaction(); // if all succeeds
+   ```
+
+   OR
+
+   ```javascript
+   await session.abortTransaction(); // if anything fails
+   ```
+
+   - If all the steps are successful, the changes are saved permanently.
+   - If an error occurs, all changes are undone (rolled back).
+
+   7. End the Session
+
+   ```javascript
+   session.endSession();
+   ```
+
+   - Cleans up the session regardless of success or failure.
+
+   8. 🛡️ Error Handling
+
+   ```javascript
+   catch (err) {
+     await session.abortTransaction();
+     throw new ApplicationError(`Order Failed !`, 500);
+   }
+   ```
+
+   - If something goes wrong (e.g., DB issue or stock mismatch), the order is not placed, and a custom error is thrown.
+
+   This function:
+
+   - Safely processes an order.
+   - Ensures data consistency using transactions.
+   - Prevents partial updates (e.g., stock reducing without order creation).
+   - Is robust against errors.
+
+2. `getTotalAmount(userId)` function
+
+   ```javascript
+   async getTotalAmount(userId, session) {
+   // aggregate with session passed as an option
+    return items;
+   }
+   ```
+
+   - Session Support Added: New version accepts and uses a session for transactional safety.
+   - Return Value Changed: Old version just logs the total; new version returns the items array for further use.
+
+### 2. Updated 'mongodb.js' file
+
+```javascript
+export const getClient = () => {
+  return client;
+};
+```
+
+- New Function Added: getClient() is introduced.
+  - Purpose: Returns the MongoDB client instance, useful for operations like starting sessions (e.g., for transactions).
+- No Changes in Existing Logic: Everything else remains the same, including connectToMongoDB(), getDB(), createCounter(), and createIndexes().
+
+### 3. Testing in Postman Part-1
+
+#### Added Stocks in each Products
+
+<img src="./images/addedStocksOnProducts.png" alt="Added Stock on Products MongoShell" width="650" height="auto">
+<img src="./images/stocksOnProducts_MongoDBCompass.png" alt="Added Stock on Products MongoDBCompass" width="650" height="auto">
+
+#### PLacing Order in Standalone MongoDB
+
+<img src="./images/placeOrder_error.png" alt="Place Order" width="650" height="auto">
+<img src="./images/replicatSet_MongoServerError.png" alt="MongoServer Error: Replica Set" width="650" height="auto">
+
+Error:
+
+```sh
+MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+```
+
+Happens when trying to use MongoDB transactions (like session.startTransaction()) on a standalone MongoDB server, which does not support transactions.
+
+### 4. Fix: ConcertingExistingMongoDB to ReplicaSet
+
+1. Stop MongoDB if it’s running as a service
+   - Press Win + R → type services.msc → Enter.
+   - Find MongoDB → Right-click → Stop.
+2. Start MongoDB Manually with Replica Set Config
+   - Open Command Prompt as Administrator, then run:
+   ```bash
+   mongod --dbpath "C:\your\existing\data\path" --replSet rs0
+   # mongod --dbpath "C:\Program Files\MongoDB\Server\8.0\data" --replSet rs0
+   ```
+   - NOTE: If if shows a lock file or DBPathInUse error. However, after stopping the MongoDB process from Task Manager, the lock is released, and MongoDB starts successfully.
+   - This starts MongoDB with the same data, but with replica set support
+     <img src="./images/replicaSet_cmd.png" alt="MongoDB to Replica Set CMD" width="650" height="auto">
+3. Open a New Command Prompt and Connect Using mongosh
+
+   ```bash
+   mongosh
+   ```
+
+   Then initiate the replica set:
+
+   ```javascript
+   rs.initiate();
+   ```
+
+   You should see a success message like:
+
+   ```json
+   { "ok": 1 }
+   ```
+
+   <img src="./images/rsInitiate()_mongoShell.png" alt="Replica Set Intitiate MongoShell" width="650" height="auto">
+
+4. Verify the Replica Set is Running
+   ```javascript
+   rs.status();
+   ```
+5. Now Transactions Will Work
+   - Replica set has been successfully enabled using the existing data.
+   - Transactions are now supported in MongoDB Compass and application code.
+
+NOTE:
+
+To find the default data storage path used by MongoDB on Windows:
+
+#### Option 1: Check MongoDB Log File (Best method)
+
+1. Go to: `C:\Program Files\MongoDB\Server\<your version>\log`
+2. Open the latest .log file (like mongod.log).
+3. Search for dbpath — you’ll find something like:
+
+```sh
+[initandlisten] options: { storage: { dbPath: "C:\\data\\db" }, ... }
+```
+
+#### Option 2: Check MongoDB Service Configuration (if installed as service)
+
+1. Press Win + R, type services.msc, and press Enter.
+2. Find MongoDB in the list.
+3. Right-click → Properties → Go to Path to executable.
+   Example:
+
+```bash
+"C:\Program Files\MongoDB\Server\8.0\bin\mongod.exe" --config "C:\Program Files\MongoDB\Server\8.0\bin\mongod.cfg" --service
+```
+
+4. Open that .cfg file (e.g., mongod.cfg) and look for the line:
+
+```bash
+"dbPath":"C:/Program Files/MongoDB/Server/8.0/data"
+```
+
+That’s your default data path.
+
+### 5. Testing in Postman Part-2
+
+#### Place an Order
+
+<img src="./images/placeOrder_successful.png" alt="PlaceOrder Successful Postman" width="700" height="auto">
+
+#### Created a new Order Collection
+
+<img src="./images/orders_collection.png" alt="Orders Collection Created" width="700" height="auto">
+
+#### Reduced stock for the products
+
+<img src="./images/updatedStocks_onProducts.png" alt="stocks Updated on Products" width="700" height="auto">
+
+#### Cleared the Cart Items belonging to the specific user
+
+<img src="./images/cartItems_empty_afterPlaceOrder.png" alt="CartItems Empty after PlaceOrder" width="700" height="auto">
