@@ -12,6 +12,7 @@ import apiDocs from "./swagger.json" with { type: "json" };
 import winstonLoggerMiddleware from "./src/middlewares/winstonLogger.middleware.js";
 import { ApplicationError } from "./src/error-handler/applicationError.js";
 import {connectToMongoDB} from "./config/mongodb.js";
+import { connectUsingMongoose } from "./config/mongooseConfig.js"
 import orderRouter from "./src/features/order/order.routes.js";
 
 // 2. Initialize Express server
@@ -67,5 +68,6 @@ server.use((req, res) => {
 const PORT = 3100;
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`); // Log server start
-  connectToMongoDB();
+  connectUsingMongoose();
+  //connectToMongoDB();
 });
