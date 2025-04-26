@@ -18,3 +18,6 @@
 5. [Getting Started with Database](docs/DATABASE-OVERVIEW.md)
 6. [MongoDB with NodeJS-I](docs/MONGODB-WITH-NODEJS-I.md)
 7. [MongoDB with NodeJS-II](docs/MONGODB-WITH-NODEJS-II.md)
+
+### 🚀 Mastering Mongoose for MongoDB
+8. [Working with Mongoose-I](docs/WORKING-WITH-MONGOOSE-I.md)
