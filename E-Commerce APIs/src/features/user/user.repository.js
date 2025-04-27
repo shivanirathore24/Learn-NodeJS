@@ -1,32 +1,40 @@
-import { getDB } from "../../../config/mongodb.js";
+import mongoose from "mongoose";
+import { userSchema } from "./user.schema.js";
 import { ApplicationError } from "../../error-handler/applicationError.js";
 
-class UserRepository {
-  constructor() {
-    this.collection = "users";
-  }
-  async signUp(newUser) {
+//Creating Model from Schema
+const UserModel = mongoose.model("User", userSchema);
+
+export default class UserRepository {
+  async signUp(user) {
     try {
-      const db = getDB(); // 1. Get the database
-      const collection = db.collection(this.collection); // 2. Get the collection
-      await collection.insertOne(newUser); // 3.Insert the document
+      //create instance of model
+      const newUser = new UserModel(user);
+      await newUser.save();
       return newUser;
     } catch (err) {
       console.log(err);
-      throw new ApplicationError("Something went wrong", 500);
+      throw new ApplicationError("Something is wrong with database !", 500);
     }
   }
+
+  /*
+  async signIn(email, password) {
+    try {
+      return await UserModel.findOne({ email, password });
+    } catch (err) {
+      console.log(err);
+      throw new ApplicationError("Something is wrong with database !", 500);
+    }
+  */
 
   async findByEmail(email) {
     try {
-      const db = getDB(); // 1. Get the database
-      const collection = db.collection(this.collection); // 2. Get the collection
-      return await collection.findOne({ email }); // 3. Find the document
+      return await UserModel.findOne({ email });
     } catch (err) {
       console.log(err);
-      throw new ApplicationError("Something went wrong", 500);
+      console.log(err);
+      throw new ApplicationError("Something is wrong with database !", 500);
     }
   }
 }
-
-export default UserRepository;

@@ -184,3 +184,182 @@ This schema ensures every cart document is connected to a product and a user, wh
 #### ✨ In simple words:
 
 "This schema defines the cart rules: Each cart contains a product (linked by its ID), belongs to a user (linked by their ID), and includes a quantity for that product ~ nothing extra, nothing missing."
+
+## Models in Mongoose
+
+### 🔹 What is a Model in Mongoose ?
+
+A Model is a direct connection to a MongoDB collection.
+It is created using a Schema and provides methods to create, read, update, and delete documents.
+
+- Schema = Defines the structure of the data (blueprint).
+- Model = Gives you power to interact with that data in MongoDB.
+
+#### 🎯 In very simple words:
+
+Schema says what the data should look like.
+Model lets you actually work with that data ~ like adding, finding, updating, and deleting records inside MongoDB.
+
+### Mongoose Model VS MVC Model
+
+#### 📌 Mongoose Model
+
+1. It is part of the Mongoose library (for MongoDB).
+2. It is only responsible for database operations (like saving, finding, deleting).
+3. You create it using mongoose.model('Name', schema).
+4. It uses a Schema to structure how data should look.
+5. Example: A `UserModel` that knows how to save and retrieve users from MongoDB.
+
+#### 📌 MVC Model (Model-View-Controller Model)
+
+1. It is a part of app architecture, not just database.
+2. It represents all the business logic and data handling in the application.
+3. It may include methods, calculations, rules, and even Mongoose models inside
+4. It talks to the database through something like a Mongoose model.
+5. Example: A `User` class that handles logic like calculating user age, verifying password, etc.. and also saves/fetches data.
+
+#### 🌟 Quick Example:
+
+Suppose you're building an e-commerce app.
+
+- Mongoose Model: You create a `ProductModel` using Mongoose. It knows how to save products into MongoDB.
+- MVC Model: You create a Product class that includes business logic like "apply discount", "check stock" —> and inside it, it may use the `ProductModel` to fetch or save data.
+
+#### 🔥 In Short:
+
+Mongoose Model = deals only with MongoDB.
+MVC Model = deals with all the business logic + database + validation in your app.
+
+## Users Operations
+
+### 1. Updated 'user.repository.js' file
+
+Moved existing code from user.repository.js to user.repository_ols.js, and added new code to a fresh user.repository.js file:
+
+```javascript
+import mongoose from "mongoose";
+import { userSchema } from "./user.schema.js";
+import { ApplicationError } from "../../error-handler/applicationError.js";
+
+//Creating Model from Schema
+const UserModel = mongoose.model("User", userSchema);
+
+export default class UserRepository {
+  async signUp(user) {
+    try {
+      //create instance of model
+      const newUser = new UserModel(user);
+      await newUser.save();
+      return newUser;
+    } catch (err) {
+      console.log(err);
+      throw new ApplicationError("Something is wrong with database !", 500);
+    }
+  }
+
+  /*
+  async signIn(email, password) {
+    try {
+      return await UserModel.findOne({ email, password });
+    } catch (err) {
+      console.log(err);
+      throw new ApplicationError("Something is wrong with database !", 500);
+    }
+  */
+
+  async findByEmail(email) {
+    try {
+      return await UserModel.findOne({ email });
+    } catch (err) {
+      console.log(err);
+      console.log(err);
+      throw new ApplicationError("Something is wrong with database !", 500);
+    }
+  }
+}
+```
+
+This file is the **User Repository**, which interacts with the MongoDB database to handle user data. It's built using **Mongoose**, a popular Object Data Modeling (ODM) library for MongoDB and Node.js. Mongoose allows you to define schemas and models for MongoDB collections, making database operations easier.
+
+1. Import Statements
+
+   ```javascript
+   import mongoose from "mongoose";
+   import { userSchema } from "./user.schema.js";
+   import { ApplicationError } from "../../error-handler/applicationError.js";
+   ```
+
+   - `mongoose`: A library to interact with MongoDB, providing methods like `.model()`, `.save()`, `.find()`, etc.
+   - `userSchema`: A predefined schema (likely in `user.schema.js`) that defines the structure of user documents in MongoDB.
+   - `ApplicationError`: A custom error class used to handle application-specific errors, providing structured error management.
+
+2. Creating the User Model from Schema
+
+   ```javascript
+   const UserModel = mongoose.model("User", userSchema);
+   ```
+
+   - `UserModel` is created from the `userSchema`. The model is a constructor function in Mongoose that represents the collection (`User` in this case) and gives you the ability to perform CRUD (Create, Read, Update, Delete) operations.
+   - The first argument `"User"` represents the name of the model and also the name of the collection in MongoDB (Mongoose automatically looks for a lowercase, plural version of the model name, so it'll look for `users` collection).
+   - The second argument `userSchema` defines the structure of the documents in the `users` collection.
+
+3. UserRepository Class
+
+   ```javascript
+   export default class UserRepository {
+     ...
+   }
+   ```
+
+   - The `UserRepository` class encapsulates the logic for interacting with the `UserModel`. This is a repository pattern, which is useful for organizing code that handles database operations separately from the application logic. It makes it easier to manage and test.
+
+4. signUp Method
+
+   ```javascript
+   async signUp(user) {
+     try {
+       const newUser = new UserModel(user); // create instance of model
+       await newUser.save();  // save new user to database
+       return newUser;  // return saved user
+     } catch (err) {
+       console.log(err);
+       throw new ApplicationError("Something is wrong with database !", 500);
+     }
+   }
+   ```
+
+   - `async signUp(user)`: This method is asynchronous because database operations are time-consuming. `user` is the input parameter containing the data to be saved for a new user.
+   - `new UserModel(user)`: A new instance of `UserModel` is created, which represents a new user document in MongoDB. The `user` object is passed as the data for the new user.
+   - `await newUser.save()`: The `save()` method is an asynchronous Mongoose method that saves the document to the database. It's wrapped in `await` because we want to ensure that the document is saved before proceeding further.
+   - `return newUser`: After the user is successfully saved, the newUser document (including its MongoDB-generated ID and other auto-generated fields) is returned.
+   - `Error Handling`: If an error occurs during the saving process (e.g., a database issue), the `catch` block triggers, throwing a custom `ApplicationError`. This helps manage database-related errors more effectively.
+
+5. findByEmail Method (needed for signUp)
+
+   ```javascript
+   async findByEmail(email) {
+    try {
+      return await UserModel.findOne({ email });  // find a user by email
+    } catch (err) {
+      console.log(err);
+      throw new ApplicationError("Something is wrong with database !", 500);
+    }
+   }
+   ```
+
+   - async findByEmail(email): This method searches for a user by their email. It's also asynchronous because it involves a database query
+   - await UserModel.findOne({ email }): The findOne() method is a Mongoose query that searches for the first document that matches the email field. If no match is found, it returns null.
+   - Error Handling: As in the signUp method, errors are caught in the catch block and an ApplicationError is thrown with a generic message "Something went wrong with database !" and a status code 500 (Internal Server Error).
+
+The repository class provides methods for user sign-up and finding users by email in MongoDB, with proper error handling. It follows the repository pattern for better scalability and maintainability.
+
+### 2. Testing in Postman
+
+#### User Sign-Up and Sign-In
+
+<img src="./images/user_signup_postman1.png" alt="User Sign-Up Postman" width="650" height="auto">
+<img src="./images/user_signin_postman1.png" alt="User Sign-In Postman" width="650" height="auto">
+
+#### Similarly, add other users to the collection, then review the users collection to check if the users have been added after signup.
+
+<img src="./images/users_Collection.png" alt="Users Collection" width="700" height="auto">

@@ -16,26 +16,33 @@ export class UserModel {
 /*
 //Hardcoded User Data
 let users = [
-  {
-    id: 1,
-    name: "Seller User",
-    email: "seller@ecom.com",
-    password: "password1",
-    type: "seller",
-  },
-  {
-    id: 2,
-    name: "Customer1 User",
-    email: "customer1@ecom.com",
-    password: "customer1",
-    type: "customer",
-  },
-  {
-    id: 3,
-    name: "Customer2 User",
-    email: "customer2@ecom.com",
-    password: "customer2",
-    type: "customer",
-  },
+    {
+        id: 1,
+        "name": "Shivani Rathore",
+        "email": "shivani.rathore@ecom.com",
+        "password": "Shivani@123",
+        "type": "Customer"
+    },
+    {
+        id: 2,
+        "name": "William Harris",
+        "email": "william.harris@ecom.com",
+        "password": "William@123",
+        "type": "Seller"
+    },
+    {
+        id: 3,
+        "name": "Henry Wilson",
+        "email": "henry.wilson@ecom.com",
+        "password": "Henry@123",
+        "type": "Customer"
+    },
+    {
+        id: 4,
+        "name": "Isabelle Morgan",
+        "email": "isabelle.morgan@ecom.com",
+        "password": "Isabelle@123",
+        "type": "Seller"
+    }
 ];
 */
