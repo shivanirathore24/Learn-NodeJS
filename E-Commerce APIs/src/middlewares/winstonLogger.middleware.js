@@ -9,7 +9,11 @@ const logger = winston.createLogger({
 
 const winstonLoggerMiddleware = async (req, res, next) => {
   // Exclude logging for /signin and /signup routes
-  if (!req.url.includes("/signin") && !req.url.includes("/signup")) {
+  if (
+    !req.url.includes("/signin") &&
+    !req.url.includes("/signup") &&
+    !req.url.includes("/resetPassword")
+  ) {
     const logData = `${req.url} - ${JSON.stringify(req.body)}`;
     logger.info(logData);
   }

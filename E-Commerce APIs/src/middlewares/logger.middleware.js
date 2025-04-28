@@ -11,8 +11,12 @@ async function log(logData) {
 }
 
 const loggerMiddleware = async (req, res, next) => {
-  // Exclude logging for /signin and /signup routes
-  if (!req.url.includes("/signin") && !req.url.includes("/signup")) {
+  // Exclude logging for /signin, /signup, and /resetPassword routes
+  if (
+    !req.url.includes("/signin") &&
+    !req.url.includes("/signup") &&
+    !req.url.includes("/resetPassword")
+  ) {
     const logData = `${req.url} - ${JSON.stringify(req.body)}`;
     await log(logData);
   }

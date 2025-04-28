@@ -363,3 +363,130 @@ The repository class provides methods for user sign-up and finding users by emai
 #### Similarly, add other users to the collection, then review the users collection to check if the users have been added after signup.
 
 <img src="./images/users_Collection.png" alt="Users Collection" width="700" height="auto">
+
+## Password Reset
+
+### 1. Updated 'user.controller.js' file
+
+```Javascript
+  //added
+ async resetPassword(req, res, next) {
+    const { newPassword } = req.body;
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const userID = req.userID;
+    try {
+      await this.userRepository.resetPassword(userID, hashedPassword);
+      res.status(200).send("Password is updated !");
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send("Something went wrong");
+  }
+```
+
+#### resetPassword Method:
+
+1. Hashing the New Password:
+
+    - The `newPassword` is taken from the request body, and it is hashed using `bcrypt.has`h with a salt rounds of 12. This ensures the password is securely stored in the database.
+
+2. Calling `resetPassword` from the Repository:
+
+    - The hashed password is passed along with the userID to the `resetPassword` method in the `UserRepository`. This method updates the password for the user identified by `userID` in the database.
+
+3. Sending a Response:
+    - If the update is successful, it sends a `200` status with a success message ("Password is updated!"). In case of errors, it logs the error and sends a `500` status with a generic error message ("Something went wrong")
+
+This method ensures secure password handling by hashing the new password and updating it in the database, with appropriate error handling and response.
+
+### 2.Updated 'user.repository.js' file
+
+```javascript
+//added
+async resetPassword(userID, hashedPassword) {
+    try {
+      let user = await UserModel.findById(userID);
+      if (user) {
+        user.password = hashedPassword;
+        user.save();
+      } else {
+        throw new Error("No such user found !");
+      }
+    } catch (err) {
+      console.log(err);
+      throw new ApplicationError("Something is wrong with database !", 500);
+    }
+  }
+```
+
+The updated part of the code is the addition of the resetPassword method in the UserRepository class.
+
+#### `resetPassword` Method:
+
+1. Purpose: To update the password of a user in the database.
+2. Functionality:
+   - It takes the `userID` and `hashedPassword` as inputs.
+   - Find User: It tries to find the user by `userID` using `UserModel.findById(userID)`.
+   - Update Password: If the user is found, the password is updated with the `hashedPassword`, and `user.save()` saves the updated data to the database.
+   - Error Handling: If no user is found, an error is thrown with the message "No such user found!". If any other issue occurs during the operation, an `ApplicationError` with a database-related message is thrown.
+3. Key Updates:
+   - Database Interaction: The `resetPassword` method adds the logic for querying the database, updating the user's password, and saving the changes.
+   - Error Handling: Uses custom error handling (`ApplicationError`) for handling database-related issues.
+
+In short, this new method facilitates password updates and ensures proper error handling in case of issues.
+
+### 3. Updated 'user.routes.js' file
+
+```javascript
+//added
+userRouter.put("/resetPassword", jwtAuth, (req, res, next) => {
+  userController.resetPassword(req, res, next);
+});
+```
+
+The updated code introduces a password reset route (`/resetPassword`) secured with JWT authentication:
+
+1. JWT Authentication Middleware (`jwtAuth`): Ensures that only authenticated users (with a valid JWT token) can access the `/resetPassword` route.
+2. New Route:
+    - Method: `PUT`
+    - Path: `/resetPassword`
+    - The request is passed to the resetPassword method in `UserController` only if the token is valid.
+
+This ensures that only logged-in users can reset their password.
+
+### 4. Updated 'winstonLogger.middleware.js' file
+```javascript
+const winstonLoggerMiddleware = async (req, res, next) => {
+  // Exclude logging for /signin and /signup routes
+  if (
+    !req.url.includes("/signin") &&
+    !req.url.includes("/signup") &&
+    !req.url.includes("/resetPassword")  //added
+  ) {
+    const logData = `${req.url} - ${JSON.stringify(req.body)}`;
+    logger.info(logData);
+  }
+  next();
+};
+```
+- The updated part of the code focuses on enhancing the logging middleware to exclude the `/resetPassword` route from being logged, in addition to the existing exclusion of `/signin` and `/signup`.
+- If the request URL is not one of these, it logs the request URL and body to a `log.txt` file using the `winston` logger.
+
+### 4. Testing in Postman
+
+#### 🔐 User Sign-In (Before Password Reset)
+<img src="./images/user_signin_postman2.png" alt="User Sign-In Postman" width="650" height="auto">
+
+#### 🔑 Using Generated Token for Authorization
+<img src="./images/resetPassword_authorization_postman.png" alt="Authorized User can Reset Password" width="650" height="auto">
+
+#### 🔄 Resetting User Password
+<img src="./images/resetPassword_postman.png" alt="Reset Password Postman" width="650" height="auto">
+
+#### ❌ Attempt to Sign-In with Old Password (After Reset)
+<img src="./images/userSignIn_oldPassword_postman.png" alt="Sign-In Using OldPassword" width="650" height="auto">
+
+#### ✅ Successful Sign-In with New Password
+<img src="./images/user_signin_postman3.png" alt="User Sign-In Postman" width="650" height="auto">
+
+#### 🗂️ Updated User Password in User's Collection
+<img src="./images/updatedPassword_MongoDBCompass.png" alt="User Collection" width="650" height="auto">
