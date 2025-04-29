@@ -743,12 +743,96 @@ server.use((err, req, res, next) => {
 
 #### Password Less Than 8 Characters
 
-<img src="./images/schema_validationError.png" alt="Schema Validation Error" width="650" height="auto">
+<img src="./images/schema_validationError1.png" alt="Schema Validation Error" width="650" height="auto">
 
 #### Password Between 8 and 12 Characters
 
-<img src="./images/schema_validationSuccessful.png" alt="Schema Validation Successful" width="650" height="auto">
+<img src="./images/schema_validationSuccessful1.png" alt="Schema Validation Successful" width="650" height="auto">
 
 #### User Successfully Added to MongoDB Collection
 
 <img src="./images/userAdded_MongoDBCompass.png" alt="User Added MongoDB" width="650" height="auto">
+
+## Fix: Validation on Hashed Password
+
+### 1. Updated 'user.controller.js' file
+
+Updated Part in signUp() Method:
+
+#### 🔁 Before:
+
+```javascript
+// const hashedPassword = await bcrypt.hash(password, 12);
+// const user = new UserModel(name, email, hashedPassword, type);
+const user = new UserModel(name, email, password, type);
+```
+
+#### ✅ After:
+
+```javascript
+console.log("Password from request:", password);
+const passwordRegex =
+  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/;
+const isValid = passwordRegex.test(password);
+console.log("Is password valid?", isValid);
+
+if (!isValid) {
+  return res
+    .status(400)
+    .send("Password must be 8-12 characters with letter, number, special.");
+}
+const hashedPassword = await bcrypt.hash(password, 12);
+const user = new UserModel(name, email, hashedPassword, type);
+```
+
+#### ✨ Purpose of the Update:
+
+1. Validation: Ensures password is 8–12 characters and contains a letter, number, and special character.
+2. Security: Password is hashed using bcrypt before saving to the database.
+3. Debugging logs: console.log lines help during development to verify the input and validation result.
+
+### 2. Updated 'user.schema.js' file
+
+The only updated part in your code is within the password field of the userSchema object.
+
+#### 🔄 Before (Old Code):
+
+```javascript
+password: {
+  type: String,
+  validate: {
+    validator: function (value) {
+      return /^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/.test(value);
+    },
+    message: "Password must be between 8 and 12 characters long.",
+  },
+},
+```
+
+#### ✅ After (Updated Code):
+
+```javascript
+password: {
+  type: String,
+  required: [true, "Password is required"],
+  // validate: {
+  //   validator: function (value) {
+  //     return /^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/.test(value);
+  //   },
+  //   message: "Password must be between 8 and 12 characters long.",
+  // },
+},
+```
+
+- The password validation logic was commented out.
+- Only the required rule was enforced.
+
+### 3. Testing in Postman
+
+#### Password Less Than 8 Characters
+
+<img src="./images/schema_validationError2.png" alt="Schema Validation Error" width="650" height="auto">
+
+#### Password Between 8 and 12 Characters
+
+<img src="./images/schema_validationSuccessful2.png" alt="Schema Validation Successful" width="650" height="auto">

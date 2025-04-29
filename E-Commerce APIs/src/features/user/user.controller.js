@@ -24,9 +24,22 @@ export default class UserController {
   async signUp(req, res, next) {
     try {
       const { name, email, password, type } = req.body;
-      //const hashedPassword = await bcrypt.hash(password, 12);
-      //const user = new UserModel(name, email, hashedPassword, type);
-      const user = new UserModel(name, email, password, type);
+      console.log("Password from request:", password);
+      const passwordRegex =
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/;
+      const isValid = passwordRegex.test(password);
+      console.log("Is password valid?", isValid);
+
+      if (!isValid) {
+        return res
+          .status(400)
+          .send(
+            "Password must be 8-12 characters with letter, number, special."
+          );
+      }
+      const hashedPassword = await bcrypt.hash(password, 12);
+      const user = new UserModel(name, email, hashedPassword, type);
+      // const user = new UserModel(name, email, password, type);
       await this.userRepository.signUp(user);
       res.status(201).send(user);
     } catch (err) {

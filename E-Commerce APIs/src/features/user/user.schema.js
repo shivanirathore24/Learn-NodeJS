@@ -13,12 +13,13 @@ export const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    validate: {
-      validator: function (value) {
-        return /^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/.test(value);
-      },
-      message: "Password must be between 8 and 12 characters long.",
-    },
+    required: [true, "Password is required"],
+    // validate: {
+    //   validator: function (value) {
+    //     return /^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/.test(value);
+    //   },
+    //   message: "Password must be between 8 and 12 characters long.",
+    // },
   },
   type: {
     type: String,
