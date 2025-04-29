@@ -387,14 +387,14 @@ The repository class provides methods for user sign-up and finding users by emai
 
 1. Hashing the New Password:
 
-    - The `newPassword` is taken from the request body, and it is hashed using `bcrypt.has`h with a salt rounds of 12. This ensures the password is securely stored in the database.
+   - The `newPassword` is taken from the request body, and it is hashed using `bcrypt.has`h with a salt rounds of 12. This ensures the password is securely stored in the database.
 
 2. Calling `resetPassword` from the Repository:
 
-    - The hashed password is passed along with the userID to the `resetPassword` method in the `UserRepository`. This method updates the password for the user identified by `userID` in the database.
+   - The hashed password is passed along with the userID to the `resetPassword` method in the `UserRepository`. This method updates the password for the user identified by `userID` in the database.
 
 3. Sending a Response:
-    - If the update is successful, it sends a `200` status with a success message ("Password is updated!"). In case of errors, it logs the error and sends a `500` status with a generic error message ("Something went wrong")
+   - If the update is successful, it sends a `200` status with a success message ("Password is updated!"). In case of errors, it logs the error and sends a `500` status with a generic error message ("Something went wrong")
 
 This method ensures secure password handling by hashing the new password and updating it in the database, with appropriate error handling and response.
 
@@ -447,20 +447,21 @@ The updated code introduces a password reset route (`/resetPassword`) secured wi
 
 1. JWT Authentication Middleware (`jwtAuth`): Ensures that only authenticated users (with a valid JWT token) can access the `/resetPassword` route.
 2. New Route:
-    - Method: `PUT`
-    - Path: `/resetPassword`
-    - The request is passed to the resetPassword method in `UserController` only if the token is valid.
+   - Method: `PUT`
+   - Path: `/resetPassword`
+   - The request is passed to the resetPassword method in `UserController` only if the token is valid.
 
 This ensures that only logged-in users can reset their password.
 
 ### 4. Updated 'winstonLogger.middleware.js' file
+
 ```javascript
 const winstonLoggerMiddleware = async (req, res, next) => {
   // Exclude logging for /signin and /signup routes
   if (
     !req.url.includes("/signin") &&
     !req.url.includes("/signup") &&
-    !req.url.includes("/resetPassword")  //added
+    !req.url.includes("/resetPassword") //added
   ) {
     const logData = `${req.url} - ${JSON.stringify(req.body)}`;
     logger.info(logData);
@@ -468,25 +469,286 @@ const winstonLoggerMiddleware = async (req, res, next) => {
   next();
 };
 ```
+
 - The updated part of the code focuses on enhancing the logging middleware to exclude the `/resetPassword` route from being logged, in addition to the existing exclusion of `/signin` and `/signup`.
 - If the request URL is not one of these, it logs the request URL and body to a `log.txt` file using the `winston` logger.
 
 ### 4. Testing in Postman
 
 #### 🔐 User Sign-In (Before Password Reset)
+
 <img src="./images/user_signin_postman2.png" alt="User Sign-In Postman" width="650" height="auto">
 
 #### 🔑 Using Generated Token for Authorization
+
 <img src="./images/resetPassword_authorization_postman.png" alt="Authorized User can Reset Password" width="650" height="auto">
 
 #### 🔄 Resetting User Password
+
 <img src="./images/resetPassword_postman.png" alt="Reset Password Postman" width="650" height="auto">
 
 #### ❌ Attempt to Sign-In with Old Password (After Reset)
+
 <img src="./images/userSignIn_oldPassword_postman.png" alt="Sign-In Using OldPassword" width="650" height="auto">
 
 #### ✅ Successful Sign-In with New Password
+
 <img src="./images/user_signin_postman3.png" alt="User Sign-In Postman" width="650" height="auto">
 
 #### 🗂️ Updated User Password in User's Collection
+
 <img src="./images/updatedPassword_MongoDBCompass.png" alt="User Collection" width="650" height="auto">
+
+## Validations in Mongoose
+
+### 1. Updated 'user.schema.js' file
+
+```javascript
+//updated
+import mongoose from "mongoose";
+
+export const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    maxLength: [25, "Name must not exceed 25 characters."],
+  },
+  email: {
+    type: String,
+    unique: true,
+    required: [true, "Email address is required."],
+    match: [/.+\@.+\..+/, "Please provide a valid email address."],
+  },
+  password: {
+    type: String,
+    validate: {
+      validator: function (value) {
+        return /^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/.test(value);
+      },
+      message: "Password must be between 8 and 12 characters long.",
+    },
+  },
+  type: {
+    type: String,
+    enum: {
+      values: ["Customer", "Seller"],
+      message: "User type must be either 'Customer' or 'Seller'.",
+    },
+  },
+});
+```
+
+The updated code introduces additional validation and constraints to the userSchema for the fields name, email, password, and type.
+
+1. Name Field:
+   - `type: String`: Specifies that the `name` field should be a string.
+   - `maxLength: [25, "Name must not exceed 25 characters."]`: This adds a validation rule that the length of the `name` must not exceed 25 characters. If a name is longer, an error with the message `"Name must not exceed 25 characters."` will be thrown.
+2. Email Field:
+
+   - `type: String:` Specifies that the `email` field should be a string.
+   - `unique: true:` Ensures that the `email` is unique across the database, meaning no two users can have the same email.
+   - `required: [true, "Email address is required."]:` Ensures the email field is mandatory, and if missing, it throws an error with the message `"Email address is required."`.
+   - `match: [/.+\@.+\..+/, "Please provide a valid email address."]:` Uses a regular expression to validate that the email follows a standard email format (e.g., `example@domain.com)`. If the email is invalid, an error is thrown with the message `"Please provide a valid email address."`.
+
+3. Password Field:
+
+   - `type: String:` Specifies that the `password` field should be a string.
+   - `validate:` This introduces a custom validation rule for the `password` field.
+     - `validator:` A function that tests the password using a regular expression `(/^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/).`
+     - This regex ensures that the password:
+       - Contains at least one special character (e.g., `@`, `$`, `!`, etc.).
+       - Is at least 8 characters long.
+       - The regex does not enforce an upper limit for password length, allowing passwords longer than 12 characters (this could be an area of improvement if you want a maximum length too).
+   - `message:` The error message `"Password must be between 8 and 12 characters long."` is displayed if the validation fails.
+
+4. Type Field:
+   - `type: String:` Specifies that the type field should be a string.
+   - `enum: { values: ["Customer", "Seller"], message: "User type must be either 'Customer' or 'Seller'." }:` This restricts the possible values for the `type` field to either `"Customer"` or `"Seller"`. If the value is anything other than these two, an error will be thrown with the message `"User type must be either 'Customer' or 'Seller'."`.
+     These additional validations ensure that data entered into the database meets the desired criteria and help in preventing errors or invalid data being stored.
+
+NOTE:
+
+1. `/.+@.+..+/` is a regular expression used to validate emails.
+   - `.+` → One or more of any characters (before `@`).
+   - `\@` → Matches the literal `@` symbol.
+   - `.+` → One or more characters (after `@`, for domain name).
+   - `\.` → Matches the literal dot `.` (before domain extension).
+   - `.+` → One or more characters (for domain extension like `com`, `org`).
+
+#### Example Matches:
+
+- ✅ user@domain.com → Valid
+- ✅ user@domain.co → Valid
+- ❌ user@domain → Invalid (missing domain extension)
+- ❌ userdomain.com → Invalid (missing @ symbol)
+
+2. `/^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/` is a regular expression used to validate passwords.
+   - ^ → Start of the string.
+   - (?=._[@$!%_?&]) → Must contain at least one special character (@, $, !, %, \*, ?, &).
+   - [A-Za-z\d@$!%*?&]{8,} → Must be at least 8 characters long,- using only letters (A-Z, a-z), digits (0-9), and allowed special characters.
+   - $ → End of the string.
+
+Example Matches:
+
+- ✅ Shiv@123 → Valid
+- ✅ Pass!word9 → Valid
+- ❌ password123 → Invalid (missing special character)
+- ❌ Shiv1234 → Invalid (missing special character)
+
+### 2. Updated 'user.controller.js' file
+
+The updated part of the code is in the `signUp` method of the `UserController` class.
+
+#### ✅ Before (Old Code):
+
+```javascript
+const hashedPassword = await bcrypt.hash(password, 12);
+const user = new UserModel(name, email, hashedPassword, type);
+```
+
+- The password was hashed inside the controller using `bcrypt.hash(...)`.
+- The `UserModel` received the hashed password.
+
+#### 🔁 After (Updated Code):
+
+```javascript
+const user = new UserModel(name, email, password, type);
+```
+
+- Password is **not hashed** in the controller.
+- The **raw password** is directly passed to the `UserModel`.
+
+#### ✅ Also Added:
+
+```javascript
+catch (err) {
+  next(err);
+}
+```
+
+Instead of directly sending the error, it now uses next(err) to pass the error to an error-handling middleware in Express.
+
+### 3. Updated 'user.repository.js' file
+
+The updated part of your `UserRepository` code is inside the `signUp()` method.
+
+#### ✅ Before (Old Code):
+
+```javascript
+catch (err) {
+  console.log(err);
+  throw new ApplicationError("Something is wrong with database !", 500);
+}
+```
+
+All errors were treated the same — logged and wrapped in a generic `ApplicationError`.
+
+#### 🔁 After (Updated Code):
+
+```javascript
+catch (err) {
+  if (err instanceof mongoose.Error.ValidationError) {
+    throw err;
+  } else {
+    console.log(err);
+    throw new ApplicationError("Something is wrong with database !", 500);
+  }
+}
+```
+
+✔️ What's New:
+
+- Now explicitly checks if the error is a Mongoose ValidationError (e.g., for schema rules like required fields, invalid formats).
+- If it is a validation error, it is re-thrown as-is so it can be handled differently (e.g., to show meaningful validation messages to the user).
+- Other errors are still wrapped in the generic `ApplicationError`.
+
+### 4. Updated 'user.route.js' file
+
+#### 🔄 What's Changed:
+
+The previous version of the route handler for `/signup` only accepted `(req, res)`:
+
+```javascript
+userRouter.post("/signup", (req, res) => {
+  userController.signUp(req, res);
+});
+```
+
+✅ Now, it includes `next` as a third parameter and passes it to the controller:
+
+```javascript
+userRouter.post("/signup", (req, res, next) => {
+  userController.signUp(req, res, next);
+});
+```
+
+#### 🎯 Why This Update Matters:
+
+- `next` is used to pass control to the Express error-handling middleware.
+- Inside `UserController.signUp`, if an error occurs (like a validation error), it's passed to `next(err)`.
+- This allows centralized error handling — meaning consistent, clean error responses across the app.
+
+### 6. Updated 'server.js' file
+
+#### ✅ Before (Old Code):
+
+```javascript
+// Error handler middleware
+server.use((err, req, res, next) => {
+  console.log(err);
+  if (err instanceof ApplicationError) {
+    res.status(err.code).send(err.message);
+  }
+  //Server Errors.
+  res.status(503).send("Something went wrong, please try later");
+});
+```
+
+#### 🔁 After (Updated Code):
+
+```javascript
+// Error handler middleware
+server.use((err, req, res, next) => {
+  console.log(err);
+  if (err instanceof mongoose.Error.ValidationError) {
+    const errorMessages = Object.values(err.errors)
+      .map((error) => error.message)
+      .join("\n");
+    res.status(400).send(errorMessages);
+    console.log("Mongoose Validation Errors:\n", errorMessages);
+  }
+  if (err instanceof ApplicationError) {
+    res.status(err.code).send(err.message);
+  }
+  //Server Errors.
+  res.status(503).send("Something went wrong, please try later");
+});
+```
+
+✅ What the Updated Part Does:
+
+1. `err instanceof mongoose.Error.ValidationError`:
+   - Checks if the error is a Mongoose validation error.
+2. `Object.values(err.errors)`:
+   - Converts the `err.errors` object into an array of individual field error objects.
+3. `.map((error) => error.message)`:
+   - Extracts just the error messages from each error object (e.g., `"Name is required", "Price must be positive"`).
+4. `.join("\n")`:
+   - Combines all error messages into a single string, separated by new lines (`\n`).
+5. `res.status(400).send(errorMessages)`:
+   - Sends a `400 Bad Request` response with the combined error messages to the client.
+6. `console.log(...)`:
+   - Logs the error messages to the server console for debugging purposes.
+
+### 5. Testing in Postman
+
+#### Password Less Than 8 Characters
+
+<img src="./images/schema_validationError.png" alt="Schema Validation Error" width="650" height="auto">
+
+#### Password Between 8 and 12 Characters
+
+<img src="./images/schema_validationSuccessful.png" alt="Schema Validation Successful" width="650" height="auto">
+
+#### User Successfully Added to MongoDB Collection
+
+<img src="./images/userAdded_MongoDBCompass.png" alt="User Added MongoDB" width="650" height="auto">

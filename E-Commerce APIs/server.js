@@ -14,6 +14,7 @@ import { ApplicationError } from "./src/error-handler/applicationError.js";
 import {connectToMongoDB} from "./config/mongodb.js";
 import { connectUsingMongoose } from "./config/mongooseConfig.js"
 import orderRouter from "./src/features/order/order.routes.js";
+import mongoose from 'mongoose';
 
 // 2. Initialize Express server
 const server = express();
@@ -51,6 +52,13 @@ server.get("/", (req, res) => {
 // 6. Error handler middleware
 server.use((err, req, res, next)=>{
   console.log(err);
+  if (err instanceof mongoose.Error.ValidationError) {
+    const errorMessages = Object.values(err.errors)
+      .map(error => error.message)
+      .join('\n');
+    res.status(400).send(errorMessages);
+    console.log("Mongoose Validation Errors:\n", errorMessages);
+  }
   if(err instanceof ApplicationError){
     res.status(err.code).send(err.message);
   }

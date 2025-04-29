@@ -11,7 +11,7 @@ export default class UserRepository {
       let user = await UserModel.findById(userID);
       if (user) {
         user.password = hashedPassword;
-        user.save();
+        await user.save();
       } else {
         throw new Error("No such user found !");
       }
@@ -20,6 +20,7 @@ export default class UserRepository {
       throw new ApplicationError("Something is wrong with database !", 500);
     }
   }
+
   async signUp(user) {
     try {
       //create instance of model
@@ -27,8 +28,12 @@ export default class UserRepository {
       await newUser.save();
       return newUser;
     } catch (err) {
-      console.log(err);
-      throw new ApplicationError("Something is wrong with database !", 500);
+      if (err instanceof mongoose.Error.ValidationError) {
+        throw err;
+      } else {
+        console.log(err);
+        throw new ApplicationError("Something is wrong with database !", 500);
+      }
     }
   }
 

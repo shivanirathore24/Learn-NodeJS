@@ -9,7 +9,7 @@ export class UserModel {
   /*
   static getAll() {
     return users;
-  }
+  } 
   */
 }
 
@@ -43,6 +43,13 @@ let users = [
         "email": "isabelle.morgan@ecom.com",
         "password": "Isabelle@123",
         "type": "Seller"
+    }, 
+    {
+        id: 5,
+        "name": "Noah Sterling",
+        "email": "noah.sterling@ecom.com",
+        "password": "NoahTech@123",
+        "type": "Customer"
     }
 ];
 */
