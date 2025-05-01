@@ -60,3 +60,6 @@ Fri Mar 14 2025 21:10:45 GMT+0530 (India Standard Time) +  /api/cartItems/3 - {}
 {"level":"info","message":"/api/products/rate - {\"productID\":\"67f242edf1855373e646900b\",\"rating\":4.9}","service":"request-logging"}
 {"level":"info","message":"/api/products/rate - {\"productID\":\"67f242edf1855373e646900b\",\"rating\":4.5}","service":"request-logging"}
 {"level":"info","message":"/api/orders - {}","service":"request-logging"}
+{"level":"info","message":"/api/products/rate - {\"productID\":\"67f241c7f1855373e6469006\",\"rating\":4.6}","service":"request-logging"}
+{"level":"info","message":"/api/products/rate - {\"productID\":\"67f241c7f1855373e6469006\",\"rating\":4.3}","service":"request-logging"}
+{"level":"info","message":"/api/products/rate - {\"productID\":\"67f241c7f1855373e6469006\",\"rating\":4.7}","service":"request-logging"}

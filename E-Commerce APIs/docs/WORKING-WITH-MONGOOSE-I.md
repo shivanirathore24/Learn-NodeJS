@@ -121,7 +121,7 @@ import mongoose from "mongoose";
 export const productSchema = new mongoose.Schema({
   name: String,
   price: Number,
-  categpry: String,
+  category: String,
   description: String,
   inStock: Number,
 });

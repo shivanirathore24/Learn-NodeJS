@@ -1,12 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getDB } from "../../../config/mongodb.js";
 import { ApplicationError } from "../../error-handler/applicationError.js";
-import mongoose from "mongoose";
-import { productSchema } from "./product.schema.js";
-import { reviewSchema } from "./review.schema.js";
-
-const ProductModel = mongoose.model("Product", productSchema);
-const ReviewModel = mongoose.model("Review", reviewSchema);
 
 class ProductRepository {
   constructor() {
@@ -79,42 +73,73 @@ class ProductRepository {
     }
   }
 
+  /*
+    async rate(userID, productID, rating) {
+      try {
+        const db = getDB();
+        const collection = db.collection(this.collection);
+        // 1. Find the product
+        const product = await collection.findOne({
+          _id: new ObjectId(productID),
+        });
+        // 2. Find the rating
+        const userRating = product?.ratings?.find((r) => r.userID == userID);
+        if (userRating) {
+          // 3. Update the rating
+          await collection.updateOne(
+            {
+              _id: new ObjectId(productID),
+              "ratings.userID": new ObjectId(userID),
+            },
+            {
+              $set: {
+                "ratings.$.rating": rating,
+              },
+            }
+          );
+        } else {
+          await collection.updateOne(
+            {
+              _id: new ObjectId(productID),
+            },
+            {
+              $push: { ratings: { userID: new ObjectId(userID), rating } },
+            }
+          );
+        }
+      } catch (err) {
+        console.log(err);
+        throw new ApplicationError("Something went wrong with Data", 500);
+      }
+    }
+  }
+  */
+
   async rate(userID, productID, rating) {
     try {
-      // 1. Check if product exists
-      const productToUpdate = await ProductModel.findById(productID);
-      if (!productToUpdate) {
-        throw new Error("Product not found !");
-      }
-
-      // 2. Get the existing review
-      let review;
-      const existingReview = await ReviewModel.findOne({
-        product: new ObjectId(productID),
-        user: new ObjectId(userID),
-      });
-
-      if (existingReview) {
-        existingReview.rating = rating;
-        await existingReview.save();
-        review = existingReview;
-      } else {
-        const newReview = new ReviewModel({
-          product: new ObjectId(productID),
-          user: new ObjectId(userID),
-          rating: rating,
-        });
-        await newReview.save();
-        review = newReview;
-      }
-
-      // Update the product's reviews array
-      await ProductModel.findByIdAndUpdate(productID, {
-        $addToSet: { reviews: review._id }, // $addToSet prevents duplicates
-      });
+      const db = getDB();
+      const collection = db.collection(this.collection);
+      // 1. Removes existing entry
+      await collection.updateOne(
+        {
+          _id: new ObjectId(productID),
+        },
+        {
+          $pull: { ratings: { userID: new ObjectId(userID) } },
+        }
+      );
+      // 2. Add new entry
+      await collection.updateOne(
+        {
+          _id: new ObjectId(productID),
+        },
+        {
+          $push: { ratings: { userID: new ObjectId(userID), rating } },
+        }
+      );
     } catch (err) {
       console.log(err);
-      throw new ApplicationError("Something went wrong with database", 500);
+      throw new ApplicationError("Something went wrong with Data", 500);
     }
   }
 
