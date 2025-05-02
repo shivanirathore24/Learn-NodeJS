@@ -5,13 +5,18 @@ export const productSchema = new mongoose.Schema({
   desc: String,
   price: Number,
   imageUrl: String,
-  category: String,
   sizes: [String],
   stock: Number,
   reviews: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Review",
+    },
+  ],
+  categories: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
     },
   ],
 });

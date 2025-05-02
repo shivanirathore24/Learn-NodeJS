@@ -352,3 +352,359 @@ This function effectively interacts with the database to check product existence
 <img src="./images/reviews_collection.png" alt="Reviews Collection" width="700" height="auto">
 
 <img src="./images/addedReviews_OnProduct.png" alt="Reviews added on Product" width="700" height="auto">
+
+## Many-to-Many Relationship: Products can belong to multiple Categories and vice versa
+
+### 1. Created 'category.schema.js' file
+
+```javascript
+import mongoose from "mongoose";
+
+export const categorySchema = new mongoose.Schema({
+  name: String,
+  products: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+    },
+  ],
+});
+```
+
+Defines a Mongoose schema for categories, each having a name and a list of associated product references.
+
+1. Imports Mongoose to work with MongoDB in a structured way.
+2. Defines and exports a `categorySchema` using `mongoose.Schema`.
+3. The schema has two fields:
+   - `name`: A string representing the category name (e.g., "Books", "Clothing").
+   - `products`: An array of ObjectIds that reference documents in the `Product` collection.
+4. Each ObjectId in `products` uses: - `type: mongoose.Schema.Types.ObjectId` – to store MongoDB reference IDs. - `ref: "Product"` – to link it to the Product model for population.
+   Enables relationships between categories and their products using Mongoose’s population feature.
+
+### 2. Updated 'product.schema.js' file
+
+#### ✅ Before (Old Code):
+
+```javascript
+import mongoose from "mongoose";
+
+export const productSchema = new mongoose.Schema({
+  name: String,
+  desc: String,
+  price: Number,
+  imageUrl: String,
+  category: String,
+  sizes: [String],
+  stock: Number,
+  reviews: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Review",
+    },
+  ],
+});
+```
+
+#### 🔁 After (Updated Code):
+
+```javascript
+import mongoose from "mongoose";
+
+export const productSchema = new mongoose.Schema({
+  name: String,
+  desc: String,
+  price: Number,
+  imageUrl: String,
+  sizes: [String],
+  stock: Number,
+  reviews: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Review",
+    },
+  ],
+  categories: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+    },
+  ],
+});
+```
+
+Explanation of the updated part of the code:
+
+1. Removed: `category: String`
+   - This field for a single category was removed.
+2. Added: `categories: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }]`
+   - Products can now belong to multiple categories.
+   - Each category is represented by an ObjectId referencing the `Category` collection.
+   - `ref: "Category"` links these ObjectIds to the `Category` model for easy population of category details.
+
+### 3. Updated 'mongooseConfig.js' file
+
+#### ✅ Before (Old Code):
+
+```javascript
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config();
+
+const url = process.env.DB_URL;
+export const connectUsingMongoose = async () => {
+  try {
+    await mongoose.connect(url);
+    console.log("MongoDB connected using Mongoose !");
+  } catch (err) {
+    console.log("Error while connecting to db !");
+    console.log(err);
+  }
+};
+```
+
+#### 🔁 After (Updated Code):
+
+```javascript
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import { categorySchema } from "../src/features/product/category.schema.js";
+dotenv.config();
+
+const url = process.env.DB_URL;
+export const connectUsingMongoose = async () => {
+  try {
+    await mongoose.connect(url);
+    console.log("MongoDB connected using Mongoose !");
+    addCategories();
+  } catch (err) {
+    console.log("Error while connecting to db !");
+    console.log(err);
+  }
+};
+
+async function addCategories() {
+  const CategoryModel = mongoose.model("Category", categorySchema);
+  const categories = await CategoryModel.find();
+  if (!categories || categories.length == 0) {
+    await CategoryModel.insertMany([
+      { name: "Geography" },
+      { name: "Global Politics" },
+      { name: "Map" },
+      { name: "Non-Fiction" },
+      { name: "Science" },
+      { name: "Physics" },
+      { name: "Genetics" },
+      { name: "Computers" },
+      { name: "Software Development" },
+      { name: "Programming" },
+      { name: "Articial Intelligence" },
+      { name: "Technology" },
+    ]);
+  }
+  console.log("Categories are added !");
+}
+```
+
+Explanation of the updated part of the code:
+
+- **Added `addCategories` function:**
+  - The function is called after successfully connecting to the database (`addCategories()`).
+  - It checks whether the `Category` collection already contains any categories:
+  - If no categories exist (`if (!categories || categories.length == 0)`), it inserts a predefined list of categories using `CategoryModel.insertMany()`.
+  - The categories include topics like "Geography", "Science", "Programming", etc.
+- **Purpose:**
+  - Automatic category creation: Ensures that default categories are added to the database when the connection is successful and if no categories are already present.
+  - Database initialization: Helps initialize the `Category` collection with standard categories.
+- **Why it's useful:**
+  - It ensures the application has a set of default categories for future products to be associated with.
+  - Provides a mechanism to populate the `Category` collection automatically if it’s empty, improving the system setup.
+
+### 4. Updated 'product.controller.js' file
+
+#### ✅ Before (Old Code):
+
+```javascript
+async addProduct(req, res) {
+  try {
+    const { name, desc, price, imageUrl, category, sizes } = req.body;
+
+    const newProduct = new ProductModel(
+      name,
+      desc || "No description available",
+      parseFloat(price),
+      req.file ? req.file.filename : imageUrl,
+      category || "Uncategorized",
+      Array.isArray(sizes)
+        ? sizes
+        : typeof sizes === "string"
+        ? sizes.split(",")
+        : []
+    );
+
+    const createdProduct = await this.productRepository.add(newProduct);
+    res.status(201).send(createdProduct);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send("Something went wrong");
+  }
+}
+```
+
+#### 🔁 After (Updated Code):
+
+```javascript
+async addProduct(req, res) {
+  try {
+    const { name, desc, price, imageUrl, categories, sizes } = req.body;
+
+    // Convert 'categories' to array if string, else keep it as array
+    const categoriesArray =
+      typeof categories === "string"
+        ? categories.split(",").map((c) => c.trim())
+        : Array.isArray(categories)
+        ? categories.map((c) => c.trim())
+        : [];
+
+    // Convert 'sizes' to array if string, else keep it as array
+    const sizesArray = Array.isArray(sizes)
+      ? sizes
+      : typeof sizes === "string"
+      ? sizes.split(",")
+      : [];
+
+    const newProduct = new ProductModel(
+      name,
+      desc || "No description available",
+      parseFloat(price),
+      req.file ? req.file.filename : imageUrl,
+      categoriesArray,
+      sizesArray
+    );
+
+    const createdProduct = await this.productRepository.add(newProduct);
+    res.status(201).send(createdProduct);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send("Something went wrong");
+  }
+}
+```
+
+`addProduct` Method Update:
+
+1. Changed `category` to `categories`:
+   - This handles multiple categories as an array or comma-separated string sent in the request body (`req.body.categories`).
+2. Updated `categoriesArray`:
+   - If `categories` is a string, it is split into an array and each category is trimmed.
+   - If `categories` is already an array, it is mapped to remove extra spaces.
+3. Updated `sizesArray`:
+   - Similar logic applied to `sizes` to ensure that it's either a string split into an array or left as-is if it’s already an array.
+
+These changes ensure that you can handle multiple categories and sizes correctly when adding a product.
+
+### 5. Updated 'product.model.js' file
+
+Moved existing code from product.model.js to product.model_old.js, and added updated code to a fresh product.model.js file:
+
+```javascript
+export default class ProductModel {
+  constructor(name, desc, price, imageUrl, categories, sizes, id) {
+    this._id = id;
+    this.name = name;
+    this.desc = desc;
+    this.price = price;
+    this.imageUrl = imageUrl;
+    this.categories = categories;
+    this.sizes = sizes;
+  }
+}
+```
+
+- Renaming `category` to `categories`: The constructor now accepts `categories` as an array instead of a single string. This allows a product to belong to multiple categories, which makes the model more flexible. The `category` property was replaced because a product may fit into multiple categories (e.g., "Science" and "Geography"), and this change accommodates that.
+- The rest of the fields remain the same to maintain existing functionality.
+
+### 6. Updated 'product.repository.js' file
+
+#### 🏗️ 1. Created Mongoose Models
+
+✅ Added at the top:
+
+```javascript
+import mongoose from "mongoose";
+import { productSchema } from "./product.schema.js";
+import { reviewSchema } from "./review.schema.js";
+import { categorySchema } from "./category.schema.js";
+
+const ProductModel = mongoose.model("Product", productSchema);
+const ReviewModel = mongoose.model("Review", reviewSchema);
+const CategoryModel = mongoose.model("Category", categorySchema);
+```
+
+In the updated code, only `CategoryModel` is newly added, while ProductModel and ReviewModel remain unchanged.
+
+- `ProductModel` and `ReviewModel` represent the `Product` and `Review` collections, respectively, providing methods for querying and updating MongoDB.
+- `CategoryModel` is newly introduced to interact with the `Category` collection. It is used to update the relevant categories by adding the new product's ID to the `products` array in the categories.
+
+#### 🔁 2. Updated add Method Logic
+
+```javascript
+async add(productData) {
+  try {
+    // 1. Add the product.
+    const newProduct = new ProductModel(productData);
+    console.log(newProduct); // Log the Mongoose Model instance
+    const savedProduct = await newProduct.save();
+
+    // 2. Update Categories.
+    await CategoryModel.updateMany(
+      {
+        _id: { $in: productData.categories },
+      },
+      {
+        $push: { products: new ObjectId(savedProduct._id) },
+      }
+    );
+    return savedProduct;
+  } catch (err) {
+    console.log(err);
+    throw new ApplicationError("Something went wrong with Data", 500);
+  }
+}
+```
+
+This code defines an add method that creates a new product, saves it to the database, and updates the related categories with the new product's ID.
+
+1. Creating a New Product Instance:
+   - The line `const newProduct = new ProductModel(productData);` creates a new product instance using the `ProductModel` and the data passed in `productData`. This product is created but not yet saved to the database.
+   - `ProductModel(productData)`: This is a Mongoose model constructor that uses the schema to validate and create a new product object.
+2. Saving the Product to MongoDB:
+   - `const savedProduct = await newProduct.save();` saves the newly created product to the MongoDB database. The `.save()` method automatically handles validation (if defined) and assigns an `_id` to the new product.
+   - `newProduct.save()`: This persists the document and returns the saved document.
+3. Updating Categories:
+   - After the product is saved, we update the related categories using `CategoryModel.updateMany()`. This method performs a bulk update on all categories that are associated with the product.
+   - CategoryModel.updateMany():
+     - `{$in: productData.categories}`: This checks that the category IDs from `productData.categories` match any category in the database.
+     - `$push: { products: new ObjectId(savedProduct._id) }`: This adds the product's `_id` to the `products` array of each matching category.
+
+This ensures that the product is saved in the database, and related categories are updated accordingly.
+
+### 7. Testing in Postman
+
+#### Categories Collection (Before Adding Product)
+
+<img src="./images/categories_collection1.png" alt="Initial Categories Collection" width="700" height="auto">
+<img src="./images/categories_collection2.png" alt="Initial Categories Collection" width="700" height="auto">
+<img src="./images/categories_collection3.png" alt="Initial Categories Collection" width="700" height="auto">
+
+#### Add Product with Multiple Categories (via Postman)
+
+<img src="./images/addProduct_postman1.png" alt="Add Product via Postman - Request Body" width="700" height="auto">
+<img src="./images/addProduct_postman2.png" alt="Add Product via Postman - Response" width="700" height="auto">
+
+#### Products Collection: Product with Multiple Categories
+
+<img src="./images/products_m2m_MongoDBCompass.png" alt="Product Document with Category References" width="700" height="auto">
+
+#### Categories Collection (After Adding Product): Category with Multiple Products
+
+<img src="./images/categories_m2m_MongoDBCompass.png" alt="Updated Categories with Product Reference" width="700" height="auto">

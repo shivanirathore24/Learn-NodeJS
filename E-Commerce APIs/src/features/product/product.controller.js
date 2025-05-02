@@ -18,19 +18,32 @@ export default class ProductController {
 
   async addProduct(req, res) {
     try {
-      const { name, desc, price, imageUrl, category, sizes } = req.body;
+      const { name, desc, price, imageUrl, categories, sizes } = req.body;
+
+      // Convert 'categories' to array if string, else keep it as array
+      const categoriesArray =
+        typeof categories === "string"
+          ? categories.split(",").map((c) => c.trim())
+          : Array.isArray(categories)
+          ? categories.map((c) => c.trim())
+          : [];
+
+      // Convert 'sizes' to array if string, else keep it as array
+      const sizesArray = Array.isArray(sizes)
+        ? sizes
+        : typeof sizes === "string"
+        ? sizes.split(",")
+        : [];
+
       const newProduct = new ProductModel(
         name,
         desc || "No description available",
         parseFloat(price),
         req.file ? req.file.filename : imageUrl,
-        category || "Uncategorized",
-        Array.isArray(sizes)
-          ? sizes
-          : typeof sizes === "string"
-          ? sizes.split(",")
-          : []
+        categoriesArray,
+        sizesArray
       );
+      //console.log(newProduct);
       const createdProduct = await this.productRepository.add(newProduct);
       res.status(201).send(createdProduct);
     } catch (err) {
