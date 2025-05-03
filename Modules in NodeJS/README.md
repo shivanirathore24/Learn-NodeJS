@@ -153,17 +153,22 @@ In a Node.js project, the package.json file lists all of the external dependenci
 the project needs to run. Two types of external dependencies can be included in the
 file:
 
-dependencies: These are the dependencies that arr required for the project
-to run in a production environment. An example of a dependency could be
-MongoDB, which is a popular database system used with Node.js. You can
-install MongoDB as a dependency using the following command: `npm install mongodb`
+1. dependencies: 
+    - These are the dependencies that arr required for the project
+  to run in a production environment. 
+    - An example of a dependency could be
+  MongoDB, which is a popular database system used with Node.js. 
+    - You can
+  install MongoDB as a dependency using the following command: `npm install mongodb`
 
-devDependencies: These dependencies are only needed for development
-purposes, such as testing or building the project. They are installed with the
-command npm install and can be listed with the --save-dev or -D flag. For
-example, to install Nodemon as a dev dependency, you can run the following
-command: `npm install nodemon -—save-dev or npm install -D
-nodemon`
+2. devDependencies: 
+    - These dependencies are only needed for development
+    purposes, such as testing or building the project. They are installed with the
+    command npm install and can be listed with the --save-dev or -D flag. 
+    - For
+    example, to install Nodemon as a dev dependency, you can run the following
+    command: `npm install nodemon -—save-dev or npm install -D
+    nodemon`
 
 Listing dependencies separately can help make it clear which dependencies are
 required for the project to run in production, and which are only needed for
@@ -301,40 +306,40 @@ non-blocking (asynchronous).
 1. Reading a file: To read a file, you can use the `fs.readFileSync()` method, which
 returns a buffer. You can convert the buffer to a string, or you can set the
 encoding property to 'utf8' to get the content directly as a string.
-```javascript
-const fs = require('fs');
-const path = 'example.txt'; // A file at path exists
-// Reading a file synchronously
-const data = fs.readFileSync(path,{encoding :'utf8'});
-console.log(data);
-```
+    ```javascript
+    const fs = require('fs');
+    const path = 'example.txt'; // A file at path exists
+    // Reading a file synchronously
+    const data = fs.readFileSync(path,{encoding :'utf8'});
+    console.log(data);
+    ```
 2. Writing to a file: To write data to a file, use the fs.writeFileSync() method. It
 creates a new file or overwrites an existing one.
-```javascript
-const fs = require('fs');
-const path = 'example.txt';
-// Writing to a file synchronously
-fs.writeFileSync(path, 'Hello World!');
-console.log('File written successfully.');
-```
+    ```javascript
+    const fs = require('fs');
+    const path = 'example.txt';
+    // Writing to a file synchronously
+    fs.writeFileSync(path, 'Hello World!');
+    console.log('File written successfully.');
+    ```
 3. Updating a file: If you want to append content to an existing file, use the
 fs.appendFileSync() method.
-```javascript
-const fs = require('fs');
-const path = 'example.txt';
-// Updating a file synchronously
-fs.appendFileSync(path, '\nThis is an update.');
-console.log('File updated successfully.');
-```
+    ```javascript
+    const fs = require('fs');
+    const path = 'example.txt';
+    // Updating a file synchronously
+    fs.appendFileSync(path, '\nThis is an update.');
+    console.log('File updated successfully.');
+    ```
 
 4. Deleting a file: To delete a file, use the fs.unlinkSync() method.
-```javascript
-const fs = require('fs');
-const path = 'example.txt';
-// Deleting a file synchronously using fs.unlinkSync()
-fs.unlinkSync(path);
-console.log('File deleted successfully.');
-```
+    ```javascript
+    const fs = require('fs');
+    const path = 'example.txt';
+    // Deleting a file synchronously using fs.unlinkSync()
+    fs.unlinkSync(path);
+    console.log('File deleted successfully.');
+    ```
 
 ### Using Asynchronous Methods
 We learned about performing CRUD operations using blocking code with the File
@@ -343,47 +348,47 @@ thread is blocked, and it can't perform any other task. Blocking code can make y
 app less responsive and slow. To avoid this, we can use non-blocking or
 asynchronous methods available in the FileSystem module.
 1. Reading a file: To read a file asynchronously, use fs.readFile().
-```javascript
-fs.readFile("data.txt", (err, data) => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log(data.toString());
-  }
-});
-```
+    ```javascript
+    fs.readFile("data.txt", (err, data) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(data.toString());
+      }
+    });
+    ```
 2. Writing to a file: To write data to a file asynchronously, use fs.writeFile().
-```javascript
-fs.writeFile("employee.txt", "New Employee", (err) => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log("File is written");
-  }
-});
-```
+    ```javascript
+    fs.writeFile("employee.txt", "New Employee", (err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("File is written");
+      }
+    });
+    ```
 3. Updating a file: To append content to a file asynchronously, use
 fs.appendFile().
-```javascript
-fs.appendFile("employee.txt", "\n Another Employee", (err) => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log("File is updated");
-  }
-});
-```
+    ```javascript
+    fs.appendFile("employee.txt", "\n Another Employee", (err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("File is updated");
+      }
+    });
+    ```
 
 4. Deleting a file: To delete a file asynchronously, use fs.unlink().
-```javascript
-fs.unlink("employee.txt", (err) => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log("File is deleted");
-  }
-});
-```
+    ```javascript
+    fs.unlink("employee.txt", (err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("File is deleted");
+      }
+    });
+    ```
 
 ### Path module
 The Path module in Node.js is a built-in module that provides various methods to
@@ -393,50 +398,50 @@ and directory paths.
 1. path.join(): This method joins two or more path segments using the
 platform-specific separator and returns the combined path.
 Here is an example:
-```javascript
-const path = require('path');
-const filePath = path.join('folder', 'file.txt');
-console.log(filePath);
-// output: folder/file.txt (on Unix-based systems)
-// output: folder\file.txt (on Windows systems)
-```
+    ```javascript
+    const path = require('path');
+    const filePath = path.join('folder', 'file.txt');
+    console.log(filePath);
+    // output: folder/file.txt (on Unix-based systems)
+    // output: folder\file.txt (on Windows systems)
+    ```
 2. path.resolve(): This method resolves the given sequence of paths or path
 segments into an absolute 
 path. It takes multiple arguments as input and
 returns the resolved absolute path.
 Here is an example:
-```javascript
-const path = require('path');
-const absPath = path.resolve('folder', 'file.txt');
-console.log(absPath);
-// output:
-/home/user/folder/file.txt (on Unix-based systems)
-//output:
-\home\user\folder\file.txt (on Windows systems)
-```
+    ```javascript
+    const path = require('path');
+    const absPath = path.resolve('folder', 'file.txt');
+    console.log(absPath);
+    // output:
+    /home/user/folder/file.txt (on Unix-based systems)
+    //output:
+    \home\user\folder\file.txt (on Windows systems)
+    ```
 
 3. path.extname(): This method returns the extension of the given file path. It
 takes a file path as input, and returns the extension (including the dot). If there
 is no extension, an empty string is returned.
 Here is an example:
-```javascript
-const path = require('path');
-const ext = path.extname('file.txt');
-console.log(ext); // output: .txt
-```
+    ```javascript
+    const path = require('path');
+    const ext = path.extname('file.txt');
+    console.log(ext); // output: .txt
+    ```
 
 ## Summarising it
 Let’s summarise what we have learned in this module:
-1. Types of modules and how to use them.
-2. Package managers and NPM.
-3. Nodemon and how it can be used for automatic server restarts.
-4. package.json and package-lock.json files.
-5. dependencies and devDependencies
-6. NVM to manage multiple Node.js versions on the same machine.
-7. Reading data from the console using the readline module.
-8. File System module, including synchronous and asynchronous
+- Types of modules and how to use them.
+- Package managers and NPM.
+- Nodemon and how it can be used for automatic server restarts.
+- package.json and package-lock.json files.
+- dependencies and devDependencies
+- NVM to manage multiple Node.js versions on the same machine.
+- Reading data from the console using the readline module.
+- File System module, including synchronous and asynchronous
 methods for file operations.
-9. Path module and its usage.
+- Path module and its usage.
 
 ### Some Additional Resources:
 https://medium.com/better-programming/use-nvm-to-manage-node-js-and-npm-versions-2bd0d0875f9f
