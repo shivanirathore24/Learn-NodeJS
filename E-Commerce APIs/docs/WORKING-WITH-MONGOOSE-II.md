@@ -1023,3 +1023,102 @@ This update completes the integration of the Like feature, maintaining consisten
 
 <img src="./images/getLikeProduct_postman.png" alt="Get Like Product Postman" width="700" height="auto">
 <img src="./images/getLikeCategory_postman.png" alt="Get Like Category Postman" width="700" height="auto">
+
+## Mongoose Middleware
+
+Mongoose middleware are functions that can be executed before or after certain
+operations on documents, such as saving, updating, or removing. These middleware
+functions enable you to add custom logic or perform actions before or after database
+operations. For example, you can use middleware to automatically update
+timestamps or perform data validation.
+
+#### Use Cases:
+
+1. You want to automatically update the "lastUpdated" field of a document every
+   time it is modified.
+
+```javascript
+userSchema.pre("save", function (next) {
+  this.lastUpdated = new Date();
+  next();
+});
+```
+
+2. You want to delete all related comments after removing a blog post.
+
+```javascript
+postSchema.pre("remove", async function (next) {
+  await Comment.deleteMany({ postId: this._id });
+  next();
+});
+```
+
+### 1. Updated 'like.schema.js' file
+
+```javascript
+import mongoose from "mongoose";
+
+export const likeSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  likeable: {
+    type: mongoose.Schema.Types.ObjectId,
+    refPath: "types",
+  },
+  types: {
+    type: String,
+    enum: ["Product", "Category"],
+  },
+})
+  .pre("save", (next) => {
+    console.log("New like coming in...");
+    next();
+  })
+  .post("save", (docs) => {
+    console.log("Like is saved !");
+    console.log(docs);
+  })
+  .pre("find", (next) => {
+    console.log("Retrieving likes...");
+    next();
+  })
+  .post("find", (docs) => {
+    console.log("Find is completed !");
+    console.log(docs);
+  });
+```
+
+The updated part of the code enhances the likeSchema by adding Mongoose middleware hooks (pre and post) to log key operations for debugging and monitoring:
+
+1. `pre("save")` Hook:
+   - Executes before a like is saved to the database.
+   - Logs `"New like coming in..."` to indicate an incoming like action.
+2. `post("save")` Hook:
+   - Executes after a like is successfully saved.
+   - Logs `"Like is saved !"` and the saved document (`docs`) for confirmation.
+3. `pre("find")` Hook:
+   - Executes before a find operation (e.g., when fetching likes).
+   - Logs `"Retrieving likes..."` to track database read operations.
+4. `post("find")` Hook:
+   - Executes after likes are retrieved from the database.
+   - Logs `"Find is completed !"` and the result documents (docs).
+
+These hooks help in tracing application behavior and are useful for debugging and auditing like-related operations.
+
+### 2. Testing in Postman
+
+#### ✅ Like a Product & Mongoose Middleware (pre/post on .save())
+
+<img src="./images/likeProduct_postman1.png" alt="Like Product Postman" width="700" height="auto">
+<img src="./images/mongoose_middleware1.png" alt="Mongoose Middleware" width="550" height="auto">
+
+#### 🔍 Fetch Product Like Details & Mongoose Middleware (pre/post on .find())
+
+<img src="./images/getLikeProduct_postman1.png" alt="Get Like Product Postman" width="700" height="auto">
+<img src="./images/mongoose_middleware2.png" alt="Mongoose Middleware" width="650" height="auto">
+
+#### 📂 MongoDB Likes Collection
+
+<img src="./images/likes_collection1.png" alt="Likes Collection" width="700" height="auto">
