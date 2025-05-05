@@ -15,6 +15,7 @@ import {connectToMongoDB} from "./config/mongodb.js";
 import { connectUsingMongoose } from "./config/mongooseConfig.js"
 import orderRouter from "./src/features/order/order.routes.js";
 import mongoose from 'mongoose';
+import likeRouter from "./src/features/like/like.routes.js";
 
 // 2. Initialize Express server
 const server = express();
@@ -43,6 +44,7 @@ server.use("/api/products", jwtAuth, productRouter); // Protected product routes
 server.use("/api/users", userRouter); // Public user routes
 server.use("/api/cartItems", jwtAuth, cartRouter); // Protected cart routes
 server.use('/api/orders', jwtAuth, orderRouter); // Protected order routes
+server.use('/api/likes', jwtAuth, likeRouter); // Protected like routes
 
 // 5. Default route
 server.get("/", (req, res) => {

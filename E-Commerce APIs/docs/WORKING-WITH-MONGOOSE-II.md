@@ -708,3 +708,318 @@ This ensures that the product is saved in the database, and related categories a
 #### Categories Collection (After Adding Product): Category with Multiple Products
 
 <img src="./images/categories_m2m_MongoDBCompass.png" alt="Updated Categories with Product Reference" width="700" height="auto">
+
+## Multiple References
+
+In some cases, you may need to reference the same model multiple times within a
+single schema. For instance, in a social networking application, users can have
+multiple types of connections, such as friends and mentors, both of which are also
+users of the application. Multiple references allow you to establish different types of
+relationships with the same model.
+
+#### Use Case:
+
+In a social networking application, users can have friends and mentors who are also users of the application.
+
+```javascript
+const userSchema = new mongoose.Schema({
+  name: String,
+  friends: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  mentors: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+});
+
+const User = mongoose.model("User", userSchema);
+```
+
+## Create 'Like' Feature
+
+### 1. Created 'like.schema.js' file
+
+```javascript
+import mongoose from "mongoose";
+
+export const likeSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  likeable: {
+    type: mongoose.Schema.Types.ObjectId,
+    refPath: "types",
+  },
+  types: {
+    type: String,
+    enum: ["Product", "Category"],
+  },
+});
+```
+
+This Mongoose schema defines a "Like" system, where a user can like different types of entities ~ specifically a Product or a Category. It uses a polymorphic reference (refPath) to dynamically link to different models based on the liked item's type
+
+1. 🧑‍💻 `user`
+   - Type: `mongoose.Schema.Types.ObjectId`
+   - Ref: `"User"`
+   - Purpose: Stores the ID of the user who performed the like.
+   - Function: Establishes a relationship with the User model, enabling population of user details later.
+2. ❤️ `likeable`
+   - Type: `mongoose.Schema.Types.ObjectId`
+   - RefPath: `"types"`
+   - Purpose: Holds the ID of the liked entity (can be either a Product or a Category).
+   - Function: Dynamically references the model defined in the `types` field using Mongoose’s `refPath`.
+3. 🏷️ `types`
+   - Type: `String`
+   - Enum: `["Product", "Category"]`
+   - Purpose: Specifies the type of the liked item.
+   - Function: Used by `refPath` to determine whether the liked item is from the `Product` or `Category` model.
+
+This schema provides a **flexible and scalable way** to handle likes on multiple types of items using \***\*polymorphic references**. Instead of creating separate like schemas for each model, this single schema efficiently supports likes on both `Product` and `Category` entities.
+
+### 2. Created 'like.controller.js' file
+
+```javascript
+import { LikeRepository } from "./like.repository.js";
+
+export class LikeController {
+  constructor() {
+    this.likeRepository = new LikeRepository();
+  }
+
+  async likeItem(req, res, next) {
+    try {
+      const { id, type } = req.body;
+      const userId = req.userID;
+      if (type != "Product" && type != "Category") {
+        return res.status(400).send("Invalid Type !");
+      }
+      if (type == "Product") {
+        this.likeRepository.likeProduct(userId, id);
+      } else {
+        this.likeRepository.likeCategory(userId, id);
+      }
+      return res.status(200).send(`${type} liked successfully !`);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send("Something went wrong");
+    }
+  }
+
+  async getLikes(req, res, next) {
+    try {
+      const { id, type } = req.query;
+      const likes = await this.likeRepository.getLikes(type, id);
+      return res.status(200).send(likes);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send("Something went wrong");
+    }
+  }
+}
+```
+
+The `LikeController` class is part of a typical MVC (Model-View-Controller) backend architecture. It handles HTTP requests related to liking items (either a Product or Category) and retrieving likes.
+
+It uses a separate `LikeRepository` to handle database operations, keeping the controller clean and focused on handling requests/responses.
+
+1. 🧱 Structure Overview
+   - The controller begins by importing the `LikeRepository`, which is responsible for handling all database operations related to likes.
+   - A class named `LikeController` is defined and exported. Inside its constructor, it creates an instance of the `LikeRepository`. This allows the controller to use repository methods to perform database actions like liking items or fetching likes.
+2. Method `likeItem(req, res, next)` : Handles liking a Product or Category.
+   - Input:
+     - `req.body` should include:
+       - `id:` ID of the item to be liked
+       - `type:` either `"Product"` or `"Category"`
+     - `req.userID`: ID of the user performing the like (likely set via authentication middleware)
+   - Steps:
+     - Validates the type — if it's not "Product" or "Category", sends a 400 Bad Request.
+     - Based on the type, calls the appropriate method:
+       - `likeProduct(userId, id)`
+       - `likeCategory(userId, id)`
+     - Sends a 200 response confirming the specified item type was liked successfully.
+   - Error Handling:
+     - Logs any unexpected errors and returns 500 Internal Server Error.
+3. Method `getLikes(req, res, next)`: Fetches likes for a specific item (Product or Category).
+   - Input:
+     - `req.query` should include:
+       - `id`: ID of the item
+       - `type`: either `"Product"` or `"Category"`
+   - Steps:
+     - Calls `getLikes(type, id)` from the repository.
+     - Returns the list of likes with 200 OK.
+   - Error Handling:
+     - Logs errors and sends a 500 response if something fails.
+
+The `LikeController` manages user like actions and retrieves like data efficiently. It ensures clean separation of logic by delegating database tasks to the `LikeRepository`.
+
+### 3. Created 'like.repository.js' file
+
+```javascript
+import mongoose from "mongoose";
+import { ObjectId } from "mongodb";
+import { likeSchema } from "./like.schema.js";
+
+const LikeModel = mongoose.model("Like", likeSchema);
+export class LikeRepository {
+  async getLikes(type, id) {
+    return await LikeModel.find({
+      likeable: new ObjectId(id),
+      types: type,
+    })
+      .populate("user")
+      .populate({ path: "likeable", model: type });
+  }
+
+  async likeProduct(userId, productId) {
+    try {
+      const newLike = new LikeModel({
+        user: new ObjectId(userId),
+        likeable: new ObjectId(productId),
+        types: "Product",
+      });
+      await newLike.save();
+    } catch (err) {
+      console.log(err);
+      throw new ApplicationError("Something went wrong with Database", 500);
+    }
+  }
+
+  async likeCategory(userId, categoryId) {
+    try {
+      const newLike = new LikeModel({
+        user: new ObjectId(userId),
+        likeable: new ObjectId(categoryId),
+        types: "Category",
+      });
+      await newLike.save();
+    } catch (err) {
+      console.log(err);
+      throw new ApplicationError("Something went wrong with Database", 500);
+    }
+  }
+}
+```
+
+The `LikeRepository` class is part of the **data access layer**. It handles **database operations** for the Like system using Mongoose and MongoDB, including storing likes and retrieving them.
+
+1. 🧱 Structure Overview
+   - Imports:
+     - `mongoose` for defining and working with MongoDB models.
+     - `ObjectId` from MongoDB to correctly format object IDs.
+     - `likeSchema` which defines the structure for like documents.
+   - Creates a `LikeModel` using the `likeSchema`.
+2. Method `getLikes(type, id)`
+   - Purpose: Fetches all likes for a given item (Product or Category).
+   - Steps:
+     - Finds documents in the "Like" collection where:
+       - likeable matches the given item ID.
+       - types matches the item type (Product/Category).
+     - Populates the user field to return full user details.
+     - Dynamically populates the likeable field based on the type value.
+   - Returns: An array of like documents with populated user and likeable data.
+3. Method `likeProduct(userId, productId)`
+   - Purpose: Saves a new like for a Product.
+   - Steps:
+     - Creates a new document with:
+       - `user`: the user ID
+       - `likeable:` the product ID
+       - `types`: set to `"Product"`
+     - Saves it to the database.
+   - Error Handling:
+     - Logs the error and throws a custom `ApplicationError`.
+4. Method `likeCategory(userId, categoryId)`
+   - Purpose: Saves a new like for a Category.
+   - Same logic as `likeProduct`, but sets `types` to `"Category"`.
+
+The `LikeRepository` handles the creation and retrieval of like records in a clean, modular way. It supports polymorphic references and uses best practices like dynamic population and centralized error handling.
+
+4. Created 'like.routes.js' file
+
+```javascript
+import express from "express";
+import { LikeController } from "./like.controller.js";
+
+const likeRouter = express.Router();
+
+const likeController = new LikeController();
+
+likeRouter.post("/", (req, res, next) => {
+  likeController.likeItem(req, res, next);
+});
+
+likeRouter.get("/", (req, res, next) => {
+  likeController.getLikes(req, res, next);
+});
+
+export default likeRouter;
+```
+
+This code defines an Express router named likeRouter to handle HTTP requests related to the "Like" feature. It connects incoming requests to the appropriate methods in the LikeController.
+
+1. 🧱 Structure Overview
+   - Imports:
+     - express: To create the router.
+     - LikeController: The controller containing the business logic for handling likes.
+   - Router Initialization:
+     - likeRouter is created using express.Router() to define route-specific middleware and handlers.
+     - An instance of LikeController is created to access its methods.
+2. ✅ Routes Defined
+   - POST `/`
+     - Handler: `likeController.likeItem(req, res, next)`
+     - Purpose: Allows a user to like a Product or Category.
+     - Request Type: POST
+     - Input Expected: In the body – item `id` and `type` (Product or Category).
+   - GET `/`
+     - Handler: `likeController.getLikes(req, res, next)`
+     - Purpose: Retrieves all likes for a specific Product or Category.
+     - Request Type: GET
+     - Input Expected: In the query – item `id` and `type`.
+
+The `likeRouter` sets up the API endpoints for liking items and retrieving likes, and routes the requests to the appropriate controller methods, maintaining a clean separation of concerns in the application's architecture.
+
+### 5. Updated 'server.js' file
+
+The updated code added Like API support to the main server file.
+
+1. Imported Like Router
+
+```javascript
+import likeRouter from "./src/features/like/like.routes.js";
+```
+
+This imports the router that handles Like-related routes such as liking products or categories and fetching likes.
+
+2. Registered Like Route in Express
+
+```javascript
+server.use("/api/likes", jwtAuth, likeRouter);
+```
+
+- This line mounts the `likeRouter` under the `/api/likes` path.
+- It is protected by `jwtAuth`, so only authenticated users can access like APIs.
+
+This update completes the integration of the Like feature, maintaining consistent security, structure, and modularity across the API.
+
+### 6. Testing in Postman
+
+#### ✅ Adding a Like to a Product and Category
+
+<img src="./images/likeProduct_postman.png" alt="Like Product Postman" width="700" height="auto">
+<img src="./images/likeCategory_postman.png" alt="Like Category Postman" width="700" height="auto">
+
+#### 📂 MongoDB - Likes Collection View
+
+<img src="./images/likes_collection.png" alt="Likes Collection" width="700" height="auto">
+
+#### 📥 Get Like Details for Product and Category
+
+<img src="./images/getLikeProduct_postman.png" alt="Get Like Product Postman" width="700" height="auto">
+<img src="./images/getLikeCategory_postman.png" alt="Get Like Category Postman" width="700" height="auto">
