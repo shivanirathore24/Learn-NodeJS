@@ -72,22 +72,32 @@ To debug Node.js applications in VS Code:
 1. Open the products.js file in VS Code.
 2. Go to the Run and Debug panel or press Ctrl+Shift+D and click "create a
    launch.json file".
-   ![launch.json file](./images/launch_file.png)
+
+    <img src="./images/launch_file.png" alt="launch.json file" width="300" height="auto">
+
 3. Select "Node.js" from the dropdown to create a basic configuration for
    debugging Node.js applications
-   ![Select Debugger](./images/select_debugger.png)
+
+    <img src="./images/select_debugger.png" alt="Select Debugger" width="450" height="auto">
+
 4. Set a breakpoint at line 4 by clicking on the left side of the line number.
-   ![Set Breakpoint](./images/set_breakpoint.png)
+
+    <img src="./images/set_breakpoint.png" alt="Set Breakpoint" width="600" height="auto">
+
 5. Click the green "Launch Program" button or press F5 to start the debugger.
-   ![Launch Program](./images/launch_program.png)
+
+    <img src="./images/launch_program.png" alt="Launch Program" width="300" height="auto">
+
 6. Add the product and total variables to the watch panel to monitor their values.
-   ![Watch Panel](./images/watch_panel.png)
+
+    <img src="./images/watch_panel.png" alt="Watch Panel" width="300" height="auto">
+
 7. The debugger will pause at the breakpoint, allowing you to inspect variables,
    step through code, and observe the call stack.
 
-VS Code offers several debugger options to control the debugging
-process:
-![Debugger Options](./images/debugger_options.png)
+#### VS Code offers several debugger options to control the debugging process:
+
+  <img src="./images/debugger_options.png" alt="Debugger Options" width="500" height="auto">
 
 1. Continue: This option allows the debugger to continue running the code until
    the next breakpoint or the end of the program is reached.
@@ -252,10 +262,11 @@ Explanation:
 5. Click the "Send" button to execute the POST request.
 6. Postman will display the response and allow you to analyze the API response.
 
-![Testing API using Postman](./images/testing_api_using_postman.png)
+<img src="./images/testing_api_using_postman.png" alt="Testing API using Postman" width="700" height="auto">
 
 VS Code Terminal after POST request:
-![VS Code terminal after POST Request](./images/vscode_terminal_after_postrequest.png)
+
+<img src="./images/vscode_terminal_after_postrequest.png" alt="VS Code terminal after POST Request" width="350" height="auto">
 
 Code Example:
 
@@ -349,86 +360,96 @@ emailListener and inventoryListener for sending a confirmation email and updatin
 the inventory, respectively.
 
 3. When running the index.js file, the output will be:
-   ![Custom Event Output](./images/customevent_output.png)
+   <img src="./images/customevent_output.png" alt="Custom Event Output" width="650" height="auto">
 
 ## Event-Driven Architecture in Node.js
-- Event-Driven Architecture is a core concept in Node.js that allows the flow of
-a program to be determined by events triggered by external factors or other
-parts of the application. External factors in Event-Driven Architecture could
-include user interactions (such as mouse clicks and keyboard inputs), network
-events (such as receiving a message from a server), or system events (such
-as the creation or modification of a file).
-- In this architecture, events are emitted and event listeners react to those
-events, enabling concurrent and asynchronous handling of tasks.
-- The main components of Event-Driven Architecture are events, event
-emitters, and event listeners.
-- When an event occurs, all registered listeners for that event are executed
-independently
 
-![Event Driven Architecture](./images/eventdriven_architecture.png)
+- Event-Driven Architecture is a core concept in Node.js that allows the flow of
+  a program to be determined by events triggered by external factors or other
+  parts of the application. External factors in Event-Driven Architecture could
+  include user interactions (such as mouse clicks and keyboard inputs), network
+  events (such as receiving a message from a server), or system events (such
+  as the creation or modification of a file).
+- In this architecture, events are emitted and event listeners react to those
+  events, enabling concurrent and asynchronous handling of tasks.
+- The main components of Event-Driven Architecture are events, event
+  emitters, and event listeners.
+- When an event occurs, all registered listeners for that event are executed
+  independently
+
+  <img src="./images/eventdriven_architecture.png" alt="Event Driven Architecture" width="600" height="auto">
 
 - In a social media platform, when a user creates a new post, multiple tasks
-need to be performed concurrently.
+  need to be performed concurrently.
 - By emitting a "postCreated" event, different listeners can react to the event
-and handle tasks independently.
+  and handle tasks independently.
 - Example listeners include sending notifications to followers, updating the
-user's timeline, and saving the post to the database
+  user's timeline, and saving the post to the database
 
 ### Advantages of Event-Driven Architecture:
-1. *Scalability:* Supports handling a large number of simultaneous tasks, making it
-suitable for scalable applications.
-2. *Loose coupling:* Components of the application are less dependent on each
-other, resulting in more maintainable and flexible code.
-3. *Better responsiveness:* Concurrent and asynchronous handling of tasks
-ensures the application remains responsive even with a high volume of
-requests.
-4. *Improved performance:* Efficient resource management and concurrent
-handling of multiple tasks lead to improved overall performance.
+
+1. _Scalability:_ Supports handling a large number of simultaneous tasks, making it
+   suitable for scalable applications.
+2. _Loose coupling:_ Components of the application are less dependent on each
+   other, resulting in more maintainable and flexible code.
+3. _Better responsiveness:_ Concurrent and asynchronous handling of tasks
+   ensures the application remains responsive even with a high volume of
+   requests.
+4. _Improved performance:_ Efficient resource management and concurrent
+   handling of multiple tasks lead to improved overall performance.
 
 #### Other real-world use cases for Event-Driven Architecture
+
 Stock trading application: Events like stock price changes can trigger actions such as
 user notifications, updating trading strategies, and logging historical data.
 
 ## Best Practices for Working with Modules in Node.js
+
 Best practices are important for working with modules and writing maintainable code
 in Node.js. Following these practices ensures a clean and organized codebase,
 making development and collaboration more efficient.
 
-#### Organizing Code into Modules:
+#### 1. Organizing Code into Modules:
+
 Identify components in your application that can be modularized, such as user authentication, product management, shopping cart, and order processing.Modularizing code improves maintainability, reusability, and separation of concerns.
 
-#### Naming Conventions:
+#### 2. Naming Conventions:
+
 Use clear and descriptive names for variables, functions, and modules.
 Follow a consistent naming convention throughout the codebase for easier
 readability and understanding.
 
-#### Documentation:
+#### 3. Documentation:
+
 Document your code with comments to explain the purpose of functions and
 complex code blocks. Write a README file for each module, providing information
 about its functionality and usage. Documentation helps developers understand the
 codebase and facilitates future maintenance and collaboration.
 
-#### Version Control:
+#### 4. Version Control:
+
 Utilize version control systems like Git to track code changes and collaborate
 effectively. Use branches and pull requests to maintain a structured development
 process and ensure code integrity.
 
-
 ## Summarising it
+
 Let’s summarise what we have learned in this module:
-1. Learned about debugging in Node.js.
-2. Learned about debugging in Visual Studio Code.
-3. Explored sending emails in Node.js.
-4. Studied events in Node.js and how to work with built-in and custom
-events.
-5. Learned how to test APIs using Postman.
-6. Created custom events in Node.js using the events module.
-7. Explored the advantages of using Event-Driven Architecture in Node.js
-applications.
-8. Discussed best practices for working with modules and writing
-maintainable code in Node.js
+
+- Learned about debugging in Node.js.
+- Learned about debugging in Visual Studio Code.
+- Explored sending emails in Node.js.
+- Studied events in Node.js and how to work with built-in and custom
+  events.
+- Learned how to test APIs using Postman.
+- Created custom events in Node.js using the events module.
+- Explored the advantages of using Event-Driven Architecture in Node.js
+  applications.
+- Discussed best practices for working with modules and writing
+  maintainable code in Node.js
 
 ### Some Additional Resources:
+
 [How to debug Node.js with the built-in Debugger?](https://www.digitalocean.com/community/tutorials/how-to-debug-node-js-with-the-built-in-debugger-and-chrome-devtools)
 
 [How to use Nodemailer?](https://www.freecodecamp.org/news/use-nodemailer-to-send-emails-from-your-node-js-server/)
@@ -436,4 +457,3 @@ maintainable code in Node.js
 [How to code your own event emitter in Node.js ?](https://www.freecodecamp.org/news/how-to-code-your-own-event-emitter-in-node-js-a-step-by-step-guide-e13b7e7908e1/)
 
 [Postman tutorial - How to use for API testing?](https://www.guru99.com/postman-tutorial.html)
-
