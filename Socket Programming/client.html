@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="chat-container">
@@ -34,9 +35,11 @@
                 // Add message to the list.
                 const messageElement = document.createElement("div");
                 messageElement.innerText = message;
+                messageElement.classList.add("message", "sent"); 
                 messageList.appendChild(messageElement);
 
                 messageInput.value = "";
+                messageList.scrollTop = messageList.scrollHeight; // Auto-scroll to bottom
             }
         })
     </script>
