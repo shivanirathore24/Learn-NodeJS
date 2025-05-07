@@ -366,6 +366,7 @@ Code Explanation:
    - Every client that is connected will receive the message in real time.
 
 SUMMARY:
+
 - Client sends a message using `socket.emit("chatMessage", message)`.
 - Server receives the message with `socket.on("chatMessage", (message) => {...})`.
 - Server broadcasts the message to all clients using `io.emit("chatMessage", message)`.
@@ -432,6 +433,50 @@ SUMMARY:
   clients.
 - On the client, we use `socket.emit(...)` to send custom events to the server.
 
+### 3. Broadcasting Events
+
+Socket.io allows you to broadcast events to all connected clients or to all clients except the sender.
+
+#### Server-side (server.js):
+
+```javascript
+// Broadcast a custom event to all connected clients except the sender
+socket.broadcast.emit("notification", "A new user has joined!");
+
+// Broadcast a custom event to all clients in a specific room except the sender
+socket.to("room1").emit("roomMessage", "A message for room 1!");
+
+// Explanation:
+// socket.broadcast.emit(...) sends an event to all clients except the sender.
+// socket.to("room").emit(...) sends an event to all clients in a specific room except the sender.
+```
+
+1. `socket.broadcast.emit("event", data)`
+
+   - Sends a message to every connected client except the one who sent it.
+   - Useful for global notifications, like: `"A new user has joined!"` – others see it, but the new user doesn’t.
+
+2. `socket.to("room").emit("event", data)`
+   - Sends a message to all users in a specific room except the sender.
+   - Useful in group chats or rooms, like: `"A message for room 1!"` – everyone in "room1" sees it, except the sender.
+
+#### Client-side (index.html):
+
+```javascript
+// Listen for a "notification" event from the server
+socket.on("notification", (message) => {
+  // When the "notification" event is received, log the message to the console
+  console.log(`Notification: ${message}`);
+});
+```
+
+- `socket.on("notification", ...)`: Listens for an event named "notification" sent by the server.
+- `(message) => { ... }`: A callback function that runs when the event is received.
+- `console.log(...)`: Displays the received message in the browser's console.
+
+Clients can listen for broadcasted events from the server using `socket.on(...)`.
+In this example, clients will receive the "notification" event if a new user joins.
+
 ## Creating Chat UI
 
 ### Updated 'client.html' file
@@ -461,7 +506,7 @@ SUMMARY:
       // Read the message from input and send to server.
       const message = messageInput.value;
       if (message) {
-        socket.emit("new-message", message);
+        socket.emit("new_message", message);
 
         // Add message to the list.
         const messageElement = document.createElement("div");
@@ -486,7 +531,7 @@ Handling User Input and Emitting Messages:
 3. Send Message:
    - `const message = messageInput.value;`: Grabs the text entered in the message input field.
    - `if (message) { ... }`: Checks if the message is not empty.
-   - `socket.emit('new-message', message);`: Emits the 'new-message' event to the server with the message data. The server can then broadcast this to all connected clients.
+   - `socket.emit('new_message', message);`: Emits the 'new_message' event to the server with the message data. The server can then broadcast this to all connected clients.
 4. Add Message to Chat:
    - `const messageElement = document.createElement("div");`: Creates a new div element for displaying the message.
    - `messageElement.innerText = message;`: Sets the content of the new div to the message that was typed.
@@ -497,3 +542,63 @@ Handling User Input and Emitting Messages:
 This approach updates the chat UI with the sent message, emits the message to the server, and keeps the app interactive.
 
 <img src="./images/chat_default_ui.png" alt="Chat Default UI" width="600" height="auto">
+
+## Broadcasting Message
+
+### 1. Updated 'server.js' file:
+
+The added part of code is this section inside the io.on("connection") block:
+
+```javascript
+socket.on("new_message", (message) => {
+  // broadcast this message to all the clients.
+  socket.broadcast.emit("broadcast_message", message);
+});
+```
+
+Explanation:
+
+- `socket.on("new_message", ...)`: This listens for a custom event called "new_message" sent from a client.
+- `socket.broadcast.emit("broadcast_message", message)`:
+  - This sends the received message to all other connected clients except the sender.
+  - It emits a new event called `"broadcast_message"` with the message payload.
+
+Purpose:
+This addition enables a **real-time messaging system** where any client's message is instantly delivered to all others, creating a basic chat-like broadcast functionality.
+
+### 2. Updated 'client.html' file
+
+The added part of HTML/JavaScript code is this block:
+
+```javascript
+// Listen for broadcast message, and add it to the list.
+socket.on("broadcast_message", (message) => {
+  const messageElement = document.createElement("div");
+  messageElement.innerText = message;
+  messageElement.classList.add("message", "received");
+  messageList.appendChild(messageElement);
+});
+```
+
+Explanation:
+
+- `socket.on('broadcast_message', ...)`: This listens for `"broadcast_message"` events sent by the server (i.e. messages from other users).
+- When such a message is received, it:
+  - Creates a new `<div>` element.
+  - Sets its text to the message content.
+  - Adds CSS classes `message` and `received` (to differentiate styling from sent messages).
+  - Appends it to the `message-list` div, displaying it in the chat window.
+
+Purpose: This enables the client to **display messages sent by other users** in real time.
+
+### Output Preview
+
+<!-- [▶️ Watch Real-Time Chat Demo](/Socket%20Programming/videos/realtime_chatscreen.mp4) -->
+
+[▶️ Download the Real-Time Chat Demo Video from Release](https://github.com/shivanirathore24/Learn-NodeJS/releases/download/v1.0/realtime_chatscreen.mp4)
+
+<img src="./images/realtime_chatscreen.png" alt="Realtime Chat-Screen" width="700" height="auto">
+
+Responsive Design Preview: Chat UI on Small Devices
+
+<img src="./images/responsive_realtime_chatscreen.png" alt="Responsive Realtime Chat-Screen" width="600" height="auto">

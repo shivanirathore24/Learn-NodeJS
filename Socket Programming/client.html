@@ -30,7 +30,7 @@
             // Read the message from input and send to server.
             const message = messageInput.value;
             if(message){
-                socket.emit('new-message',message);
+                socket.emit('new_message',message);
 
                 // Add message to the list.
                 const messageElement = document.createElement("div");
@@ -42,6 +42,15 @@
                 messageList.scrollTop = messageList.scrollHeight; // Auto-scroll to bottom
             }
         })
+
+        // Listen for broadcast message, and add it to the list.
+        socket.on('broadcast_message', (message) =>{
+            const messageElement = document.createElement("div");
+            messageElement.innerText = message;
+            messageElement.classList.add("message", "received");
+            messageList.appendChild(messageElement);
+        })
+
     </script>
 </body>
 </html>
