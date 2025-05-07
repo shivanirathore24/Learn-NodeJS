@@ -366,6 +366,7 @@ Code Explanation:
    - Every client that is connected will receive the message in real time.
 
 SUMMARY:
+
 - Client sends a message using `socket.emit("chatMessage", message)`.
 - Server receives the message with `socket.on("chatMessage", (message) => {...})`.
 - Server broadcasts the message to all clients using `io.emit("chatMessage", message)`.
@@ -432,6 +433,50 @@ SUMMARY:
   clients.
 - On the client, we use `socket.emit(...)` to send custom events to the server.
 
+### 3. Broadcasting Events
+
+Socket.io allows you to broadcast events to all connected clients or to all clients except the sender.
+
+#### Server-side (server.js):
+
+```javascript
+// Broadcast a custom event to all connected clients except the sender
+socket.broadcast.emit("notification", "A new user has joined!");
+
+// Broadcast a custom event to all clients in a specific room except the sender
+socket.to("room1").emit("roomMessage", "A message for room 1!");
+
+// Explanation:
+// socket.broadcast.emit(...) sends an event to all clients except the sender.
+// socket.to("room").emit(...) sends an event to all clients in a specific room except the sender.
+```
+
+1. `socket.broadcast.emit("event", data)`
+
+   - Sends a message to every connected client except the one who sent it.
+   - Useful for global notifications, like: `"A new user has joined!"` – others see it, but the new user doesn’t.
+
+2. `socket.to("room").emit("event", data)`
+   - Sends a message to all users in a specific room except the sender.
+   - Useful in group chats or rooms, like: `"A message for room 1!"` – everyone in "room1" sees it, except the sender.
+
+#### Client-side (index.html):
+
+```javascript
+// Listen for a "notification" event from the server
+socket.on("notification", (message) => {
+  // When the "notification" event is received, log the message to the console
+  console.log(`Notification: ${message}`);
+});
+```
+
+- `socket.on("notification", ...)`: Listens for an event named "notification" sent by the server.
+- `(message) => { ... }`: A callback function that runs when the event is received.
+- `console.log(...)`: Displays the received message in the browser's console.
+
+Clients can listen for broadcasted events from the server using `socket.on(...)`.
+In this example, clients will receive the "notification" event if a new user joins.
+
 ## Creating Chat UI
 
 ### Updated 'client.html' file
@@ -461,7 +506,7 @@ SUMMARY:
       // Read the message from input and send to server.
       const message = messageInput.value;
       if (message) {
-        socket.emit("new-message", message);
+        socket.emit("new_message", message);
 
         // Add message to the list.
         const messageElement = document.createElement("div");
@@ -486,7 +531,7 @@ Handling User Input and Emitting Messages:
 3. Send Message:
    - `const message = messageInput.value;`: Grabs the text entered in the message input field.
    - `if (message) { ... }`: Checks if the message is not empty.
-   - `socket.emit('new-message', message);`: Emits the 'new-message' event to the server with the message data. The server can then broadcast this to all connected clients.
+   - `socket.emit('new_message', message);`: Emits the 'new_message' event to the server with the message data. The server can then broadcast this to all connected clients.
 4. Add Message to Chat:
    - `const messageElement = document.createElement("div");`: Creates a new div element for displaying the message.
    - `messageElement.innerText = message;`: Sets the content of the new div to the message that was typed.

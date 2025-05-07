@@ -23,7 +23,10 @@ io.on("connection", (socket) => {
   console.log("⚡️ New client connected:", socket.id);
 
   // — You can register custom socket events here —
-  // e.g. socket.on("chat message", msg => { /* … */ });
+  socket.on("new_message", (message) => {
+    //broadcast this message to all the clients.
+    socket.broadcast.emit("broadcast_message", message);
+  });
 
   // Handle client disconnect
   socket.on("disconnect", (reason) => {
