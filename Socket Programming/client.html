@@ -4,53 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css"> <!-- External CSS for styling -->
 </head>
 <body>
+    <!-- Chat interface container -->
     <div class="chat-container">
-        <div id="message-list">
-            <!-- List will contain messages -->
+
+        <!-- Container for displaying chat messages -->
+        <div id="message-list"></div>
+
+        <!-- Message input section -->
+        <div class="message-input-container">
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button id="send-message">Send</button>
         </div>
-        <input type="text" id="message-input" placeholder="Type a message...">
-        <button id="send-message">Send</button>
     </div>
 
-    <!-- Load Socket.io client library -->
+    <!-- Load Socket.IO client script from local server -->
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+
     <script>
-        // Connect to Socket.io server
+        // Establish connection with Socket.IO server
         const socket = io.connect('http://localhost:3000');
 
-        //Get the elements
+        // Prompt user for a username (keeps prompting if blank)
+        let username = prompt("Enter your name");
+        while (!username) {
+            username = prompt("Please enter your name:");
+        }
+
+        // Notify server of new user joining the chat
+        socket.emit("join", username);
+
+        // DOM elements for interaction
         const messageInput = document.getElementById("message-input");
         const messageList = document.getElementById("message-list");
         const sendButton = document.getElementById('send-message');
 
-        sendButton.addEventListener("click", function(){
-            // Read the message from input and send to server.
-            const message = messageInput.value;
-            if(message){
-                socket.emit('new_message',message);
+        // Track the last sender to avoid repeating usernames
+        let previousSender = null;
 
-                // Add message to the list.
+        // Event listener for sending a message when "Send" button is clicked
+        sendButton.addEventListener("click", function () {
+            const message = messageInput.value.trim();
+
+            if (message) {
+                // Emit message to server
+                socket.emit('new_message', message);
+
+                // Display own message in chat
                 const messageElement = document.createElement("div");
-                messageElement.innerText = message;
-                messageElement.classList.add("message", "sent"); 
+                const messageContent = previousSender !== username
+                    ? `<div class="user-name">${username}</div>${message}`
+                    : message;
+                
+                messageElement.innerHTML = messageContent;
+                messageElement.classList.add("message", "sent");
                 messageList.appendChild(messageElement);
 
+                // Reset input and scroll to bottom
                 messageInput.value = "";
-                messageList.scrollTop = messageList.scrollHeight; // Auto-scroll to bottom
+                messageList.scrollTop = messageList.scrollHeight;
+                previousSender = username;
             }
-        })
+        });
 
-        // Listen for broadcast message, and add it to the list.
-        socket.on('broadcast_message', (message) =>{
+        // Listen for incoming messages from other users
+        socket.on('broadcast_message', (userMessage) => {
             const messageElement = document.createElement("div");
-            messageElement.innerText = message;
             messageElement.classList.add("message", "received");
-            messageList.appendChild(messageElement);
-        })
 
+            // Show username only if sender has changed
+            const messageContent = previousSender !== userMessage.username
+                ? `<div class="user-name">${userMessage.username}</div>${userMessage.message}`
+                : userMessage.message;
+
+            messageElement.innerHTML = messageContent;
+            messageList.appendChild(messageElement);
+
+            // Scroll to the latest message
+            messageList.scrollTop = messageList.scrollHeight;
+            previousSender = userMessage.username;
+        });
     </script>
 </body>
 </html>

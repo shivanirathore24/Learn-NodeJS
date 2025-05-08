@@ -22,10 +22,17 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("⚡️ New client connected:", socket.id);
 
-  // — You can register custom socket events here —
+  socket.on("join", (data) => {
+    socket.username = data;
+  });
+
   socket.on("new_message", (message) => {
+    let userMessage = {
+      username: socket.username,
+      message: message,
+    };
     //broadcast this message to all the clients.
-    socket.broadcast.emit("broadcast_message", message);
+    socket.broadcast.emit("broadcast_message", userMessage);
   });
 
   // Handle client disconnect
