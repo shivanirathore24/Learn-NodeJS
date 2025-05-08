@@ -2,6 +2,8 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import { connect } from "./config.js";
+import { chatModel } from "./chat.schema.js";
 
 // Create an Express application
 const app = express();
@@ -31,6 +33,14 @@ io.on("connection", (socket) => {
       username: socket.username,
       message: message,
     };
+
+    const newChat = new chatModel({
+      username: socket.username,
+      message: message,
+      timestamp: new Date(),
+    });
+    newChat.save();
+
     //broadcast this message to all the clients.
     socket.broadcast.emit("broadcast_message", userMessage);
   });
@@ -45,4 +55,5 @@ io.on("connection", (socket) => {
 const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Server listening at http://localhost:${PORT}`);
+  connect();
 });

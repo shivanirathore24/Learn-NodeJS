@@ -603,247 +603,269 @@ Responsive Design Preview: Chat UI on Small Devices
 
 <img src="./images/responsive_realtime_chatscreen.png" alt="Responsive Realtime Chat-Screen" width="600" height="auto">
 
-
 ## User Identification
+
 ### 1. Updated 'client.html' file
 
 #### Before Changes (Old Code):
+
 ```html
 <body>
-    <div class="chat-container">
-        <div id="message-list">
-            <!-- List will contain messages -->
-        </div>
-        <input type="text" id="message-input" placeholder="Type a message...">
-        <button id="send-message">Send</button>
+  <div class="chat-container">
+    <div id="message-list">
+      <!-- List will contain messages -->
     </div>
+    <input type="text" id="message-input" placeholder="Type a message..." />
+    <button id="send-message">Send</button>
+  </div>
 
-    <!-- Load Socket.io client library -->
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-    <script>
-        // Connect to Socket.io server
-        const socket = io.connect('http://localhost:3000');
+  <!-- Load Socket.io client library -->
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script>
+    // Connect to Socket.io server
+    const socket = io.connect("http://localhost:3000");
 
-        //Get the elements
-        const messageInput = document.getElementById("message-input");
-        const messageList = document.getElementById("message-list");
-        const sendButton = document.getElementById('send-message');
+    //Get the elements
+    const messageInput = document.getElementById("message-input");
+    const messageList = document.getElementById("message-list");
+    const sendButton = document.getElementById("send-message");
 
-        sendButton.addEventListener("click", function(){
-            // Read the message from input and send to server.
-            const message = messageInput.value;
-            if(message){
-                socket.emit('new_message',message);
+    sendButton.addEventListener("click", function () {
+      // Read the message from input and send to server.
+      const message = messageInput.value;
+      if (message) {
+        socket.emit("new_message", message);
 
-                // Add message to the list.
-                const messageElement = document.createElement("div");
-                messageElement.innerText = message;
-                messageElement.classList.add("message", "sent"); 
-                messageList.appendChild(messageElement);
+        // Add message to the list.
+        const messageElement = document.createElement("div");
+        messageElement.innerText = message;
+        messageElement.classList.add("message", "sent");
+        messageList.appendChild(messageElement);
 
-                messageInput.value = "";
-                messageList.scrollTop = messageList.scrollHeight; // Auto-scroll to bottom
-            }
-        })
+        messageInput.value = "";
+        messageList.scrollTop = messageList.scrollHeight; // Auto-scroll to bottom
+      }
+    });
 
-        // Listen for broadcast message, and add it to the list.
-        socket.on('broadcast_message', (message) =>{
-            const messageElement = document.createElement("div");
-            messageElement.innerText = message;
-            messageElement.classList.add("message", "received");
-            messageList.appendChild(messageElement);
-        })
-
-    </script>
+    // Listen for broadcast message, and add it to the list.
+    socket.on("broadcast_message", (message) => {
+      const messageElement = document.createElement("div");
+      messageElement.innerText = message;
+      messageElement.classList.add("message", "received");
+      messageList.appendChild(messageElement);
+    });
+  </script>
 </body>
 ```
 
 #### After Changes (New Code):
+
 ```html
 <body>
-    <!-- Chat interface container -->
-    <div class="chat-container">
+  <!-- Chat interface container -->
+  <div class="chat-container">
+    <!-- Container for displaying chat messages -->
+    <div id="message-list"></div>
 
-        <!-- Container for displaying chat messages -->
-        <div id="message-list"></div>
-
-        <!-- Message input section -->
-        <div class="message-input-container">
-            <input type="text" id="message-input" placeholder="Type a message...">
-            <button id="send-message">Send</button>
-        </div>
+    <!-- Message input section -->
+    <div class="message-input-container">
+      <input type="text" id="message-input" placeholder="Type a message..." />
+      <button id="send-message">Send</button>
     </div>
+  </div>
 
-    <!-- Load Socket.IO client script from local server -->
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <!-- Load Socket.IO client script from local server -->
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 
-    <script>
-        // Establish connection with Socket.IO server
-        const socket = io.connect('http://localhost:3000');
+  <script>
+    // Establish connection with Socket.IO server
+    const socket = io.connect("http://localhost:3000");
 
-        // Prompt user for a username (keeps prompting if blank)
-        let username = prompt("Enter your name");
-        while (!username) {
-            username = prompt("Please enter your name:");
-        }
-
-        // Notify server of new user joining the chat
-        socket.emit("join", username);
-
-        // DOM elements for interaction
-        const messageInput = document.getElementById("message-input");
-        const messageList = document.getElementById("message-list");
-        const sendButton = document.getElementById('send-message');
-
-        // Track the last sender to avoid repeating usernames
-        let previousSender = null;
-
-        // Event listener for sending a message when "Send" button is clicked
-        sendButton.addEventListener("click", function () {
-            const message = messageInput.value.trim();
-
-            if (message) {
-                // Emit message to server
-                socket.emit('new_message', message);
-
-                // Display own message in chat
-                const messageElement = document.createElement("div");
-                const messageContent = previousSender !== username
-                    ? `<div class="user-name">${username}</div>${message}`
-                    : message;
-                
-                messageElement.innerHTML = messageContent;
-                messageElement.classList.add("message", "sent");
-                messageList.appendChild(messageElement);
-
-                // Reset input and scroll to bottom
-                messageInput.value = "";
-                messageList.scrollTop = messageList.scrollHeight;
-                previousSender = username;
-            }
-        });
-
-        // Listen for incoming messages from other users
-        socket.on('broadcast_message', (userMessage) => {
-            const messageElement = document.createElement("div");
-            messageElement.classList.add("message", "received");
-
-            // Show username only if sender has changed
-            const messageContent = previousSender !== userMessage.username
-                ? `<div class="user-name">${userMessage.username}</div>${userMessage.message}`
-                : userMessage.message;
-
-            messageElement.innerHTML = messageContent;
-            messageList.appendChild(messageElement);
-
-            // Scroll to the latest message
-            messageList.scrollTop = messageList.scrollHeight;
-            previousSender = userMessage.username;
-        });
-    </script>
-</body>
-```
-The updated code adds username prompts, shows names only when the sender changes, and improves layout for a cleaner, user-friendly chat experience.
-1. Prompt for Username
-    ```javascript
+    // Prompt user for a username (keeps prompting if blank)
     let username = prompt("Enter your name");
     while (!username) {
-        username = prompt("Please enter your name:");
+      username = prompt("Please enter your name:");
     }
+
+    // Notify server of new user joining the chat
     socket.emit("join", username);
-    ```
-    🔍 What’s new:
-      - Prompts the user to enter a name on page load.
-      - Uses a while loop to ensure the user doesn't proceed with a blank name.
-      - Sends this name to the server using socket.emit("join", username);
 
-    💡 Purpose:
-      - Associates a name with the user's socket connection on the server.
-      - Enables the chat to identify the sender of each message.
+    // DOM elements for interaction
+    const messageInput = document.getElementById("message-input");
+    const messageList = document.getElementById("message-list");
+    const sendButton = document.getElementById("send-message");
 
-2. Track Last Message Sender
-    ```javascript
+    // Track the last sender to avoid repeating usernames
     let previousSender = null;
-    ```
-    🔍 What’s new: 
-    - A variable to remember who sent the previous message.
 
-    💡 Purpose:
-      - Helps determine whether to display the sender's name again.
-      - Avoids repeating the same name for consecutive messages from the same user.
-      - Keeps the chat interface clean and less cluttered.
-
- 3. Updated Message Sending Logic
-    ```javascript
+    // Event listener for sending a message when "Send" button is clicked
     sendButton.addEventListener("click", function () {
-        const message = messageInput.value.trim();
+      const message = messageInput.value.trim();
 
-        if (message) {
-            socket.emit('new_message', message);
+      if (message) {
+        // Emit message to server
+        socket.emit("new_message", message);
 
-            const messageElement = document.createElement("div");
-            const messageContent = previousSender !== username
-                ? `<div class="user-name">${username}</div>${message}`
-                : message;
-
-            messageElement.innerHTML = messageContent;
-            messageElement.classList.add("message", "sent");
-            messageList.appendChild(messageElement);
-
-            messageInput.value = "";
-            messageList.scrollTop = messageList.scrollHeight;
-            previousSender = username;
-        }
-    });
-    ```
-
-    🔍 What’s new:
-      - Displays the username only if the last message wasn't from the same sender.
-      - Uses innerHTML to insert a username div + message if needed.
-
-    💡 Purpose:
-      - Makes the chat feel more like modern apps (e.g., WhatsApp, Slack), where the sender's name is shown only when it changes.
-      - Adds cleaner formatting.
-
-4. Improved Message Receiving Logic
-    ```javascript
-    socket.on('broadcast_message', (userMessage) => {
+        // Display own message in chat
         const messageElement = document.createElement("div");
-        messageElement.classList.add("message", "received");
-
-        const messageContent = previousSender !== userMessage.username
-            ? `<div class="user-name">${userMessage.username}</div>${userMessage.message}`
-            : userMessage.message;
+        const messageContent =
+          previousSender !== username
+            ? `<div class="user-name">${username}</div>${message}`
+            : message;
 
         messageElement.innerHTML = messageContent;
+        messageElement.classList.add("message", "sent");
         messageList.appendChild(messageElement);
 
+        // Reset input and scroll to bottom
+        messageInput.value = "";
         messageList.scrollTop = messageList.scrollHeight;
-        previousSender = userMessage.username;
+        previousSender = username;
+      }
     });
-    ```
-    🔍 What’s new:
-      - Listens for messages from others.
-      - Same name-check logic to show/hide usernames.
-      - Automatically scrolls to the newest message.
 
-    💡 Purpose:
-      - Keeps the interface clean while maintaining clarity about who is speaking.
-      - Enhances the user experience.
+    // Listen for incoming messages from other users
+    socket.on("broadcast_message", (userMessage) => {
+      const messageElement = document.createElement("div");
+      messageElement.classList.add("message", "received");
+
+      // Show username only if sender has changed
+      const messageContent =
+        previousSender !== userMessage.username
+          ? `<div class="user-name">${userMessage.username}</div>${userMessage.message}`
+          : userMessage.message;
+
+      messageElement.innerHTML = messageContent;
+      messageList.appendChild(messageElement);
+
+      // Scroll to the latest message
+      messageList.scrollTop = messageList.scrollHeight;
+      previousSender = userMessage.username;
+    });
+  </script>
+</body>
+```
+
+The updated code adds username prompts, shows names only when the sender changes, and improves layout for a cleaner, user-friendly chat experience.
+
+1. Prompt for Username
+
+   ```javascript
+   let username = prompt("Enter your name");
+   while (!username) {
+     username = prompt("Please enter your name:");
+   }
+   socket.emit("join", username);
+   ```
+
+   🔍 What’s new:
+
+   - Prompts the user to enter a name on page load.
+   - Uses a while loop to ensure the user doesn't proceed with a blank name.
+   - Sends this name to the server using socket.emit("join", username);
+
+   💡 Purpose:
+
+   - Associates a name with the user's socket connection on the server.
+   - Enables the chat to identify the sender of each message.
+
+2. Track Last Message Sender
+
+   ```javascript
+   let previousSender = null;
+   ```
+
+   🔍 What’s new:
+
+   - A variable to remember who sent the previous message.
+
+   💡 Purpose:
+
+   - Helps determine whether to display the sender's name again.
+   - Avoids repeating the same name for consecutive messages from the same user.
+   - Keeps the chat interface clean and less cluttered.
+
+3. Updated Message Sending Logic
+
+   ```javascript
+   sendButton.addEventListener("click", function () {
+     const message = messageInput.value.trim();
+
+     if (message) {
+       socket.emit("new_message", message);
+
+       const messageElement = document.createElement("div");
+       const messageContent =
+         previousSender !== username
+           ? `<div class="user-name">${username}</div>${message}`
+           : message;
+
+       messageElement.innerHTML = messageContent;
+       messageElement.classList.add("message", "sent");
+       messageList.appendChild(messageElement);
+
+       messageInput.value = "";
+       messageList.scrollTop = messageList.scrollHeight;
+       previousSender = username;
+     }
+   });
+   ```
+
+   🔍 What’s new:
+
+   - Displays the username only if the last message wasn't from the same sender.
+   - Uses innerHTML to insert a username div + message if needed.
+
+   💡 Purpose:
+
+   - Makes the chat feel more like modern apps (e.g., WhatsApp, Slack), where the sender's name is shown only when it changes.
+   - Adds cleaner formatting.
+
+4. Improved Message Receiving Logic
+
+   ```javascript
+   socket.on("broadcast_message", (userMessage) => {
+     const messageElement = document.createElement("div");
+     messageElement.classList.add("message", "received");
+
+     const messageContent =
+       previousSender !== userMessage.username
+         ? `<div class="user-name">${userMessage.username}</div>${userMessage.message}`
+         : userMessage.message;
+
+     messageElement.innerHTML = messageContent;
+     messageList.appendChild(messageElement);
+
+     messageList.scrollTop = messageList.scrollHeight;
+     previousSender = userMessage.username;
+   });
+   ```
+
+   🔍 What’s new:
+
+   - Listens for messages from others.
+   - Same name-check logic to show/hide usernames.
+   - Automatically scrolls to the newest message.
+
+   💡 Purpose:
+
+   - Keeps the interface clean while maintaining clarity about who is speaking.
+   - Enhances the user experience.
 
 5. HTML Structure Update:
-    ```html
-    <div class="message-input-container">
-        <input type="text" id="message-input" placeholder="Type a message...">
-        <button id="send-message">Send</button>
-    </div>
-    ```
-    - The input and send button are now grouped inside a container (message-input-container) for better layout control.
-    - This wrapper allows easier styling and customization through CSS.
+   ```html
+   <div class="message-input-container">
+     <input type="text" id="message-input" placeholder="Type a message..." />
+     <button id="send-message">Send</button>
+   </div>
+   ```
+   - The input and send button are now grouped inside a container (message-input-container) for better layout control.
+   - This wrapper allows easier styling and customization through CSS.
 
 ### 2. Updated 'server.js' file
 
 #### Before Changes (Old Code):
+
 ```javascript
 // Listen for client connections
 io.on("connection", (socket) => {
@@ -863,6 +885,7 @@ io.on("connection", (socket) => {
 ```
 
 #### After Changes (New Code):
+
 ```javascript
 // Listen for client connections
 io.on("connection", (socket) => {
@@ -887,29 +910,33 @@ io.on("connection", (socket) => {
   });
 });
 ```
-The updated server code introduces username handling for each connected client. 
+
+The updated server code introduces username handling for each connected client.
+
 1. New join Event Listener:
-    ```javascript
-    socket.on("join", (data) => {
-      socket.username = data;
-    });
-    ```
-    - **Purpose:** When a client connects, it sends a "join" event with the user's name.
-    - **What it does:**Stores the username in the socket object (e.g., socket.username = "Alice"), allowing it to be used later when sending messages.
+
+   ```javascript
+   socket.on("join", (data) => {
+     socket.username = data;
+   });
+   ```
+
+   - **Purpose:** When a client connects, it sends a "join" event with the user's name.
+   - **What it does:**Stores the username in the socket object (e.g., socket.username = "Alice"), allowing it to be used later when sending messages.
 
 2. Modified new_message Handler:
-    ```javascript
-    socket.on("new_message", (message) => {
-      let userMessage = {
-        username: socket.username,
-        message: message,
-      };
-      socket.broadcast.emit("broadcast_message", userMessage);
-    });
-    ```
-      - **Before**: Only the raw message was broadcasted.
-      - **Now**: A structured object containing both the username and message is broadcasted.
-      - **Benefit**: This allows clients to identify and display who sent the message, enabling cleaner and more organized chats.
+   ```javascript
+   socket.on("new_message", (message) => {
+     let userMessage = {
+       username: socket.username,
+       message: message,
+     };
+     socket.broadcast.emit("broadcast_message", userMessage);
+   });
+   ```
+   - **Before**: Only the raw message was broadcasted.
+   - **Now**: A structured object containing both the username and message is broadcasted.
+   - **Benefit**: This allows clients to identify and display who sent the message, enabling cleaner and more organized chats.
 
 The updated code personalizes the chat experience by capturing the sender’s name and broadcasting both name and message to others, supporting user-specific message displays on the frontend.
 
@@ -921,3 +948,163 @@ The updated code personalizes the chat experience by capturing the sender’s na
 
 <img src="./images/realtime_groupchat.png" alt="Realtime Group-Chat" width="700" height="auto">
 
+## Storing chats in MongoDB
+
+Install Mongoose and set up your MongoDB connection using ES6 modules.
+
+### 1. Created a separate module for database connection: 'config.js'
+
+```javascript
+import mongoose from "mongoose";
+
+export const connect = async () => {
+  try {
+    await mongoose.connect("mongodb://127.0.0.1:27017/chatApp");
+    console.log("DB is connected!");
+  } catch (err) {
+    console.error("DB connection error:", err.message);
+  }
+};
+```
+
+This code connects your app to a local MongoDB database named `chatApp` using Mongoose:
+
+- `mongoose.connect(...)` tries to connect to MongoDB.
+- If successful, it logs "DB is connected!".
+- If it fails, it logs the error.
+
+🔗 It ensures your app can store and retrieve chat messages from the database.
+
+### 2. Define a Schema and Model: 'chat.schema.js'
+
+Define a Mongoose schema and model for the data you want to save
+
+```javascript
+import mongoose from "mongoose";
+const chatSchema = new mongoose.Schema({
+  username: String,
+  message: String,
+  timestamp: Date,
+});
+
+export const chatModel = mongoose.model("Chat", chatSchema);
+```
+
+This code defines a **Mongoose schema and model** for storing chat messages in MongoDB:
+
+- `chatSchema` defines the structure:
+  - `username`: who sent the message
+  - `message`: the message content
+  - `timestamp`: when it was sent
+- `chatModel` creates a model named **"Chat"** based on that schema, which allows you to interact with the `chats` collection in the database (e.g., save, find, update messages).
+
+🧠 In short: It sets up how chat messages are saved and used in MongoDB.
+
+### 3. Updated 'server.js'
+
+```javascript
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import cors from "cors";
+import { connect } from "./config.js";
+import { chatModel } from "./chat.schema.js";
+
+// Create an Express application
+const app = express();
+app.use(cors()); // Enable CORS for all routes
+
+// 1. Create an HTTP server wrapping the Express app
+const server = http.createServer(app);
+
+// 2️. Initialize a Socket.io server, allowing CORS from any origin
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+// 3️. Listen for client connections
+io.on("connection", (socket) => {
+  console.log("⚡️ New client connected:", socket.id);
+
+  socket.on("join", (data) => {
+    socket.username = data;
+  });
+
+  socket.on("new_message", (message) => {
+    let userMessage = {
+      username: socket.username,
+      message: message,
+    };
+
+    const newChat = new chatModel({
+      username: socket.username,
+      message: message,
+      timestamp: new Date(),
+    });
+    newChat.save();
+
+    //broadcast this message to all the clients.
+    socket.broadcast.emit("broadcast_message", userMessage);
+  });
+
+  // Handle client disconnect
+  socket.on("disconnect", (reason) => {
+    console.log(`❌ Client ${socket.id} disconnected:`, reason);
+  });
+});
+
+// Start listening on port 3000
+const PORT = 3000;
+server.listen(PORT, () => {
+  console.log(`🚀 Server listening at http://localhost:${PORT}`);
+  connect();
+});
+```
+
+Updated Part Explanation (with MongoDB Integration):
+
+1. Import database utilities:
+
+   ```javascript
+   import { connect } from "./config.js";
+   import { chatModel } from "./chat.schema.js";
+   ```
+
+   - `connect()` connects to MongoDB.
+   - `chatModel` is the Mongoose model for saving chat messages.
+
+2. Save message to MongoDB:
+
+   ```javascript
+   const newChat = new chatModel({
+     username: socket.username,
+     message: message,
+     timestamp: new Date(),
+   });
+   newChat.save();
+   ```
+
+   When a new message is received, it’s saved to MongoDB with timestamp.
+
+3. Connect to DB when server starts:
+   ```javascript
+   connect();
+   ```
+   Ensures DB is connected when the server begins.
+
+🧠 In short:
+This update saves chat messages to MongoDB and connects the server to the database when it starts.
+
+### Output Preview
+
+#### 💬 Group Chat Interface Preview
+
+<img src="./images/groupchat_mongoDB.png" alt="Group Chat stored in DB" width="500" height="auto">
+
+#### 🗃️ Chat Data Stored in MongoDB
+
+<img src="./images/chats_collection1.png" alt="Chats Collection" width="700" height="auto">
+<img src="./images/chats_collection2.png" alt="Chats Collection" width="700" height="auto">
