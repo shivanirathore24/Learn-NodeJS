@@ -69,6 +69,26 @@
             }
         });
 
+        // Display messages on UI
+        socket.on('load_messages', (messages) =>{
+            messages.forEach(message => {
+                const messageElement = document.createElement("div");
+                messageElement.classList.add("message");
+
+                const isSentByMe = message.username === username;
+                messageElement.classList.add(isSentByMe ? "sent" : "received");
+
+                const messageContent = previousSender !== message.username
+                    ? `<div class="user-name">${message.username}</div>${message.message}`
+                    : message.message;
+
+                messageElement.innerHTML = messageContent;
+                messageList.appendChild(messageElement);
+                previousSender = message.username; // Update previousSender as you process loaded messages
+                messageList.scrollTop = messageList.scrollHeight; // Scroll to the latest loaded message
+            });
+        });
+
         // Listen for incoming messages from other users
         socket.on('broadcast_message', (userMessage) => {
             const messageElement = document.createElement("div");

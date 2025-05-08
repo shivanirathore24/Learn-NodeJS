@@ -26,6 +26,14 @@ io.on("connection", (socket) => {
 
   socket.on("join", (data) => {
     socket.username = data;
+    // send old messages to the clients.
+    chatModel.find().sort({ timestamp: 1 }).limit(100)
+      .then((messages) => {
+        socket.emit("load_messages", messages);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   });
 
   socket.on("new_message", (message) => {

@@ -1108,3 +1108,108 @@ This update saves chat messages to MongoDB and connects the server to the databa
 
 <img src="./images/chats_collection1.png" alt="Chats Collection" width="700" height="auto">
 <img src="./images/chats_collection2.png" alt="Chats Collection" width="700" height="auto">
+
+## Loading previous messages
+
+### 1. Updated 'server.js' file
+
+```javascript
+socket.on("join", (data) => {
+  socket.username = data;
+  // send old messages to the clients.
+  chatModel
+    .find()
+    .sort({ timestamp: 1 })
+    .limit(100)
+    .then((messages) => {
+      socket.emit("load_messages", messages);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+```
+
+ChatGPT said:
+The `load_messages` feature is implemented to send old chat messages to a new user when they join the chat.
+
+1. Finding Old Messages:
+
+   - When a new user connects and emits the `"join"` event, the server queries the database to retrieve the last 100 messages, sorted by their timestamp in ascending order:
+     ```javascript
+     chatModel.find().sort({ timestamp: 1 }).limit(50);
+     ```
+   - This ensures that the user gets the latest 50 messages in chronological order.
+
+2. Sending Messages to the Client:
+   - After retrieving the messages, the server emits them to the client using `socket.emit("load_messages", messages)`. This sends the chat history to the client who just joined, allowing them to view previous messages.
+
+SUMMARY:
+
+- When a new user joins, they receive the last 50 messages from the database.
+- This ensures the user can see previous messages before they start sending their own.
+
+### 2. Updated 'client.html' file
+
+```javascript
+// Display messages on UI
+socket.on("load_messages", (messages) => {
+  messages.forEach((message) => {
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("message");
+
+    const isSentByMe = message.username === username;
+    messageElement.classList.add(isSentByMe ? "sent" : "received");
+
+    const messageContent =
+      previousSender !== message.username
+        ? `<div class="user-name">${message.username}</div>${message.message}`
+        : message.message;
+
+    messageElement.innerHTML = messageContent;
+    messageList.appendChild(messageElement);
+    previousSender = message.username; // Update previousSender as you process loaded messages
+    messageList.scrollTop = messageList.scrollHeight; // Scroll to the latest loaded message
+  });
+});
+```
+
+The updated part of the code handles the loading of previous messages when a new user joins the chat.
+
+1. Loading Old Messages:
+
+- When a user joins, the server sends the last 100 messages via the "load_messages" event:
+
+```javascript
+socket.on("load_messages", (messages) => {
+  messages.forEach((message) => {
+    // Processing each message
+  });
+});
+```
+
+- **Messages** are displayed on the screen by creating a new `div` for each message.
+- If the message is sent by the current user, it is styled as `"sent"`, otherwise as `"received"`.
+
+2. Displaying Messages:
+   - Each message is checked if the sender is different from the previous message's sender to display the username.
+   - After displaying the messages, it scrolls to the most recent message, ensuring the chat remains at the bottom
+
+SUMMARY:
+
+- On `"load_messages"`, it processes and displays the chat history.
+- It maintains the sender's username and dynamically updates the message display, improving the user experience.
+
+### Output Preview
+
+  <!-- [▶️ Watch "Real-Time Group Chat with Previous Message Loading Demo" Video](/Socket%20Programming/videos/loadPreviousMessage_newUser.mp4) -->
+
+[▶️ Download the "Real-Time Group Chat with Loading Previous Message" Demo Video from Release (New User)](https://github.com/shivanirathore24/Learn-NodeJS/releases/download/v3.0/loadPreviousMessage_newUser.mp4)
+
+  <img src="./images/loadPreviousMessage_newUser.png" alt="Load Previous Message" width="500" height="auto">
+
+  <!-- [▶️ Watch "Real-Time Group Chat with Previous Message Loading Demo" Video](/Socket%20Programming/videos/loadPreviousMessage_existingUser.mp4) -->
+
+[▶️ Download the "Real-Time Group Chat with Loading Previous Message" Demo Video from Release (Existing User)](https://github.com/shivanirathore24/Learn-NodeJS/releases/download/v3.0/loadPreviousMessage_existingUser.mp4)
+
+  <img src="./images/loadPreviousMessage_existingUser.png" alt="Load Previous Message" width="500" height="auto">
