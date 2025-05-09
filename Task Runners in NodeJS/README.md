@@ -197,8 +197,7 @@ Run Grunt from the project root to execute the minification tasks:
 grunt
 ```
 
-<img src="./output/grunt-task1.png" alt="Grunt Task-1" width="500" height="auto">
-
+<img src="./grunt-tasks/output/grunt-task1.png" alt="Grunt Task-1" width="500" height="auto">
 
 This will create a minified version of `input1.js` at `dest/js/main.min.js.`
 
@@ -213,13 +212,16 @@ project-root/
 ├── Gruntfile.js
 ├── package.json
 ```
+
 #### NOTE:
 
 When you run the CSS minification task, Grunt will reduce the file size. For example:
+
 ```sh
-Running "cssmin:target" (cssmin) task  
+Running "cssmin:target" (cssmin) task
 >> 1 file created. 658 B → 454 B
 ```
+
 - Before minification: The file size was 658 B.
 - After minification: The file size was reduced to 454 B, indicating successful minification by removing unnecessary characters like spaces, comments, and line breaks.
 
@@ -298,7 +300,7 @@ Run Grunt from the project root to execute the minification tasks:
 grunt
 ```
 
-<img src="./output/grunt-task2.png" alt="Grunt Task-2" width="500" height="auto">
+<img src="./grunt-tasks/output/grunt-task2.png" alt="Grunt Task-2" width="500" height="auto">
 
 This will generate a minified version of `input1.css` and place it at `dest/css/input1.min.css`.
 
@@ -317,12 +319,20 @@ project-root/
 ├── Gruntfile.js
 ├── package.json
 ```
-#### NOTE: 
+
+#### NOTE:
 
 When you run the CSS minification task, Grunt will reduce the file size.
+
 ```sh
 Running "cssmin:target" (cssmin) task
 >> 1 file created. 658 B → 454 B
 ```
+
 - Before minification: The file size is 658 B.
 - After minification: The file size is reduced to 454 B, indicating successful minification.
+
+### ⚡ Major Update
+
+Move all Grunt-related code into a newly created `grunt-tasks` folder, except for the `.gitignore` and `README.md` files.
+Additionally, the update includes adding `grunt-tasks/node_modules/` to the `.gitignore file`, ensuring that the `node_modules` directory within the `grunt-tasks` folder is also ignore
