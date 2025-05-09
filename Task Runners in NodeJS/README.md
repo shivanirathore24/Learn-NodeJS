@@ -39,7 +39,7 @@
 8. **Content Publishing**: For blogs and websites, they can automate content publishing and updates.
 9. **Game Servers**: In online gaming, TaskRunners can manage game server instances and matchmakings.
 
-## Grunt Setup
+## Task-Runner: Grunt
 
 Grunt is a popular JavaScript task runner that automates repetitive tasks in web development.
 
@@ -336,3 +336,73 @@ Running "cssmin:target" (cssmin) task
 
 Move all Grunt-related code into a newly created `grunt-tasks` folder, except for the `.gitignore` and `README.md` files.
 Additionally, the update includes adding `grunt-tasks/node_modules/` to the `.gitignore file`, ensuring that the `node_modules` directory within the `grunt-tasks` folder is also ignore
+
+## Task-Runner: Gulp
+
+Gulp is a JavaScript task runner that automates repetitive tasks in web development.
+
+### Installation:
+
+- To install Gulp, follow these steps:
+  - Install Node.js if not already installed. Gulp runs on Node.js.
+  - Install Gulp's command-line interface (CLI) globally using npm (Node Package Manager) with the following command:
+    ```sh
+    npm install --global gulp-cli
+    ```
+  - Verify the installation by checking the Gulp version:
+    ```sh
+    gulp --version
+    ```
+
+### Gulpfile Setup:
+
+The Gulpfile is a configuration file used to define and configure tasks in Gulp.
+
+#### Steps:
+
+1. Create a Gulp Project Directory:
+   - Start by creating a new directory for your Gulp project.
+   - Open your command line or terminal and navigate to this directory.
+2. Initialize a Node.js Project:
+   - Run the following command to create a package.json file, which stores project metadata and dependencies:
+     ```sh
+     npm init
+     ```
+3. Install Gulp Locally:
+   - Install Gulp as a project dependency in the project directory using npm. This allows you to manage Gulp versions specific to your project:
+     ```sh
+     npm install gulp --save-dev
+     ```
+4. Create a Gulpfile: - Create a JavaScript file named "gulpfile.js" in your project directory. This is
+   where you define your Gulp tasks and configuration.
+
+5. Task Configuration in Gulpfile:
+
+   Inside the Gulpfile, you'll configure and define tasks. A basic Gulpfile structure
+   looks like this:
+
+   ```javascript
+   import gulp from "gulp";
+   import pluginName from "gulp-plugin-name";
+
+   gulp.task("task-name", function () {
+     return gulp
+       .src("source-files")
+       .pipe(pluginName(/* plugin options */))
+       .pipe(gulp.dest("destination"));
+   });
+   ```
+
+    - Load Gulp Plugins: 
+      - To use specific Gulp plugins, you need to load them using
+      `'gulp-plugin-name'` in the Gulpfile
+    - Task Execution: 
+      - Gulp tasks are executed using the `gulp.task()` and `gulp.src()` functions. The
+      task definition includes source files, plugins, and destination paths.
+
+6. Run Gulp:
+    - To execute Gulp tasks defined in the Gulpfile, simply run gulp in your project
+   directory:
+      ```sh
+      gulp
+      ```

@@ -1,0 +1,14 @@
+{
+  "name": "gulp-tasks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shivani Rathore",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^5.0.0"
+  }
+}

@@ -1,3 +1,4 @@
 # Ignore node_modules directory as dependencies are listed in package.json 
 # and can be reinstalled with 'npm install'
 grunt-tasks/node_modules/
+gulp-tasks/node_modules/
