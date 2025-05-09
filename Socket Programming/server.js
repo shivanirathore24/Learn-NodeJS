@@ -36,22 +36,26 @@ io.on("connection", (socket) => {
       });
   });
 
-  socket.on("new_message", (message) => {
-    let userMessage = {
-      username: socket.username,
-      message: message,
-    };
+  socket.on("new_message", (messageData) => {
+    const { username, message, timestamp } = messageData;  // Changed here
 
     const newChat = new chatModel({
-      username: socket.username,
-      message: message,
-      timestamp: new Date(),
+        username: username,
+        message: message,  // Changed here
+        timestamp: new Date(timestamp),
     });
-    newChat.save();
 
-    //broadcast this message to all the clients.
-    socket.broadcast.emit("broadcast_message", userMessage);
-  });
+    newChat.save()
+        .then((savedMessage) => {
+            console.log("Message saved:", savedMessage);
+            //broadcast this message to all the clients.
+            socket.broadcast.emit("broadcast_message", messageData);
+        })
+        .catch((err) => {
+            console.error("Error saving message:", err);
+        });
+});
+
 
   // Handle client disconnect
   socket.on("disconnect", (reason) => {

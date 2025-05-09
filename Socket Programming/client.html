@@ -4,25 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
-    <link rel="stylesheet" href="style.css"> <!-- External CSS for styling -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Chat interface container -->
     <div class="chat-container">
-
-        <!-- Container for displaying chat messages -->
         <div id="message-list"></div>
-
-        <!-- Message input section -->
         <div class="message-input-container">
             <input type="text" id="message-input" placeholder="Type a message...">
             <button id="send-message">Send</button>
         </div>
     </div>
-
-    <!-- Load Socket.IO client script from local server -->
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-
     <script>
         // Establish connection with Socket.IO server
         const socket = io.connect('http://localhost:3000');
@@ -41,70 +33,109 @@
         const messageList = document.getElementById("message-list");
         const sendButton = document.getElementById('send-message');
 
-        // Track the last sender to avoid repeating usernames
+        // Track the last sender and date
         let previousSender = null;
+        let previousDate = null;
+
+        function formatTime(date) {
+            let hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            return `${hours}:${minutes} ${ampm}`;
+        }
+
+        function formatDate(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function displayMessage(messageData, isSelf) {
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message", isSelf ? "sent" : "received");
+
+            const messageContentWrapper = document.createElement("div");
+            messageContentWrapper.classList.add("message-content-wrapper");
+
+            const messageTime = new Date(messageData.timestamp);
+            const messageDate = formatDate(messageTime);
+
+            // Show username if it's a new day
+            if (previousDate !== messageDate) {
+                const userNameElement = document.createElement("div");
+                userNameElement.classList.add("user-name");
+                userNameElement.textContent = messageData.username;
+                messageContentWrapper.appendChild(userNameElement);
+                previousSender = messageData.username; // Reset sender on new day, and show name
+            }
+            // Show username if it's a different sender
+            else if (previousSender !== messageData.username) {
+                const userNameElement = document.createElement("div");
+                userNameElement.classList.add("user-name");
+                userNameElement.textContent = messageData.username;
+                messageContentWrapper.appendChild(userNameElement);
+            }
+
+            const textElement = document.createElement("div");
+            textElement.textContent = messageData.message;
+            messageContentWrapper.appendChild(textElement);
+            messageElement.appendChild(messageContentWrapper);
+
+            const timestampElement = document.createElement("div");
+            timestampElement.classList.add("message-timestamp");
+            timestampElement.textContent = formatTime(messageTime);
+            messageElement.appendChild(timestampElement);
+
+            // Date separator logic: Only display if the date has changed
+            if (previousDate !== messageDate) {
+                const dateSeparator = document.createElement("div");
+                dateSeparator.classList.add("message-date-separator");
+                dateSeparator.innerHTML = `<span>${messageDate}</span>`;
+                messageList.appendChild(dateSeparator);
+                previousDate = messageDate; //update date
+            }
+
+            messageList.appendChild(messageElement);
+            messageList.scrollTop = messageList.scrollHeight;
+            previousSender = messageData.username; //update sender
+        }
 
         // Event listener for sending a message when "Send" button is clicked
         sendButton.addEventListener("click", function () {
             const message = messageInput.value.trim();
 
             if (message) {
+                const timestamp = new Date().toISOString();
+                const messageData = {
+                    username: username,
+                    message: message,
+                    timestamp: timestamp
+                };
+
                 // Emit message to server
-                socket.emit('new_message', message);
+                socket.emit('new_message', messageData);
 
                 // Display own message in chat
-                const messageElement = document.createElement("div");
-                const messageContent = previousSender !== username
-                    ? `<div class="user-name">${username}</div>${message}`
-                    : message;
-                
-                messageElement.innerHTML = messageContent;
-                messageElement.classList.add("message", "sent");
-                messageList.appendChild(messageElement);
+                displayMessage(messageData, true);
 
-                // Reset input and scroll to bottom
+                // Reset input
                 messageInput.value = "";
-                messageList.scrollTop = messageList.scrollHeight;
-                previousSender = username;
             }
         });
 
-        // Display messages on UI
-        socket.on('load_messages', (messages) =>{
+        // Display loaded messages on UI
+        socket.on('load_messages', (messages) => {
             messages.forEach(message => {
-                const messageElement = document.createElement("div");
-                messageElement.classList.add("message");
-
-                const isSentByMe = message.username === username;
-                messageElement.classList.add(isSentByMe ? "sent" : "received");
-
-                const messageContent = previousSender !== message.username
-                    ? `<div class="user-name">${message.username}</div>${message.message}`
-                    : message.message;
-
-                messageElement.innerHTML = messageContent;
-                messageList.appendChild(messageElement);
-                previousSender = message.username; // Update previousSender as you process loaded messages
-                messageList.scrollTop = messageList.scrollHeight; // Scroll to the latest loaded message
+                displayMessage(message, message.username === username);
             });
         });
 
         // Listen for incoming messages from other users
         socket.on('broadcast_message', (userMessage) => {
-            const messageElement = document.createElement("div");
-            messageElement.classList.add("message", "received");
-
-            // Show username only if sender has changed
-            const messageContent = previousSender !== userMessage.username
-                ? `<div class="user-name">${userMessage.username}</div>${userMessage.message}`
-                : userMessage.message;
-
-            messageElement.innerHTML = messageContent;
-            messageList.appendChild(messageElement);
-
-            // Scroll to the latest message
-            messageList.scrollTop = messageList.scrollHeight;
-            previousSender = userMessage.username;
+            displayMessage(userMessage, false);
         });
     </script>
 </body>

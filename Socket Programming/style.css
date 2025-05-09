@@ -165,3 +165,38 @@ body {
 .message.received .user-name {
   color: #1a1a1a;
 }
+
+.message-timestamp {
+  font-size: 0.7rem;
+  align-self: flex-end;
+  color: #888;
+  white-space: nowrap; /* Prevent wrapping of timestamp */
+}
+
+.message-content-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.message.sent .message-timestamp {
+  color: #0d47a1;
+}
+
+.message.received .message-timestamp {
+  color: #888;
+}
+
+.message-date-separator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.message-date-separator span {
+  padding: 0.5rem;
+  background-color: #f0f0f0; /* Light background for the date */
+  border-radius: 0.5rem; 
+}

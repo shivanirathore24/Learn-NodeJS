@@ -1213,3 +1213,534 @@ SUMMARY:
 [▶️ Download the "Real-Time Group Chat with Loading Previous Message" Demo Video from Release (Existing User)](https://github.com/shivanirathore24/Learn-NodeJS/releases/download/v3.0/loadPreviousMessage_existingUser.mp4)
 
   <img src="./images/loadPreviousMessage_existingUser.png" alt="Load Previous Message" width="500" height="auto">
+
+## Adding Message Timestamps and Date Separators
+
+### 1. Updated 'client.html' file
+
+#### Before Changes (Old Code):
+
+```html
+<body>
+  <!-- Chat interface container -->
+  <div class="chat-container">
+    <!-- Container for displaying chat messages -->
+    <div id="message-list"></div>
+
+    <!-- Message input section -->
+    <div class="message-input-container">
+      <input type="text" id="message-input" placeholder="Type a message..." />
+      <button id="send-message">Send</button>
+    </div>
+  </div>
+
+  <!-- Load Socket.IO client script from local server -->
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+
+  <script>
+    // Establish connection with Socket.IO server
+    const socket = io.connect("http://localhost:3000");
+
+    // Prompt user for a username (keeps prompting if blank)
+    let username = prompt("Enter your name");
+    while (!username) {
+      username = prompt("Please enter your name:");
+    }
+
+    // Notify server of new user joining the chat
+    socket.emit("join", username);
+
+    // DOM elements for interaction
+    const messageInput = document.getElementById("message-input");
+    const messageList = document.getElementById("message-list");
+    const sendButton = document.getElementById("send-message");
+
+    // Track the last sender to avoid repeating usernames
+    let previousSender = null;
+
+    // Event listener for sending a message when "Send" button is clicked
+    sendButton.addEventListener("click", function () {
+      const message = messageInput.value.trim();
+
+      if (message) {
+        // Emit message to server
+        socket.emit("new_message", message);
+
+        // Display own message in chat
+        const messageElement = document.createElement("div");
+        const messageContent =
+          previousSender !== username
+            ? `<div class="user-name">${username}</div>${message}`
+            : message;
+
+        messageElement.innerHTML = messageContent;
+        messageElement.classList.add("message", "sent");
+        messageList.appendChild(messageElement);
+
+        // Reset input and scroll to bottom
+        messageInput.value = "";
+        messageList.scrollTop = messageList.scrollHeight;
+        previousSender = username;
+      }
+    });
+
+    // Display messages on UI
+    socket.on("load_messages", (messages) => {
+      messages.forEach((message) => {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message");
+
+        const isSentByMe = message.username === username;
+        messageElement.classList.add(isSentByMe ? "sent" : "received");
+
+        const messageContent =
+          previousSender !== message.username
+            ? `<div class="user-name">${message.username}</div>${message.message}`
+            : message.message;
+
+        messageElement.innerHTML = messageContent;
+        messageList.appendChild(messageElement);
+        previousSender = message.username; // Update previousSender as you process loaded messages
+        messageList.scrollTop = messageList.scrollHeight; // Scroll to the latest loaded message
+      });
+    });
+
+    // Listen for incoming messages from other users
+    socket.on("broadcast_message", (userMessage) => {
+      const messageElement = document.createElement("div");
+      messageElement.classList.add("message", "received");
+
+      // Show username only if sender has changed
+      const messageContent =
+        previousSender !== userMessage.username
+          ? `<div class="user-name">${userMessage.username}</div>${userMessage.message}`
+          : userMessage.message;
+
+      messageElement.innerHTML = messageContent;
+      messageList.appendChild(messageElement);
+
+      // Scroll to the latest message
+      messageList.scrollTop = messageList.scrollHeight;
+      previousSender = userMessage.username;
+    });
+  </script>
+</body>
+```
+
+#### After Changes (New Code):
+
+```html
+<body>
+  <div class="chat-container">
+    <div id="message-list"></div>
+    <div class="message-input-container">
+      <input type="text" id="message-input" placeholder="Type a message..." />
+      <button id="send-message">Send</button>
+    </div>
+  </div>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script>
+    // Establish connection with Socket.IO server
+    const socket = io.connect("http://localhost:3000");
+
+    // Prompt user for a username (keeps prompting if blank)
+    let username = prompt("Enter your name");
+    while (!username) {
+      username = prompt("Please enter your name:");
+    }
+
+    // Notify server of new user joining the chat
+    socket.emit("join", username);
+
+    // DOM elements for interaction
+    const messageInput = document.getElementById("message-input");
+    const messageList = document.getElementById("message-list");
+    const sendButton = document.getElementById("send-message");
+
+    // Track the last sender and date
+    let previousSender = null;
+    let previousDate = null;
+
+    function formatTime(date) {
+      let hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      return `${hours}:${minutes} ${ampm}`;
+    }
+
+    function formatDate(date) {
+      const day = date.getDate().toString().padStart(2, "0");
+      const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    function displayMessage(messageData, isSelf) {
+      const messageElement = document.createElement("div");
+      messageElement.classList.add("message", isSelf ? "sent" : "received");
+
+      const messageContentWrapper = document.createElement("div");
+      messageContentWrapper.classList.add("message-content-wrapper");
+
+      const messageTime = new Date(messageData.timestamp);
+      const messageDate = formatDate(messageTime);
+
+      // Show username if it's a new day
+      if (previousDate !== messageDate) {
+        const userNameElement = document.createElement("div");
+        userNameElement.classList.add("user-name");
+        userNameElement.textContent = messageData.username;
+        messageContentWrapper.appendChild(userNameElement);
+        previousSender = messageData.username; // Reset sender on new day, and show name
+      }
+      // Show username if it's a different sender
+      else if (previousSender !== messageData.username) {
+        const userNameElement = document.createElement("div");
+        userNameElement.classList.add("user-name");
+        userNameElement.textContent = messageData.username;
+        messageContentWrapper.appendChild(userNameElement);
+      }
+
+      const textElement = document.createElement("div");
+      textElement.textContent = messageData.message;
+      messageContentWrapper.appendChild(textElement);
+      messageElement.appendChild(messageContentWrapper);
+
+      const timestampElement = document.createElement("div");
+      timestampElement.classList.add("message-timestamp");
+      timestampElement.textContent = formatTime(messageTime);
+      messageElement.appendChild(timestampElement);
+
+      // Date separator logic: Only display if the date has changed
+      if (previousDate !== messageDate) {
+        const dateSeparator = document.createElement("div");
+        dateSeparator.classList.add("message-date-separator");
+        dateSeparator.innerHTML = `<span>${messageDate}</span>`;
+        messageList.appendChild(dateSeparator);
+        previousDate = messageDate; //update date
+      }
+
+      messageList.appendChild(messageElement);
+      messageList.scrollTop = messageList.scrollHeight;
+      previousSender = messageData.username; //update sender
+    }
+
+    // Event listener for sending a message when "Send" button is clicked
+    sendButton.addEventListener("click", function () {
+      const message = messageInput.value.trim();
+
+      if (message) {
+        const timestamp = new Date().toISOString();
+        const messageData = {
+          username: username,
+          message: message,
+          timestamp: timestamp,
+        };
+
+        // Emit message to server
+        socket.emit("new_message", messageData);
+
+        // Display own message in chat
+        displayMessage(messageData, true);
+
+        // Reset input
+        messageInput.value = "";
+      }
+    });
+
+    // Display loaded messages on UI
+    socket.on("load_messages", (messages) => {
+      messages.forEach((message) => {
+        displayMessage(message, message.username === username);
+      });
+    });
+
+    // Listen for incoming messages from other users
+    socket.on("broadcast_message", (userMessage) => {
+      displayMessage(userMessage, false);
+    });
+  </script>
+</body>
+```
+
+1. New Variables for Time and Date Tracking
+   ```javascript
+   let previousSender = null;
+   let previousDate = null;
+   ```
+   - previousDate is introduced (alongside previousSender) to track the last displayed message date, so that the app can show a date separator whenever the date changes.
+2. Utility Function: formatTime(date)
+
+   ```javascript
+   function formatTime(date) {
+     let hours = date.getHours();
+     const minutes = date.getMinutes().toString().padStart(2, "0");
+     const ampm = hours >= 12 ? "PM" : "AM";
+     hours = hours % 12;
+     hours = hours ? hours : 12;
+     return `${hours}:${minutes} ${ampm}`;
+   }
+   ```
+
+   - Purpose:
+
+     - This function formats a JavaScript Date object into a 12-hour time format with AM/PM.
+
+   - How it works:
+     - Extracts the hour and minute from the date object.
+     - Converts the hour to a 12-hour format.
+     - Pads the minute with a leading zero if needed (e.g., 09 for 9).
+     - Appends AM or PM based on the hour.
+     - Returns the formatted time string.
+   - Example:
+     ```javascript
+     formatTime(new Date()); // Output: "10:45 AM"
+     ```
+
+3. Utility Function: formatDate(date)
+   ```javascript
+   function formatDate(date) {
+     const day = date.getDate().toString().padStart(2, "0");
+     const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed
+     const year = date.getFullYear();
+     return `${day}/${month}/${year}`;
+   }
+   ```
+   - Purpose:
+     - This function formats a JavaScript Date object into a DD/MM/YYYY format.
+   - How it works:
+     - Extracts the day, month, and year from the date object.
+     - Pads the day and month with a leading zero if needed (e.g., 09 for 9).
+     - Returns the formatted date string.
+   - Example:
+     ```javascript
+     formatDate(new Date()); // Output: "09/05/2025"
+     ```
+4. Centralized displayMessage() Function
+
+   ```javascript
+   function displayMessage(messageData, isSelf) {
+     const messageElement = document.createElement("div");
+     messageElement.classList.add("message", isSelf ? "sent" : "received");
+
+     const messageContentWrapper = document.createElement("div");
+     messageContentWrapper.classList.add("message-content-wrapper");
+
+     const messageTime = new Date(messageData.timestamp);
+     const messageDate = formatDate(messageTime);
+
+     // Show username if it's a new day
+     if (previousDate !== messageDate) {
+       const userNameElement = document.createElement("div");
+       userNameElement.classList.add("user-name");
+       userNameElement.textContent = messageData.username;
+       messageContentWrapper.appendChild(userNameElement);
+       previousSender = messageData.username; // Reset sender on new day, and show name
+     }
+     // Show username if it's a different sender
+     else if (previousSender !== messageData.username) {
+       const userNameElement = document.createElement("div");
+       userNameElement.classList.add("user-name");
+       userNameElement.textContent = messageData.username;
+       messageContentWrapper.appendChild(userNameElement);
+     }
+
+     const textElement = document.createElement("div");
+     textElement.textContent = messageData.message;
+     messageContentWrapper.appendChild(textElement);
+     messageElement.appendChild(messageContentWrapper);
+
+     const timestampElement = document.createElement("div");
+     timestampElement.classList.add("message-timestamp");
+     timestampElement.textContent = formatTime(messageTime);
+     messageElement.appendChild(timestampElement);
+
+     // Date separator logic: Only display if the date has changed
+     if (previousDate !== messageDate) {
+       const dateSeparator = document.createElement("div");
+       dateSeparator.classList.add("message-date-separator");
+       dateSeparator.innerHTML = `<span>${messageDate}</span>`;
+       messageList.appendChild(dateSeparator);
+       previousDate = messageDate; // Update date
+     }
+
+     messageList.appendChild(messageElement);
+     messageList.scrollTop = messageList.scrollHeight;
+     previousSender = messageData.username; // Update sender
+   }
+   ```
+
+   - Purpose:
+     - This function displays a message in the chat interface, styling it as either sent or received depending on whether the message was sent by the current user (`isSelf`).
+   - How it works:
+     1. Message Container Creation:
+        - Creates a new `div` element (`messageElement`) and assigns it the class `"message"`, along with `"sent"` or `"received"` based on the isSelf flag.
+     2. Wrapper for Message Content:
+        - A `div` (`messageContentWrapper`) is created to wrap the message text and (conditionally) the sender’s name.
+     3. Username Display Logic:
+        - If the date has changed since the last message, the username is displayed regardless of whether it’s the same sender.
+        - Else, if the sender is different from the previous message, the username is also shown.
+        - In both cases, the username is shown using a `div` with the class `"user-name"`.
+     4. Message Text:
+        - The actual message text is added inside a `div` and appended to the content wrapper.
+     5. Timestamp:
+        - The message's timestamp is formatted using `formatTime()` and added as a `div` with class `"message-timestamp"`.
+     6. Date Separator:
+        - If the message's date is different from the previous message's date, a date separator (`"message-date-separator"`) is inserted to visually separate messages by day. The `previousDate` is then updated.
+     7. Scroll and State Update:
+        - The message is appended to the message list, and the scroll is adjusted to show the newest message.
+        - `previousSender` and `previousDate` are updated to keep track of state for future messages.
+     - Example:
+       ```javascript
+       const messageData = {
+         username: "Shiv",
+         message: "Hello, World!",
+         timestamp: "2025-05-09T10:45:00Z",
+       };
+       displayMessage(messageData, true);
+       ```
+       This will show Shiv’s message as a sent message with the proper timestamp and a date separator if it's a new day. If Shiv wasn't the sender of the previous message or it's a new date, their name will also be shown.
+
+5. Sending Messages
+
+   ```javascript
+   sendButton.addEventListener("click", function () {
+     const message = messageInput.value.trim();
+
+     if (message) {
+       const timestamp = new Date().toISOString();
+       const messageData = {
+         username: username,
+         message: message,
+         timestamp: timestamp,
+       };
+
+       // Emit message to server
+       socket.emit("new_message", messageData);
+
+       // Display own message in chat
+       displayMessage(messageData, true);
+
+       // Reset input
+       messageInput.value = "";
+     }
+   });
+   ```
+
+   - When the "Send" button is clicked, the following happens:
+     - The message input is trimmed and checked for content.
+     - The message is combined with a timestamp (current date and time) and sent to the server via socket.emit('new_message', messageData).
+     - The message is displayed in the chat with the displayMessage function, tagged as a sent message (true).
+     - Finally, the message input is cleared.
+
+6. Displaying Received Messages
+
+   ```javascript
+   socket.on("broadcast_message", (userMessage) => {
+     displayMessage(userMessage, false);
+   });
+   ```
+
+   - The `socket.on('broadcast_message')` listens for any incoming messages sent by other users.
+   - When a message is received, it is passed to the `displayMessage` function with false as the second argument, indicating that the message is received.
+
+7. Loading Previous Messages
+   ```javascript
+   socket.on("load_messages", (messages) => {
+     messages.forEach((message) => {
+       displayMessage(message, message.username === username);
+     });
+   });
+   ```
+   - Upon initial connection, the client loads previous chat messages from the server.
+   - Each message is passed to the `displayMessage` function, with the second argument indicating if the message was sent by the current user or someone else.
+
+The changes add timestamps and date separators to messages, improving organization, user experience, and interface professionalism, while aligning with popular chat apps for better usability and retention.
+
+### 2. Updated 'server.js' file
+
+### Before Changes (Old Code):
+
+```javascript
+socket.on("new_message", (message) => {
+  let userMessage = {
+    username: socket.username,
+    message: message,
+  };
+
+  const newChat = new chatModel({
+    username: socket.username,
+    message: message,
+    timestamp: new Date(),
+  });
+  newChat.save();
+
+  //broadcast this message to all the clients.
+  socket.broadcast.emit("broadcast_message", userMessage);
+});
+```
+
+#### After Changes (New Code):
+
+```javascript
+socket.on("new_message", (messageData) => {
+  const { username, message, timestamp } = messageData; // Changed here
+
+  const newChat = new chatModel({
+    username: username,
+    message: message, // Changed here
+    timestamp: new Date(timestamp),
+  });
+
+  newChat
+    .save()
+    .then((savedMessage) => {
+      console.log("Message saved:", savedMessage);
+      //broadcast this message to all the clients.
+      socket.broadcast.emit("broadcast_message", messageData);
+    })
+    .catch((err) => {
+      console.error("Error saving message:", err);
+    });
+});
+```
+
+The updated part of the code focuses on the new_message event listener where the message is being handled:
+
+1. Changed `message` to `messageData`:
+   - Instead of just the message text, the entire message object (`messageData`) is now passed, which includes the username, message, and timestamp.
+2. Destructuring messageData:
+   - The incoming message is now an object (`messageData`) that includes `username`, `message`, and `timestamp`. This allows more structured data handling.
+3. Saving the message to MongoDB:
+   - The `newChat` object is created with the destructured values (`username`, `message`, and `timestamp`), which are saved to the database using `chatModel`.
+   - `timestamp` is converted into a proper `Date` object (`new Date(timestamp)`) to store the correct time as per the message data.
+4. Broadcasting the message:
+   - After saving the message in the database, the broadcast is sent to all connected clients with the updated `messageData`, which includes the `username`, `message`, and `timestamp`.
+
+These changes ensure that messages are saved with their timestamps and usernames properly, and that they are consistently broadcasted across all clients with full data.
+
+### Output Overview
+
+  <!-- [▶️ Watch "Real-Time Group Chat with Timestamp Support" Demo Video](/Socket%20Programming/videos/timestampDateOnMessage.mp4) -->
+
+[▶️ Download the "Real-Time Group Chat with Timestamp Support" Demo Video from Release](https://github.com/shivanirathore24/Learn-NodeJS/releases/download/v4.0/timestampDateOnMessage.mp4)
+
+<img src="./images/timestampDateOnMessage.png" alt="Time Date on Chat" width="700" height="auto">
+
+## Summarising it
+
+- We have discussed what socket.io is, why it is needed, applications and
+  working with it.
+- We have made the connection to the backend and frontend with socket.io.
+- We have seen how to run the application.
+- We have discussed basic events, how they are emitted and how to listen to
+  them.
+- We have seen the integration of the mongodb database with our application.
+
+### Some Additional Resources:
+
+[More on Rooms](https://socket.io/docs/v4/rooms)
+
+[Socket.io](https://socket.io/docs/v4/)
