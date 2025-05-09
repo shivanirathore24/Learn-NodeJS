@@ -1,0 +1,1 @@
+function sampleFunction(){console.log("This is a sample function!")}document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll(".button").forEach(e=>{e.addEventListener("click",function(){alert("Button clicked!")})}),console.log("Sample JS loaded and ready!")});let sampleVar="This is a sample variable.";

@@ -77,3 +77,142 @@ The Gruntfile is a configuration file used to define and configure tasks in Grun
 4. Create a Gruntfile:
    - Create a JavaScript file named "Gruntfile.js" in your project directory. This is
      where you define your Grunt tasks and configuration.
+
+## Task Configuration in Gruntfile
+
+Inside the Gruntfile, you'll configure and define tasks. A basic Gruntfile structure looks like this:
+
+```javascript
+module.exports = function (grunt) {
+  grunt.initConfig({
+    // Define tasks and configurations here
+  });
+
+  // Load Grunt plugins and tasks
+  grunt.loadNpmTasks("plugin-name");
+
+  grunt.registerTask("custom-task", ["task1", "task2"]);
+};
+```
+
+1.  Load Grunt Plugins: - To use specific Grunt plugins, you need to load them using
+    `grunt.loadNpmTasks('plugin-name')` in the Gruntfile.
+2.  Task Registration:
+    - You can register custom tasks using `grunt.registerTask()` to define the order in which tasks are executed.
+3.  Run Grunt:
+    - To execute Grunt tasks defined in the Gruntfile, simply run grunt in your project directory:
+      ```sh
+      grunt
+      ```
+
+## Grunt Task-1: JavaScript Minification
+
+### 1. Install Required Grunt Plugin
+
+- Install Grunt CLI globally to access the grunt command from anywhere:
+
+  ```sh
+  npm install -g grunt-cli
+  ```
+
+- Then, install **Grunt and the Uglify plugin locally** in your project:
+
+  ```sh
+  npm install --save-dev grunt grunt-contrib-uglify
+  ```
+
+This ensures both Grunt and the Uglify plugin are available for your project’s build tasks.
+
+### 2. Set Up Project Directory Structure
+
+Create the following folder structure:
+
+```
+your-project/
+├── src/
+│   └── js/
+│       └── input1.js   ← Write your JavaScript code here
+├── dest/
+├── Gruntfile.js
+└── package.json
+```
+
+Example content of input1.js:
+
+```javascript
+function greet(name) {
+  console.log("Hello, " + name + "!");
+}
+greet("Shivani");
+```
+
+### 3. Configure and Register Tasks in Gruntfile.js
+
+```javascript
+module.exports = function (grunt) {
+  // Configure the tasks.
+  grunt.initConfig({
+    //Specify tasks.
+    uglify: {
+      target: {
+        files: {
+          // "dest/js/main.min.js": ["src/js/input1.js", "src/js/input2.js"]
+          "dest/js/main.min.js": ["src/js/*.js"],
+        },
+      },
+    },
+  });
+
+  // Load libraries.
+  grunt.loadNpmTasks("grunt-contrib-uglify");
+
+  // Setting up Tasks.
+  grunt.registerTask("default", ["uglify"]);
+};
+```
+
+Explaination:
+
+1. Configuring Grunt Tasks (`grunt.initConfig`)
+
+   - `grunt.initConfig` is used to configure the tasks for Grunt.
+   - The `uglify` task is configured here to minify all `.js` files in the `src/js/` folder.
+     - Destination: `"dest/js/main.min.js"` specifies where the minified file will be saved.
+     - Source: `"src/js/*.js"` targets all JavaScript files in the `src/js/` folder for minification.
+     - The comment `// "dest/js/main.min.js": ["src/js/input1.js", "src/js/input2.js"]` is an example showing how you can specify individual files if needed
+
+2. Loading Grunt Plugin (`grunt.loadNpmTasks`)
+   - `grunt.loadNpmTasks` loads the required Grunt plugin (`grunt-contrib-uglify`), which provides the uglify task for JavaScript minification.
+3. Registering the Default Task (grunt.registerTask)
+
+   - `grunt.registerTask` registers the default task. Here, it tells Grunt to run the `uglify` task when you execute `grunt` without specifying a task name.
+
+   The configuration minifies all .js files in the src/js/ folder and outputs the result as main.min.js in the dest/js/ folder.
+
+### 4. Run Grunt Task
+
+In your project root, run:
+
+```sh
+grunt
+```
+
+<img src="./output/grunt-task1.png" alt="Grunt Task-1" width="500" height="auto">
+
+#### Meaning of: `1 file created 437 B → 328 B`
+
+It means the original JavaScript file was 437 bytes, and after minification, it was reduced to 328 bytes — saving space by removing unnecessary characters like spaces, comments, and line breaks.
+
+This will create a minified version of `input1.js` at `dest/js/main.min.js.`
+
+```
+project-root/
+├── src/
+│   └── js/
+│       └── input1.js
+├── dest/
+│   └── js/
+│       └── main.min.js  ← (generated after running Grunt)
+├── Gruntfile.js
+├── package.json
+```
