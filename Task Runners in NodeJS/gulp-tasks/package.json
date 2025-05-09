@@ -8,7 +8,9 @@
   },
   "author": "Shivani Rathore",
   "license": "ISC",
+  "type": "module",
   "devDependencies": {
-    "gulp": "^5.0.0"
+    "gulp": "^5.0.0",
+    "gulp-imagemin": "^9.1.0"
   }
 }

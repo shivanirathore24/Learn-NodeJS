@@ -393,16 +393,140 @@ The Gulpfile is a configuration file used to define and configure tasks in Gulp.
    });
    ```
 
-    - Load Gulp Plugins: 
-      - To use specific Gulp plugins, you need to load them using
-      `'gulp-plugin-name'` in the Gulpfile
-    - Task Execution: 
-      - Gulp tasks are executed using the `gulp.task()` and `gulp.src()` functions. The
-      task definition includes source files, plugins, and destination paths.
+   - Load Gulp Plugins:
+     - To use specific Gulp plugins, you need to load them using
+       `'gulp-plugin-name'` in the Gulpfile
+   - Task Execution:
+     - Gulp tasks are executed using the `gulp.task()` and `gulp.src()` functions. The
+       task definition includes source files, plugins, and destination paths.
 
 6. Run Gulp:
-    - To execute Gulp tasks defined in the Gulpfile, simply run gulp in your project
-   directory:
-      ```sh
-      gulp
-      ```
+   - To execute Gulp tasks defined in the Gulpfile, simply run gulp in your project
+     directory:
+     ```sh
+     gulp
+     ```
+
+## Image Optimization using Gulp
+
+### 1. Setting up Gulp for Image Optimization:
+
+- First, set up Gulp and create a Gulpfile (as discussed in a previous response).
+- Image Optimization Plugin: You'll need an image optimization plugin for Gulp.
+  Popular choices include `gulp-imagemin` and `gulp-image-optimization`. Install it
+  as a project dependency.
+
+  ```sh
+  npm install --save-dev gulp-imagemin
+  ```
+
+### 2. Create Folder Structure for Images
+
+- Inside your project directory:
+
+  - Create a `src/images` folder and place 3 sample images in it.
+  - Create a corresponding `dest/images` folder where the optimized images will be saved.
+
+  ```
+  project/
+  ├── src/
+  │   └── images/
+  │       ├── data-structures-algorithms.png
+  │       ├── mern-stack-development.png
+  │       └── oxford-student-atlas.ong
+  ├── dest/
+  │   └── images/
+  ├── gulpfile.js
+  ├── package.json
+  ├── package-lock.json
+  └── node_modules/
+  ```
+
+### 3. 'gulpfile.js': Define a Gulp Task
+
+In Gulpfile, define a task for image optimization.
+
+```javascript
+import gulp from "gulp";
+import imagemin from "gulp-imagemin";
+
+gulp.task("default", () => {
+  //Define Task
+  return gulp
+    .src("src/images/*", { encoding: false })
+    .pipe(imagemin())
+    .pipe(gulp.dest("dest/images/"));
+});
+```
+
+Explaination:
+
+1. `import gulp from "gulp";`
+   - Imports the core Gulp module used for automating tasks.
+2. `import imagemin from "gulp-imagemin";`
+   - Imports the image optimization plugin which compresses images (JPEG, PNG, etc.) without losing quality.
+3. `gulp.task("default", () => { ... });`
+   - Defines the default Gulp task. This task will run when you execute just gulp in the terminal.
+4. `.src("src/images/*")`
+   - Selects all image files in the `src/images` directory as input.
+   - { encoding: false } ensures that the images are treated as binary files, not text files. This is important for images to avoid potential issues with encoding during the task.
+5. `.pipe(imagemin())`
+   - Passes the selected images through the `imagemin` plugin to optimize/compress them.
+6. `.pipe(gulp.dest("dest/images/"));`
+   - Outputs the optimized images into the `dest/images` directory.
+
+#### What This Task Does:
+
+It reads all images from `src/images/`, optimizes them using `gulp-imagemin`, and saves the optimized versions in `dest/images/`.
+
+### 4. Run Gulp to Optimize Image
+
+Run the default Gulp task from your project directory using the following command:
+
+```sh
+gulp
+```
+
+<img src="./gulp-tasks/output/gulp-task-runner.png" alt="Gulp Task-Runner" width="600" height="auto">
+
+This will automatically compress all images from the `src/images/` folder and save the optimized versions to the `dest/images/` folder.
+
+```
+project/
+├── dest/
+│   └── images/
+│       ├── data-structures-algorithms.png  (optimized)
+│       ├── mern-stack-development.png     (optimized)
+│       └── oxford-student-atlas.png       (optimized)
+├── gulpfile.js
+├── node_modules/
+├── package-lock.json
+├── package.json
+└── src/
+    └── images/
+        ├── data-structures-algorithms.png  (original)
+        ├── mern-stack-development.png     (original)
+        └── oxford-student-atlas.png       (original)
+```
+
+#### Image Size Comparison: Before and After Optimization
+
+<img src="./gulp-tasks/output/before-optimization-images-size.png" alt="Images Sizes Before Optimization" width="700" height="auto">
+
+<img src="./gulp-tasks/output/after-optimization-images-size.png" alt="Images Sizes After Optimization" width="700" height="auto">
+
+## Summarising it
+
+Let’s summarise what we have learned in this module:
+
+- We discussed TaskRunners and their importance, needs, and applications.
+- We explored the Grunt task runner, including its basic setup and operation.
+- We also examined another significant TaskRunner, Gulp, its functionality, and
+  use cases.
+- Furthermore, we implemented image optimization using gulp-imagemin.
+
+### Some Additional Resources:
+
+[Grunt Plugins](https://gruntjs.com/plugins)
+
+[Gulp Plugins](https://gulpjs.com/plugins/)
