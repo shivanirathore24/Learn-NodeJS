@@ -1,20 +1,36 @@
 module.exports = function (grunt) {
-  // Configure the tasks.
+  // Task configuration
   grunt.initConfig({
-    //Specify tasks.
+
+    // Minify JS files
     uglify: {
       target: {
         files: {
-          // "dest/js/main.min.js": ["src/js/input1.js", "src/js/input2.js"]
           "dest/js/main.min.js": ["src/js/*.js"],
         },
       },
     },
+
+    // Minify CSS files
+    cssmin: {
+      target: {
+        files: [
+          {
+            expand: true,
+            cwd: "src/css",
+            src: ["*css", "!*.min.css"],
+            dest: "dest/css",
+            ext: ".min.css",
+          },
+        ],
+      },
+    },
   });
 
-  // Load libraries.
+  // Load plugins
   grunt.loadNpmTasks("grunt-contrib-uglify");
+  grunt.loadNpmTasks("grunt-contrib-cssmin");
 
-  // Setting up Tasks.
-  grunt.registerTask("default", ["uglify"]);
+  // Default tasks
+  grunt.registerTask("default", ["uglify", "cssmin"]);
 };

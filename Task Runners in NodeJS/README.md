@@ -191,7 +191,7 @@ Explaination:
 
 ### 4. Run Grunt Task
 
-In your project root, run:
+Run Grunt from the project root to execute the minification tasks:
 
 ```sh
 grunt
@@ -199,9 +199,6 @@ grunt
 
 <img src="./output/grunt-task1.png" alt="Grunt Task-1" width="500" height="auto">
 
-#### Meaning of: `1 file created 437 B → 328 B`
-
-It means the original JavaScript file was 437 bytes, and after minification, it was reduced to 328 bytes — saving space by removing unnecessary characters like spaces, comments, and line breaks.
 
 This will create a minified version of `input1.js` at `dest/js/main.min.js.`
 
@@ -216,3 +213,116 @@ project-root/
 ├── Gruntfile.js
 ├── package.json
 ```
+#### NOTE:
+
+When you run the CSS minification task, Grunt will reduce the file size. For example:
+```sh
+Running "cssmin:target" (cssmin) task  
+>> 1 file created. 658 B → 454 B
+```
+- Before minification: The file size was 658 B.
+- After minification: The file size was reduced to 454 B, indicating successful minification by removing unnecessary characters like spaces, comments, and line breaks.
+
+## Grunt Task-2: Minify CSS
+
+### 1. Install the CSSMin plugin
+
+```sh
+npm install grunt-contrib-cssmin --save-dev
+```
+
+### 2. Prepare the source file
+
+- Create a folder structure like: src/css/input1.css
+- Add some CSS code inside input1.css
+
+### 3. Update Gruntfile.js to include CSS minification
+
+```javascript
+module.exports = function (grunt) {
+  // Task configuration
+  grunt.initConfig({
+    // Minify JS files
+    uglify: {
+      target: {
+        files: {
+          "dest/js/main.min.js": ["src/js/*.js"],
+        },
+      },
+    },
+
+    // Minify CSS files
+    cssmin: {
+      target: {
+        files: [
+          {
+            expand: true,
+            cwd: "src/css",
+            src: ["*css", "!*.min.css"],
+            dest: "dest/css",
+            ext: ".min.css",
+          },
+        ],
+      },
+    },
+  });
+
+  // Load plugins
+  grunt.loadNpmTasks("grunt-contrib-uglify");
+  grunt.loadNpmTasks("grunt-contrib-cssmin");
+
+  // Default tasks
+  grunt.registerTask("default", ["uglify", "cssmin"]);
+};
+```
+
+Explaination:
+
+1. Added cssmin task in grunt.initConfig
+   - Purpose: This task will minify all `.css` files in `src/css/` and output them as .min.css into `dest/css/`.
+     - `expand: true:` Enables dynamic file mapping.
+     - `cwd:` Sets the source folder (Current Working Directory).
+     - `src:` Selects all `.css` files, excluding already minified ones.
+     - `dest:` Output destination folder.
+     - `ext:` Adds `.min.css` extension to the output.
+2. Loaded the CSSMin plugin
+   - Loads the `grunt-contrib-cssmin` plugin so Grunt can use the `cssmin` task.
+3. Updated the default task
+   - Runs both `uglify` (for JS) and `cssmin` (for CSS) when you execute `grunt` in the terminal.
+
+### 4. Run Grunt Task
+
+Run Grunt from the project root to execute the minification tasks:
+
+```sh
+grunt
+```
+
+<img src="./output/grunt-task2.png" alt="Grunt Task-2" width="500" height="auto">
+
+This will generate a minified version of `input1.css` and place it at `dest/css/input1.min.css`.
+
+```
+project-root/
+├── src/
+│   ├── js/
+│   │   └── input1.js
+│   └── css/
+│       └── input1.css
+├── dest/
+│   ├── js/
+│   │   └── main.min.js       ← (generated after JS minification)
+│   └── css/
+│       └── input1.min.css    ← (generated after CSS minification)
+├── Gruntfile.js
+├── package.json
+```
+#### NOTE: 
+
+When you run the CSS minification task, Grunt will reduce the file size.
+```sh
+Running "cssmin:target" (cssmin) task
+>> 1 file created. 658 B → 454 B
+```
+- Before minification: The file size is 658 B.
+- After minification: The file size is reduced to 454 B, indicating successful minification.
