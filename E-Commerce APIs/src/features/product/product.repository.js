@@ -1,7 +1,5 @@
-import { ObjectId } from "mongodb";
-import { getDB } from "../../../config/mongodb.js";
-import { ApplicationError } from "../../error-handler/applicationError.js";
 import mongoose from "mongoose";
+import { ApplicationError } from "../../error-handler/applicationError.js";
 import { productSchema } from "./product.schema.js";
 import { reviewSchema } from "./review.schema.js";
 import { categorySchema } from "./category.schema.js";
@@ -11,10 +9,6 @@ const ReviewModel = mongoose.model("Review", reviewSchema);
 const CategoryModel = mongoose.model("Category", categorySchema);
 
 class ProductRepository {
-  constructor() {
-    this.collection = "products";
-  }
-
   async add(productData) {
     try {
       //console.log(productData);
@@ -30,7 +24,7 @@ class ProductRepository {
           _id: { $in: productData.categories },
         },
         {
-          $push: { products: new ObjectId(savedProduct._id) },
+          $push: { products: savedProduct._id },
         }
       );
       return savedProduct;
@@ -42,9 +36,7 @@ class ProductRepository {
 
   async getAll() {
     try {
-      const db = getDB();
-      const collection = db.collection(this.collection);
-      return await collection.find().toArray();
+      return await ProductModel.find();
     } catch (err) {
       console.log(err);
       throw new ApplicationError("Something went wrong with Data", 500);
@@ -53,19 +45,18 @@ class ProductRepository {
 
   async get(id) {
     try {
-      const db = getDB();
-      const collection = db.collection(this.collection);
-      return await collection.findOne({ _id: new ObjectId(id) });
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return null; // Or throw an error if you prefer
+      }
+      return await ProductModel.findById(id);
     } catch (err) {
       console.log(err);
       throw new ApplicationError("Something went wrong with Data", 500);
     }
   }
 
-  async filter(minPrice, maxPrice, category) {
+  async filter(minPrice, maxPrice, categories) {
     try {
-      const db = getDB();
-      const collection = db.collection(this.collection);
       let filterExpression = {};
       if (minPrice) {
         filterExpression.price = { $gte: parseFloat(minPrice) };
@@ -76,19 +67,17 @@ class ProductRepository {
           $lte: parseFloat(maxPrice),
         };
       }
-      if (category) {
+      if (categories) {
         // Replace single quotes with double quotes and parse the JSON string safely
-        const parsedCategories = JSON.parse(category.replace(/'/g, '"'));
-        filterExpression = {
-          $and: [{ category: { $in: parsedCategories } }, filterExpression],
-        };
-        // filterExpression = { $and: [{ category: category }, filterExpression] };
-        // filterExpression.category = category;
+        const parsedCategories = JSON.parse(categories.replace(/'/g, '"'));
+        filterExpression.categories = { $in: parsedCategories };
       }
-      return collection
-        .find(filterExpression)
-        .project({ name: 1, price: 1, _id: 0, ratings: { $slice: -1 } })
-        .toArray();
+
+      return await ProductModel.find(filterExpression).select({
+        name: 1,
+        price: 1,
+        ratings: { $slice: -1 },
+      });
     } catch (err) {
       console.log(err);
       throw new ApplicationError("Something went wrong with Data", 500);
@@ -106,8 +95,8 @@ class ProductRepository {
       // 2. Get the existing review
       let review;
       const existingReview = await ReviewModel.findOne({
-        product: new ObjectId(productID),
-        user: new ObjectId(userID),
+        product: productID,
+        user: userID,
       });
 
       if (existingReview) {
@@ -116,8 +105,8 @@ class ProductRepository {
         review = existingReview;
       } else {
         const newReview = new ReviewModel({
-          product: new ObjectId(productID),
-          user: new ObjectId(userID),
+          product: productID,
+          user: userID,
           rating: rating,
         });
         await newReview.save();
@@ -136,19 +125,34 @@ class ProductRepository {
 
   async averageProductPricePerCategory() {
     try {
-      const db = getDB();
-      return await db
-        .collection(this.collection)
-        .aggregate([
-          {
-            // Get Average price per category
-            $group: {
-              _id: "$category",
-              averagePrice: { $avg: "$price" },
-            },
+      return await ProductModel.aggregate([
+        {
+          $unwind: "$categories",
+        },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "categories",
+            foreignField: "_id",
+            as: "categoryInfo",
           },
-        ])
-        .toArray();
+        },
+        {
+          $unwind: "$categoryInfo",
+        },
+        {
+          $group: {
+            _id: "$categoryInfo.name",
+            averagePrice: { $avg: "$price" },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            averagePrice: { $round: ["$averagePrice", 2] },
+          },
+        },
+      ]);
     } catch (err) {
       console.log(err);
       throw new ApplicationError("Something went wrong with Data", 500);

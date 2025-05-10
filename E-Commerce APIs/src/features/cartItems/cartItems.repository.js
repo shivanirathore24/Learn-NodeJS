@@ -1,40 +1,33 @@
-import { ObjectId } from "mongodb";
-import { getDB } from "../../../config/mongodb.js";
+import mongoose from "mongoose";
 import { ApplicationError } from "../../error-handler/applicationError.js";
+import { cartItemSchema } from "./cartItems.schema.js";
+
+// Define the Mongoose model
+const CartItemModel = mongoose.model("CartItem", cartItemSchema);
 
 export default class CartItemsRepository {
-  constructor() {
-    this.collection = "cartItems";
-  }
-
   async add(productID, userID, quantity) {
     try {
-      const db = getDB();
-      const collection = db.collection(this.collection);
-
       // Check if the product already exists in the user's cart
-      const existingItem = await collection.findOne({
-        productID: new ObjectId(productID),
-        userID: new ObjectId(userID),
+      const existingItem = await CartItemModel.findOne({
+        productID: productID,
+        userID: userID,
       });
 
       if (existingItem) {
         // If it exists, just update the quantity
-        await collection.updateOne(
+        await CartItemModel.updateOne(
           { _id: existingItem._id },
           { $inc: { quantity: quantity } }
         );
       } else {
-        // If not exists, get the next counter and insert the new item
-        const id = await this.getNextCounter(db);
-        console.log("Generated ID for new item:", id);
-
-        await collection.insertOne({
-          _id: id,
-          productID: new ObjectId(productID),
-          userID: new ObjectId(userID),
+        // If not exists, insert the new item
+        const newItem = new CartItemModel({
+          productID: productID,
+          userID: userID,
           quantity: quantity,
         });
+        await newItem.save();
       }
     } catch (err) {
       console.log(err);
@@ -44,9 +37,9 @@ export default class CartItemsRepository {
 
   async get(userID) {
     try {
-      const db = getDB();
-      const collection = db.collection(this.collection);
-      return await collection.find({ userID: new ObjectId(userID) }).toArray();
+      return await CartItemModel.find({ userID: userID })
+        .populate("productID")
+        .populate("userID");
     } catch (err) {
       console.log(err);
       throw new ApplicationError("Something went wrong with Data", 500);
@@ -55,28 +48,14 @@ export default class CartItemsRepository {
 
   async delete(cartItemID, userID) {
     try {
-      const db = getDB();
-      const collection = db.collection(this.collection);
-      const result = await collection.deleteOne({
-        _id: new ObjectId(cartItemID),
-        userID: new ObjectId(userID),
+      const result = await CartItemModel.deleteOne({
+        _id: cartItemID,
+        userID: userID,
       });
       return result.deletedCount > 0;
     } catch (err) {
       console.log(err);
       throw new ApplicationError("Something went wrong with Data", 500);
     }
-  }
-
-  async getNextCounter(db) {
-    const resultDocument = await db
-      .collection("counters")
-      .findOneAndUpdate(
-        { _id: "cartItemId" },
-        { $inc: { value: 1 } },
-        { returnDocument: "after" }
-      );
-    console.log("Next counter value:", resultDocument.value);
-    return resultDocument.value;
   }
 }
