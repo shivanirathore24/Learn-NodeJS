@@ -1,107 +1,81 @@
-import { ObjectId } from "mongodb";
-import { getClient, getDB } from "../../../config/mongodb.js";
-import OrderModel from "../order/order.model.js";
+import mongoose from "mongoose";
+
 import { ApplicationError } from "../../error-handler/applicationError.js";
+import { orderSchema } from "./order.schema.js";
+import { productSchema } from "../product/product.schema.js";
+import { cartItemSchema } from "../cartItems/cartItems.schema.js";
+
+// Model definitions
+const OrderModel = mongoose.model("Order", orderSchema);
+const CartItemModel = mongoose.model("CartItem", cartItemSchema);
+const ProductModel = mongoose.model("Product", productSchema);
 
 export default class OrderRepository {
-  constructor() {
-    this.collection = "orders";
-  }
+  async placeOrder(userID) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-  async placeOrder(userId) {
-    const client = getClient();
-    const session = client.startSession();
     try {
-      const db = getDB();
-      session.startTransaction();
+      // 1. Fetch cart items and populate product details
+      const cartItems = await CartItemModel.find({ userID })
+        .populate("productID")
+        .session(session); // Optional: session-aware read
 
-      // 1. Get cartitems and calculate total amount.
-      const items = await this.getTotalAmount(userId, session);
-      const finalTotalAmount = items.reduce(
-        (acc, item) => acc + item.totalAmount,
-        0
-      );
-      console.log("Final total amount:", finalTotalAmount);
+      if (!cartItems || cartItems.length === 0) {
+        throw new Error("Cart is empty");
+      }
 
-      // 2. Create an order record.
-      const newOrder = new OrderModel(
-        new ObjectId(userId),
-        finalTotalAmount,
-        new Date()
-      );
-      await db.collection(this.collection).insertOne(newOrder, { session });
+      let finalTotalAmount = 0;
+      const orderItems = [];
 
-      // 3. Reduce the stock.
-      for (let item of items) {
-        await db.collection("products").updateOne(
-          {
-            _id: item.productID,
-          },
-          {
-            $inc: { stock: -item.quantity },
-          },
+      for (const cartItem of cartItems) {
+        const product = cartItem.productID;
+        const quantity = cartItem.quantity;
+
+        if (!product || product.stock < quantity) {
+          throw new Error(`Insufficient stock for product: ${product.name}`);
+        }
+
+        finalTotalAmount += product.price * quantity;
+
+        orderItems.push({
+          productID: product._id,
+          quantity,
+          price: product.price,
+        });
+      }
+
+      // 2. Create a new order document
+      const newOrder = new OrderModel({
+        userID,
+        totalAmount: finalTotalAmount,
+        items: orderItems,
+        timestamp: new Date(),
+      });
+
+      await newOrder.save({ session });
+
+      // 3. Update stock for each product
+      for (const cartItem of cartItems) {
+        await ProductModel.updateOne(
+          { _id: cartItem.productID._id },
+          { $inc: { stock: -cartItem.quantity } },
           { session }
         );
       }
-      //throw new Error("Something is wrong in PlaceOrder");
 
-      // 4. Clear the cart items.
-      await db.collection("cartItems").deleteMany(
-        {
-          userID: new ObjectId(userId),
-        },
-        { session }
-      );
+      // 4. Clear user's cart
+      await CartItemModel.deleteMany({ userID }, { session });
 
+      // Commit transaction
       await session.commitTransaction();
-      return;
-    } catch (err) {
+    } catch (error) {
+      // Rollback transaction on failure
       await session.abortTransaction();
-      console.log(err);
-      throw new ApplicationError(`Order Failed !`, 500);
+      console.error("Error placing order:", error);
+      throw new ApplicationError("Order Failed!", 500);
     } finally {
       session.endSession();
     }
-  }
-
-  async getTotalAmount(userId, session) {
-    const db = getDB();
-
-    const items = await db
-      .collection("cartItems")
-      .aggregate(
-        [
-          // 1. Filter cart items for the specific user
-          {
-            $match: { userID: new ObjectId(userId) },
-          },
-          // 2. Join with the 'products' collection to get product details
-          {
-            $lookup: {
-              from: "products",
-              localField: "productID",
-              foreignField: "_id",
-              as: "productInfo",
-            },
-          },
-          // 3️. Unwind the productInfo array to make it a flat object
-          {
-            $unwind: "$productInfo",
-          },
-          // 4️. Add a new field 'totalAmount' = price * quantity
-          {
-            $addFields: {
-              totalAmount: {
-                $multiply: ["$productInfo.price", "$quantity"],
-              },
-            },
-          },
-        ],
-        { session }
-      )
-      .toArray();
-
-    console.log(items);
-    return items;
   }
 }

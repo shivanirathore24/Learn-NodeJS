@@ -6,6 +6,7 @@ export default class CartItemsModel {
     this.quantity = quantity;
   }
 
+  /*
   static add(productID, userID, quantity) {
     const cartItem = new CartItemsModel(
       cartItems.length + 1,
@@ -31,9 +32,12 @@ export default class CartItemsModel {
       cartItems.splice(cartItemIndex, 1);
     }
   }
+    */
 }
 
+/*
 var cartItems = [
   new CartItemsModel(1, 1, 2, 4),
   new CartItemsModel(2, 1, 1, 3),
 ];
+*/

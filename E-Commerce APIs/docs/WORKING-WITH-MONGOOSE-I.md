@@ -148,7 +148,7 @@ This schema ensures that every product document follows a consistent structure, 
 ```javascript
 import mongoose from "mongoose";
 
-export const cartSchema = new Schema({
+export const cartItemSchema = new mongoose.Schema({
   productID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
@@ -161,9 +161,9 @@ export const cartSchema = new Schema({
 });
 ```
 
-This code defines a cartSchema for storing cart-related information in MongoDB using Mongoose. Here's the breakdown:
+This code defines a cartItemSchema for storing cart-related information in MongoDB using Mongoose. Here's the breakdown:
 
-The cartSchema specifies three fields:
+The cartItemSchema specifies three fields:
 
 - `productID`:
 
