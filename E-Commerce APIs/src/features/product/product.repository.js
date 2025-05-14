@@ -119,7 +119,21 @@ class ProductRepository {
       });
     } catch (err) {
       console.log(err);
-      throw new ApplicationError("Something went wrong with database", 500);
+      throw new ApplicationError("Something went wrong with Data", 500);
+    }
+  }
+
+  async addStock(productId, quantityToAdd) {
+    try {
+      const updatedProduct = await ProductModel.findByIdAndUpdate(
+        productId,
+        { $inc: { stock: quantityToAdd } },
+        { new: true }
+      );
+      return updatedProduct;
+    } catch (error) {
+      console.error("Error adding stock:", error);
+      throw new ApplicationError("Failed to add stock to product.", 500);
     }
   }
 

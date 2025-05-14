@@ -6,20 +6,10 @@ export default class ProductController {
     this.productRepository = new ProductRepository();
   }
 
-  async getAllProducts(req, res) {
-    try {
-      const products = await this.productRepository.getAll();
-      res.status(200).send(products);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send("Something went wrong");
-    }
-  }
-
   async addProduct(req, res) {
     try {
-      const { name, desc, price, imageUrl, categories, sizes } = req.body;
-
+      const { name, desc, price, imageUrl, categories, sizes, stock } =
+        req.body;
       // Convert 'categories' to array if string, else keep it as array
       const categoriesArray =
         typeof categories === "string"
@@ -41,11 +31,67 @@ export default class ProductController {
         parseFloat(price),
         req.file ? req.file.filename : imageUrl,
         categoriesArray,
-        sizesArray
+        sizesArray,
+        stock
       );
       //console.log(newProduct);
       const createdProduct = await this.productRepository.add(newProduct);
       res.status(201).send(createdProduct);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send("Something went wrong");
+    }
+  }
+
+  async addProductStock(req, res) {
+    try {
+      const productId = req.params.id;
+      const { quantity } = req.body;
+
+      if (quantity === undefined || typeof quantity !== "number") {
+        return res
+          .status(400)
+          .send(
+            "Please provide a valid 'quantity' to add to stock in the request body."
+          );
+      }
+
+      const updatedProduct = await this.productRepository.addStock(
+        productId,
+        quantity
+      );
+
+      if (!updatedProduct) {
+        return res.status(404).send("Product not found.");
+      }
+
+      res.status(200).send(updatedProduct);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send("Something went wrong while adding stock.");
+    }
+  }
+
+  async getAllProducts(req, res) {
+    try {
+      const products = await this.productRepository.getAll();
+      res.status(200).send(products);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send("Something went wrong");
+    }
+  }
+
+  async getOneProduct(req, res) {
+    try {
+      //const id = req.params.id;
+      const { id } = req.params;
+      const product = await this.productRepository.get(id);
+      if (!product) {
+        res.status(404).send("Product not found !");
+      } else {
+        res.status(200).send(product);
+      }
     } catch (err) {
       console.log(err);
       return res.status(500).send("Something went wrong");
@@ -69,22 +115,6 @@ export default class ProductController {
     }
   }
 
-  async getOneProduct(req, res) {
-    try {
-      //const id = req.params.id;
-      const { id } = req.params;
-      const product = await this.productRepository.get(id);
-      if (!product) {
-        res.status(404).send("Product not found !");
-      } else {
-        res.status(200).send(product);
-      }
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send("Something went wrong");
-    }
-  }
-
   async filterProducts(req, res) {
     try {
       const minPrice = req.query.minPrice;
@@ -101,6 +131,7 @@ export default class ProductController {
       return res.status(500).send("Something went wrong");
     }
   }
+
   async averagePrice(req, res, next) {
     try {
       const result =

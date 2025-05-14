@@ -694,3 +694,224 @@ This code defines a OrderRepository class with a method placeOrder that handles 
        - By using `finally`, we avoid repeating `session.endSession()` in both try and catch blocks.
 
 This code provides a robust way to handle order placement by ensuring data consistency through the use of MongoDB transactions. It fetches cart items, verifies stock, creates a new order, updates product stock, and clears the cart, all within a single atomic operation. If any step fails, the entire operation is rolled back.
+
+### Note: The 'User' and 'Like' Features were already implemented and functioning correctly using Mongoose.
+
+## Add-Stock Functionality for Products
+
+### 1. Updated 'product.schema.js' file
+
+```javascript
+import mongoose from "mongoose";
+
+export const productSchema = new mongoose.Schema({
+  name: String,
+  desc: String,
+  price: Number,
+  imageUrl: String,
+  sizes: [String],
+  stock: {
+    type: Number,
+    default: 0,
+  },
+  categories: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+    },
+  ],
+  reviews: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Review",
+    },
+  ],
+});
+```
+
+#### Updated stock field:
+
+- `type: Number` —> ensures the stock value must be a number (as before).
+- `default: 0` —> sets the initial stock to `0`if not explicitly provided when creating a new product.
+
+#### 🚀 Why this is better:
+
+- Prevents `undefined` or `null` stock values.
+- Ensures **data consistency ** — every new product starts with zero stock unless specified.
+- Makes inventory logic more predictable and bug-free in production systems.
+
+### 2. Updated 'product.model.js' file
+
+```javascript
+export default class ProductModel {
+  constructor(name, desc, price, imageUrl, categories, sizes, stock, id) {
+    this._id = id;
+    this.name = name;
+    this.desc = desc;
+    this.price = price;
+    this.imageUrl = imageUrl;
+    this.categories = categories;
+    this.sizes = sizes;
+    this.stock = stock;
+  }
+}
+```
+
+The only updated part in your ProductModel class is the addition of the stock field in the constructor:
+
+- `this.stock = stock;`
+  This line assigns a stock value to the product instance, allowing you to track inventory in your application.
+- It complements your earlier schema change where you added `stock` in the MongoDB model with a default of 0.
+
+💡 Why this is useful:
+
+- Now, every product instance in your application can hold and display stock information.
+- It's critical for features like **stock display, stock updates, "out of stock" labels, and inventory management**.
+
+### 3. Updated 'product.routes.js' file
+
+```javascript
+// http://localhost:3000/api/products/<productID>/add-stock
+productRouter.patch("/:id/add-stock", (req, res) => {
+  productController.addProductStock(req, res);
+});
+```
+
+#### 🔍 What it does:
+
+- Route: `PATCH /:id/add-stock`
+- Purpose: Adds stock to a specific product identified by its `id`.
+- Controller Method Called: `addProductStock(req, res)`
+- HTTP Method: `PATCH` — suitable because it's partially updating an existing resource (just the stock count, not the whole product).
+
+#### 📦 Use Case:
+
+- Used in inventory management to increase the available stock of a product.
+- Example: Admin restocking items without modifying other product details.
+
+#### Postman Request Type: PATCH
+
+🔗 URL:
+
+```bash
+http://localhost:3000/api/products/663f2e2e8c3a9b001f65da56/add-stock
+```
+
+📝 Body (JSON):
+
+```json
+{
+  "stock": 100
+}
+```
+
+### 4. Updated 'product.controller.js' file
+
+The updated part of the code introduces a new method `addProductStock` and modifies the `addProduct` method to include the `stock` field when creating a new product.
+
+1. `addProductStock()` Method
+
+   ```javascript
+   async addProductStock(req, res) {
+       try {
+         const productId = req.params.id;
+         const { quantity } = req.body;
+
+         if (quantity === undefined || typeof quantity !== "number") {
+           return res
+             .status(400)
+             .send(
+               "Please provide a valid 'quantity' to add to stock in the request body."
+             );
+         }
+
+         const updatedProduct = await this.productRepository.addStock(
+           productId,
+           quantity
+         );
+
+         if (!updatedProduct) {
+           return res.status(404).send("Product not found.");
+         }
+         res.status(200).send(updatedProduct);
+       } catch (error) {
+         console.error(error);
+         return res.status(500).send("Something went wrong while adding stock.");
+       }
+     }
+   ```
+
+   - Purpose: This method is used to add stock to an existing product.
+   - Parameters:
+     - `req.params.id`: The `id` of the product (URL parameter).
+     - `req.body.quantity`: The quantity to be added to the product's stock.
+   - Functionality:
+     - Checks if the `quantity` provided in the request body is a valid number.
+     - Calls the `addStock` method from the `ProductRepository` to update the product's stock.
+     - Returns the updated product if the stock is added successfully, otherwise returns a `404` error if the product is not found.
+     - If there is any issue in adding the stock, a `500` error is returned with a generic message.
+
+2. addProduct Method:
+
+   ```javascript
+   async addProduct(req, res) {
+     try {
+       const { name, desc, price, imageUrl, categories, sizes, stock } =
+         req.body;
+
+       // ... (category and size conversion logic)
+
+       const newProduct = new ProductModel(
+         name,
+         desc || "No description available",
+         parseFloat(price),
+         req.file ? req.file.filename : imageUrl,
+         categoriesArray,
+         sizesArray,
+         stock
+       );
+
+       // Call the repository method to add the new product to the database
+     } catch (err) {
+       console.log(err);
+       return res.status(500).send("Something went wrong");
+     }
+   }
+   ```
+
+   - Change: The addProduct method now accepts a stock field in the request body and includes it when creating the product instance.
+   - How it works:
+     - If the stock field is provided in the request body, it is used when creating a new product.
+     - The ProductModel is now initialized with the stock value, which was not included in the previous version.
+
+### 5. Updated 'product.repository.js' file
+
+```javascript
+async addStock(productId, quantityToAdd) {
+  try {
+    const updatedProduct = await ProductModel.findByIdAndUpdate(
+      productId,
+      { $inc: { stock: quantityToAdd } },
+      { new: true }
+    );
+    return updatedProduct;
+  } catch (error) {
+    console.error("Error adding stock:", error);
+    throw new ApplicationError("Failed to add stock to product.", 500);
+  }
+}
+```
+
+The updated part of the code is the `addStock` method within the `ProductRepository` class.
+
+- Purpose: This method is used to update the stock quantity of a specific product in the database.
+- Parameters:
+  - `productId`: The ID of the product whose stock needs to be updated.
+  - `quantityToAdd`: The quantity by which the stock will be incremented.
+- Functionality:
+  - `findByIdAndUpdate`: This is a Mongoose method that searches for the product by its productId and updates the stock field.
+  - `$inc: { stock: quantityToAdd }`: This is a MongoDB operator that increments the stock field by the specified quantity. If `quantityToAdd` is a positive number, it will increase the stock; if negative, it will decrease it.
+  - `{ new: true }`: This option ensures that the updated document (the product with the new stock value) is returned after the update operation.
+- Error Handling: If any error occurs during the update (e.g., product not found or database issues), it will log the error and throw a custom `ApplicationError` with an appropriate error message.
+
+This method is used in scenarios where the stock of a product needs to be incremented, such as when new units of a product are added to inventory.

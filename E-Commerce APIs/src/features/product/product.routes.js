@@ -35,4 +35,8 @@ productRouter.get("/:id", (req, res) => {
   productController.getOneProduct(req, res);
 });
 
+productRouter.patch("/:id/add-stock", (req, res) => {
+  productController.addProductStock(req, res);
+});
+
 export default productRouter;

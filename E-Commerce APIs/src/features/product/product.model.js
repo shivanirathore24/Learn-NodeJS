@@ -1,5 +1,5 @@
 export default class ProductModel {
-  constructor(name, desc, price, imageUrl, categories, sizes, id) {
+  constructor(name, desc, price, imageUrl, categories, sizes, stock, id) {
     this._id = id;
     this.name = name;
     this.desc = desc;
@@ -7,6 +7,7 @@ export default class ProductModel {
     this.imageUrl = imageUrl;
     this.categories = categories;
     this.sizes = sizes;
+    this.stock = stock;
   }
 }
 
@@ -59,6 +60,23 @@ export default class ProductModel {
     "imageUrl": "https://m.media-amazon.com/images/I/61-6TTTBZeL._SL1000_.jpg",
     "category": "Computers",
     "sizes": ["Hardcover"]
+},
+{
+  "name": "Data Structures and Algorithms Made Easy",
+  "desc": "Comprehensive guide to data structures and algorithms with Java implementations.",
+  "price": 579,
+  "imageUrl": "https://m.media-amazon.com/images/I/714+tgyHDRL._SL1360_.jpg",
+  "sizes": ["Paperback","Kindle"],
+  "categories": "Computers , Programming"
+},
+{
+  "name": "Beginning MERN Stack Development",
+  "desc": "A hands-on guide to building full-stack web apps using MongoDB, Express, React, and Node.js.",
+  "price": 1241,
+  "imageUrl": "https://m.media-amazon.com/images/I/51fJDInYIFL._SL1360_.jpg",
+  "sizes": ["Paperback"],
+  "categories": ["Computers", "Software Development", "Programming"]
 }
+
 
 */
