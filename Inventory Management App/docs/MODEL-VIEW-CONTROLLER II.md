@@ -1,11 +1,14 @@
 ## MODEL VIEW CONTROLLER (MVC) PART-II
 
 ## Working with Forms
+
 There are many scenarios where forms can be used, Imagine you're running an
 online store, and you want to give your staff the ability to add new products easily. To
 do this, you need to create a form that lets them input product information and
 submit it to the server.
+
 ### Creating the new-product.ejs view
+
 To add a new product, we need to create a new view file called new-product.ejs. We
 will use Bootstrap to create the form in this view. Here is the code for the
 new-product.ejs file:
@@ -35,10 +38,12 @@ new-product.ejs file:
 ```
 
 ### Updating the product.controller.js file
+
 After creating the view, we need to update our product.controller.js file. We will add a
 getAddForm method to get the form, and a postAddProduct method to update the
 model with the form data after submission.
 Here is the updated product.controller.js file:
+
 ```javascript
 import ProductModel from "../models/product.model.js";
 
@@ -63,21 +68,26 @@ export default class ProductController {
 ```
 
 ### Updating the product.ejs file
+
 Finally, we need to update the product.ejs file to add a "New Product" nav item that
 redirects to '/new'
 Here is how updated layout looks:
+
 #### Products view
+
 <img src="./images/products_view1.png" alt="Products view" width="500" height="auto" >
+
 <img src="./images/products_view2.png" alt="Products view" width="650" height="auto" >
 
 #### New Product View
+
 <img src="./images/newproduct_view.png" alt="New Product View" width="500" height="auto">
 
 Note: 'req.body' value will be `undefined` we will see how to overcome this problem
 next.
 
-
 ## Parsing Data
+
 Express's internal body parser express.urlencoded is used to parse form data. It is
 a middleware that helps us access form data in the request body.
 
@@ -91,6 +101,7 @@ occurred.
 
 To use the `express.urlencoded` middleware in the project, we need to add the
 following line of code in our index.js file:
+
 ```javascript
 import express from "express";
 import ProductController from "./src/controllers/product.controller.js";
@@ -123,10 +134,10 @@ server.listen(PORT, () => {
 });
 ```
 
-
 In the product.controller.js file, we can use `req.body` to get the form data that is
 submitted. To add this data to the products array in 'products.model.js', we need to
 add an `addProduct` method in the 'ProductModel' class.
+
 ```javascript
 export default class ProductModel {
   constructor(_id, _name, _desc, _price, _imageUrl) {
@@ -159,7 +170,7 @@ var products = [
     "Description for Product 1",
     19.99,
     "https://m.media-amazon.com/images/I/51-nXsSRfZL._SX328_BO1,204,203,200_.jpg"
-  )
+  ),
 ];
 ```
 
@@ -168,6 +179,7 @@ the form data and call the `addProduct` method to add the product to the product
 array.
 
 Here is the updated code for the product.controller.js file:
+
 ```javascript
 import ProductModel from "../models/product.model.js";
 
@@ -192,15 +204,16 @@ export default class ProductController {
 }
 ```
 
-## Additonal: Restructured Code 
+## Additonal: Restructured Code
 
 ### 1. Entry file: 'index.js'
 
 1. Variable Name Change: server → app
 2. Controller Name Change: ProductController → ProductsController
 3. Method Name Changes in Routes:
-    - getAddForm → getAddProduct
-    - addNewProduct → postAddProduct
+
+   - getAddForm → getAddProduct
+   - addNewProduct → postAddProduct
 
 4. Route Change for New Product Form: "/new" → "/new-product"
 
@@ -449,7 +462,9 @@ var products = [
 </table>
 </div>
 ```
+
 ### 5. View: 'product.css' name changes to 'index.css'
+
 ```javascript
 .container{
     margin: 24px;
@@ -461,7 +476,9 @@ img{
 ```
 
 ### 6. View: 'layout.ejs'
+
 Updated the href for the "New Product" link in the navbar:
+
 ```javascript
 <!-- Before -->
 <a class="nav-link active" aria-current="page" href="/new">New Product</a>
@@ -471,6 +488,7 @@ Updated the href for the "New Product" link in the navbar:
 ```
 
 ## Validating Data
+
 Data validation is an important process of ensuring that the input data is correct,
 accurate, and secure. In the context of web development, data validation is crucial to
 prevent potential security risks and to ensure that the application runs smoothly.
@@ -478,6 +496,7 @@ Here is some information and code snippets about data validation in the
 product.controller.js and new-product.ejs files:
 
 ### Changes in product.controller.js file
+
 To validate the incoming form data, the conditions to check for errors are added in
 the postAddProduct method in product.controller.js file. The updated code adds a
 new variable called validURL which uses the URL constructor to check if the
@@ -490,6 +509,7 @@ using the errorMsg variable. If there are no errors, the index.ejs view is rende
 with the products variable containing the updated list of products.
 
 #### Code for postAddProduct method:
+
 ```javascript
 postAddProduct(req, res, next) {
     //validate data
@@ -508,7 +528,7 @@ postAddProduct(req, res, next) {
     }
     // if(errors.length>0){
     //   return res.render('new-product', {errorMessage:errors[0],})
-    // } 
+    // }
     if (errors.length != 0) {
       res.render('new-product', { errorMessage: errors[0] })
     } else {
@@ -522,10 +542,13 @@ postAddProduct(req, res, next) {
     return res.render("index", { products });
   }
 ```
+
 ### Changes in new-product.ejs file
+
 The new-product.ejs file can incorporate a conditional statement to determine
 whether to display the the form view with error message or without error message
 based on the validity of the data. The following is the revised code snippet:
+
 ```javascript
 <%if(errorMessage){ %>
 <div class="alert alert-danger" role="alert">
@@ -533,10 +556,13 @@ based on the validity of the data. The following is the revised code snippet:
 </div>
 <%}%>
 ```
+
 ### Here is what form view with invalid data input looks like:
+
 <img src="./images/validating_data.png" alt="Model View Controller"  width="600" height="auto">
 
 ## Validation Middleware
+
 In the current implementation, the validation code for form data is placed in the
 `postAddProduct` method in `product.controller.js`. This is problematic as it violates
 the Single Responsibility Principle. We can also add the validation code in a
@@ -545,6 +571,7 @@ coupling. To overcome this issue, we can create a separate middleware function f
 validation.
 
 ### Here are the steps to implement Validation Middleware:
+
 1. Create a new folder named `middleware` in the `src` folder.
 
 <img src="./images/create_middleware.png" alt="Model View Controller"  width="300" height="400">
@@ -554,6 +581,7 @@ add a function named `validateRequest` and export it. Move the validation
 code from the `postAddProduct` method to this function.
 
 Here is the `validation.middleware.js` file:
+
 ```javascript
 const validateRequest = (req, res, next) => {
   // validate data
@@ -582,8 +610,8 @@ export default validateRequest;
 ```
 
 3. In the `index.js file`, import the `validateRequest` function from
-`validation.middleware.js` and pass it as middleware in the `/` route of the
-`server.post` method.
+   `validation.middleware.js` and pass it as middleware in the `/` route of the
+   `server.post` method.
 
 ```javascript
 import express from "express";
@@ -620,19 +648,21 @@ By implementing the Validation Middleware, we have separated the validation logi
 from the controller, and achieved a better adherence to the Single Responsibility
 Principle.
 
-
 ## Using Express Valdiator
+
 Express-validator is a middleware used for data validation in Node.js applications
 built with the Express framework. It is used to validate data coming from HTTP
 requests, such as form data, query parameters, or JSON payloads.
 
 To use express-validator, we need to follow three steps:
+
 1. Setup rules for validation
 2. Run those rules
 3. Check if there was any validation error
 
 The code in the validateRequest middleware has been updated to use
 express-validator for data validation.
+
 ```javascript
 import { body, validationResult } from "express-validator";
 
@@ -668,16 +698,17 @@ export default validateRequest;
 ```
 
 #### The following methods and imports are used in the code:
+
 - `body`: This method is used to extract the value of a field from the request
-body for validation.
+  body for validation.
 - `isLength`: This method is used to check the length of a field.
 - `withMessage`: This method is used to specify an error message if the
-validation fails.
+  validation fails.
 - `isURL`: This method is used to check if a field value is a valid URL.
 - `isInt`: This method is used to check if a field value is an integer.
 - `validationResult`: This method is used to check if there were any validation
-errors after running the validation rules.
-- `notEmpty`: This method is used  to ensures the field is not empty
+  errors after running the validation rules.
+- `notEmpty`: This method is used to ensures the field is not empty
 - `isFloat({ gt: 0 })`: This method is used checks if it is a number greater than zero.
 
 The updated code uses the body method to extract the name, price, and imageUrl
@@ -691,15 +722,19 @@ error message. If there are no errors, the code calls the next function to proce
 the next middleware.
 
 ## Updating Product
+
 To implement the functionality of updating a product's details, the following steps
 need to be taken:
+
 1. Add an "Update Product" link in the `index.ejs` view to enable updating the
-product information.
+   product information.
+
 <img src="./images/update_product_button.png" alt="Update Product Button" width="650" height="auto" >
+
 2. In the `ProductsController` class of the `product.controller.js` file, add the
-`getUpdateProductView` method. This method retrieves the product details
-based on the provided ID and renders the `update-product` view. If the product
-is not found, it sends a "Product Not Found" message.
+   `getUpdateProductView` method. This method retrieves the product details
+   based on the provided ID and renders the `update-product` view. If the product
+   is not found, it sends a "Product Not Found" message.
 
 ```javascript
  getUpdateProductView(req, res, next) {
@@ -720,9 +755,10 @@ is not found, it sends a "Product Not Found" message.
 ```
 
 3. Add the `postUpdateProduct` method in the `ProductsController` class. This
-method receives the updated product details through the request body and
-sends them to the ProductModel for updating. Finally, it renders the `index.ejs`
-view to display the updated product list.
+   method receives the updated product details through the request body and
+   sends them to the ProductModel for updating. Finally, it renders the `index.ejs`
+   view to display the updated product list.
+
 ```javascript
  postUpdateProduct(req, res) {
     ProductModel.update(req.body);
@@ -730,22 +766,25 @@ view to display the updated product list.
     res.render("index", { products });
   }
 ```
+
 4. Create a new file named `update-product.ejs` in the views folder. Use the
-product object sent from the `getUpdateProductView` method to autofill the
-`update-product` view with the existing product details.
+   product object sent from the `getUpdateProductView` method to autofill the
+   `update-product` view with the existing product details.
 
 5. In the `index.js` file, make the following changes to the routing:
+
 ```javascript
 app.get("/update-product/:id", productsController.getUpdateProductView);
 app.post("/update-product", productsController.postUpdateProduct);
 ```
 
-  - `app.post("/update-product", productsController.postUpdateProduct)`: This route is responsible for handling the POST request to update the product. It calls the postUpdateProduct method of the ProductsController when this route is
-accessed.
+- `app.post("/update-product", productsController.postUpdateProduct)`: This route is responsible for handling the POST request to update the product. It calls the postUpdateProduct method of the ProductsController when this route is
+  accessed.
 
-  - `app.get("/update-product/:id", productsController.getUpdateProductView)`: This route handles the GET request to retrieve the update-product view. It includes a route parameter :id, representing the ID of the product to be updated. It calls the getUpdateProductView method of the ProductsController to render the update-product view.
+- `app.get("/update-product/:id", productsController.getUpdateProductView)`: This route handles the GET request to retrieve the update-product view. It includes a route parameter :id, representing the ID of the product to be updated. It calls the getUpdateProductView method of the ProductsController to render the update-product view.
 
 6. In the `products.model.js` file, add the following changes to the ProductModel class:
+
 ```javascript
 static getById(id) {
   return products.find((p) => p.id == id);
@@ -756,22 +795,20 @@ static update(productObj) {
   products[index] = productObj;
 }
 ```
-  - `getByID(id)`: This method is added to retrieve a product by its ID. It takes the
-`id` parameter, representing the ID of the product to be retrieved. The method
-performs the following steps:
-    - It uses the `find` function on the products array to find the product that
-matches the provided id.
-    - If a matching product is found, it is returned by the method.
+
+- `getByID(id)`: This method is added to retrieve a product by its ID. It takes the
+  `id` parameter, representing the ID of the product to be retrieved. The method
+  performs the following steps: - It uses the `find` function on the products array to find the product that
+  matches the provided id. - If a matching product is found, it is returned by the method.
 - `update(productObj)`: This method is added to update the product details. It
-takes the `productObj` parameter, which represents the updated product object
-containing the new details. The method performs the following steps:
-    - It uses the `findIndex` function on the products array to locate the index
-of the product that matches the provided id.
-    - Once the `index` is found, the method replaces the existing product at
-that index with the updated productObj, effectively updating the details
-of the product in the array.
+  takes the `productObj` parameter, which represents the updated product object
+  containing the new details. The method performs the following steps: - It uses the `findIndex` function on the products array to locate the index
+  of the product that matches the provided id. - Once the `index` is found, the method replaces the existing product at
+  that index with the updated productObj, effectively updating the details
+  of the product in the array.
 
 ## Deleting Data
+
 To add the delete product feature, a `delete` link needs to be added to each product in
 the `index.ejs` file. This link should redirect to the URL "/delete-product/" followed by
 the product's ID
@@ -779,7 +816,8 @@ the product's ID
 <img src="./images/delete_product_button.png" alt="Delete Product Button" width="650" height="auto" >
 
 1. In the product.controller.js file, the following changes are made to add the
-deleteProduct() middleware:
+   deleteProduct() middleware:
+
 ```javascript
 deleteProduct(req, res) {
     const id = req.params.id;
@@ -792,76 +830,87 @@ deleteProduct(req, res) {
     res.render("index", { products });
 }
 ```
-  - `deleteProduct(req, res)`: This middleware is responsible for handling
-the deletion of a product. It extracts the id parameter from the request's
-URL parameters using `req.params.id`, representing the ID of the
-product to be deleted.
-  - It calls the `delete()` method of ProductModel, passing the id parameter
-to delete the product from the model.
-  - After deleting the product, it retrieves the updated list of products using
-the `getAll()` method of ProductModel.
-  - Finally, it renders the products view, passing the updated list of
-products to be displayed.
+
+- `deleteProduct(req, res)`: This middleware is responsible for handling
+  the deletion of a product. It extracts the id parameter from the request's
+  URL parameters using `req.params.id`, representing the ID of the
+  product to be deleted.
+- It calls the `delete()` method of ProductModel, passing the id parameter
+  to delete the product from the model.
+- After deleting the product, it retrieves the updated list of products using
+  the `getAll()` method of ProductModel.
+- Finally, it renders the products view, passing the updated list of
+  products to be displayed.
 
 2. In the product.model.js file, the following changes are made to the
-ProductModel class:
+   ProductModel class:
+
 ```javascript
 static delete(id) {
   const index = products.findIndex((p) => (p.id = id));
   products.splice(index, 1);
 }
 ```
-  - `static delete(id)`: This static method is added to delete a product from
-the model based on its ID. It takes the `id` as a parameter.
-  - Inside the method, it uses the `findIndex()` method on the products array
-to locate the index of the product with the matching ID (id).
-  - If a matching product is found (index is not -1), it uses the `splice()`
-method to remove the product from the products array at the identified
-index.
+
+- `static delete(id)`: This static method is added to delete a product from
+  the model based on its ID. It takes the `id` as a parameter.
+- Inside the method, it uses the `findIndex()` method on the products array
+  to locate the index of the product with the matching ID (id).
+- If a matching product is found (index is not -1), it uses the `splice()`
+  method to remove the product from the products array at the identified
+  index.
 
 ### Confirmation before deletion
+
 1. To add a confirmation message before deleting a product, the anchor tag used for
-deletion in the index.ejs file is replaced with a delete button. Modify the code in
-index.ejs as follows:
+   deletion in the index.ejs file is replaced with a delete button. Modify the code in
+   index.ejs as follows:
+
 ```javascript
 <button class="btn btn-danger" onclick="deleteProduct('<%= product.id %>')">Delete</button>
 <!-- <a href="/delete-product/<%= product.id %>" class="btn btn-danger">Delete</a> -->
 ```
 
 2. In the main.js file, add the following code for the deleteProduct method:
+
 ```javascript
 function deleteProduct(id) {
-    const result = confirm(
-      'Are you sure you want to delete this product ?'
-    );
-    if (result) {
-      fetch('/delete-product/' + id, {
-        method: 'POST',
-      }).then((res) => {
-        if (res.ok) {
-            location.reload();
-            // window.location.href = "/";
-        }
-      });
-    }
+  const result = confirm("Are you sure you want to delete this product ?");
+  if (result) {
+    fetch("/delete-product/" + id, {
+      method: "POST",
+    }).then((res) => {
+      if (res.ok) {
+        location.reload();
+        // window.location.href = "/";
+      }
+    });
   }
+}
 ```
+
 3. Create a `public` folder in the root directory of the project, which will contain a main.js
-file. This file will handle the frontend JavaScript code for the delete functionality.
+   file. This file will handle the frontend JavaScript code for the delete functionality.
+
 ```javascript
-server.use(express.static('public'));
+server.use(express.static("public"));
 ```
+
 <img src="./images/create_public.png" alt="Create Public" width="300" height="400">
 
 4. Add the main.js file in script tag in layout.ejs view.
+
 ```javascript
 <script src="main.js"></script>
 ```
+
 5. Lastly, update the route in index.js to handle the POST request for deleting a
-product. Add the following line of code:
+   product. Add the following line of code:
+
 ```javascript
-app.post('/delete-product/:id', productsController.deleteProduct);
+app.post("/delete-product/:id", productsController.deleteProduct);
 ```
+
 This route maps to the deleteProduct method in the productsController, which
 handles the deletion of the product.
 
@@ -871,31 +920,35 @@ By implementing these changes, a confirmation message will be displayed before
 deleting a product, and the deletion will be handled by the deleteProduct method in
 the productsController.
 
-
-
 ## Styling Views
+
 By following these steps, you can create a separate CSS file, link it in the `layout.ejs`
 file, and apply specific styles to the header elements in the `new-product.ejs`,
 `update-product.ejs`, and `index.ejs` views.
+
 1. Create a `css` folder inside the `public` folder. This folder will hold your CSS files.
 2. Inside the css folder, create a `header.css` file that will contain the CSS styles
-for the header.
+   for the header.
 
 <img src="./images/create_css_folder.png" alt="Create CSS folder" width="300" height="400">
 
 3. In the `layout.ejs` file, add the following line inside the <head> tag to link the
-header.css file:
+   header.css file:
+
 ```javascript
 <link rel="stylesheet" href="/css/header.css">
 ```
-4. Apply the `header` class` to the new-product.ejs, update-product.ejs, and
-index.ejs files. In these files, you can add the  `header` class to the appropriate
-elements that represent the header of each view. For example:
+
+4. Apply the `header` class`to the new-product.ejs, update-product.ejs, and
+index.ejs files. In these files, you can add the `header` class to the appropriate
+   elements that represent the header of each view. For example:
+
 ```javascript
 <div class="header">
   <!-- Header content -->
 </div>
 ```
+
 ```javascript
 <!-- index.ejs file -->
 <h1 class="mt-5 mb-4 header">Products</h1>
@@ -906,25 +959,30 @@ elements that represent the header of each view. For example:
 <!-- update-prodcut.ejs file -->
 <h1 class="mt-5 mb-4 header">Update Product</h1>
 ```
+
 By applying the header class, the corresponding styles defined in header.css
 will be applied to the header elements in these views.
 
 <img src="./images/products_header.png" alt="Create CSS folder" width="650" height="auto">
+
 <img src="./images/newproduct_header.png" alt="Create CSS folder" width="650" height="auto">
+
 <img src="./images/update_product_header.png" alt="Create CSS folder" width="650" height="auto">
 
-
 ## Summarising it
+
 Let’s summarise what we have learned in this module:
+
 - Learned to create and submit forms using POST requests.
 - Added a new feature to add products and implemented manual
-data validation.
+  data validation.
 - Set up validation middleware and used Express Validator for data
-validation.
+  validation.
 - Added features to update and delete products.
 - Explored styling views in an Express application.
 
 ### Some Additional Resources:
+
 [What does express.urlencoded do anyway?](https://nkhilv.medium.com/what-does-express-urlencoded-do-anyway-8bdc4e638e1e)
 
 [Form Data Validation in Node.js with express-validator](https://stackabuse.com/form-data-validation-in-nodejs-with-express-validator/)
@@ -932,26 +990,3 @@ validation.
 [Express Validator Tutorial](https://auth0.com/blog/express-validator-tutorial/)
 
 [Express + EJS: Styles and Partials](https://ncoughlin.com/posts/express-ejs-styles-and-partials/)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -280,28 +280,32 @@ server.listen(PORT, () => {
    http://localhost:3100/ in the address bar. This will send a GET request
    to the server, and the server will respond with the products.html file, which will
    be displayed in the browser.
+
    <img src="./images/view_as_response.png" alt="View as response" width="800" heigth="auto">
 
-
 ## Creating Model
+
 Models are the components responsible for managing the data in an application.
 They usually represent real-world objects, like products in our case, and handle
 interactions with databases, APIs, or any other data source. In short, Models are the
 heart of your application's data logic.
 
 ### Creating a Product Model
+
 To create a Product Model, we'll need to define a class that represents the product
 and its properties.
 Here are the steps to create the Product Model:
+
 1. Create a new file called `product.model.js` in the models folder.
 2. Define a `ProductModel` class with a constructor that takes in 5 parameters:
-`_id`, `_name`, `_desc`, `_price`, and `_imageUrl`. Inside the constructor, set the
-properties of the class based on the passed-in values.
+   `_id`, `_name`, `_desc`, `_price`, and `_imageUrl`. Inside the constructor, set the
+   properties of the class based on the passed-in values.
 3. Add a static method called `get()` to the ProductModel class. Inside this
-method, return an array of ProductModel objects with some sample data.
+   method, return an array of ProductModel objects with some sample data.
 4. Export the `ProductModel` class from the `product.model.js file`.
 
 Example Code for product.model.js :
+
 ```javascript
 export default class ProductModel {
   constructor(_id, _name, _desc, _price, _imageUrl) {
@@ -340,72 +344,88 @@ var products = [
   ),
 ];
 ```
+
 Note: To obtain the product details from the ProductModel class, you can import it
 into your index.js file and utilize the static get() method. Once you have fetched the
 product data, you may choose to log it to the console or use it in any other way that
 suits your application's requirements.
 
 ## Understanding View Engines
+
 View Engines are tools that help us generate HTML content dynamically based on
 the data provided. They allow us to use templates with placeholders for data, which
 are then replaced with actual data when the page is rendered. This makes it easier
 to create and maintain web pages, especially when the content changes frequently.
 
 ### A real use case
+
 Imagine your online store's product list needs to be updated regularly based on new
 products or changes in product information. Manually updating the HTML every time
 there's a change is time-consuming and error-prone. View Engines can help us
 generate dynamic HTML content, making it easier to keep our web pages up to date.
 
 ### EJS View Engine for Node.js
+
 EJS, or Embedded JavaScript, is a popular View Engine for Node.js applications. It
 allows us to embed JavaScript code within HTML templates to generate dynamic
 content.
 
 ### Installing EJS and Migrating HTML to EJS
+
 To install EJS, navigate to your project folder in the terminal and run:
+
 ```bash
 npm install ejs
 ```
 
 ### Changes in `index.js` file of inventory management project
+
 This code sets up a server using Express and EJS as the view engine to render
 dynamic content. It imports the ProductController from a file and creates an instance
 of it to handle requests for products. Here's what each line does:
+
 1. Imports the necessary modules and creates a new Express app.
+
 ```javascript
-import express from 'express';
-import ProductController from
-'./src/controllers/product.controller.js';
-import path from 'path';
+import express from "express";
+import ProductController from "./src/controllers/product.controller.js";
+import path from "path";
 const server = express();
 ```
 
 2. Sets up the EJS view engine to be used by the app and specifies the directory
-where the views are located.
+   where the views are located.
+
 ```javascript
-server.set('view engine', 'ejs');
-server.set('views', path.join(path.resolve(), 'src', 'views'));
+server.set("view engine", "ejs");
+server.set("views", path.join(path.resolve(), "src", "views"));
 ```
+
 3. Configures the app to use EJS Layouts, which is a middleware that allows the
-use of templates with multiple views.
+   use of templates with multiple views.
+
 ```javascript
 server.use(ejsLayouts);
 ```
+
 4. Serves the static files from the views directory to the browser.
+
 ```javascript
-server.use(express.static('src/views'));
+server.use(express.static("src/views"));
 ```
+
 5. Creates an instance of the ProductController and sets up a route to handle
-GET requests to the root URL. Finally, the server listens on port 3100 for
-incoming requests.
+   GET requests to the root URL. Finally, the server listens on port 3100 for
+   incoming requests.
+
 ```javascript
 const productController = new ProductController();
-server.get('/', productController.getProducts);
+server.get("/", productController.getProducts);
 server.listen(3100);
 ```
 
-### Changes in `products.html` i.e `products.ejs` file  of inventory management project
+### Changes in `products.html` i.e `products.ejs` file of inventory management project
+
 ```javascript
 <table class="table table-dark">
     <thead>
@@ -432,37 +452,40 @@ server.listen(3100);
     </tbody>
 </table>
 ```
+
 - This HTML file is an EJS template used to render dynamic product data on the page.
-The EJS syntax is used to inject data from the server-side JavaScript code into the
-HTML template.
+  The EJS syntax is used to inject data from the server-side JavaScript code into the
+  HTML template.
 
 - The syntax uses special tags <% and %> to enclose JavaScript code within the
-HTML file. In this particular example, the forEach loop is used to iterate over an array
-of products and generate table rows with product information. The product object's
-properties such as id, name, desc, price, and imageUrl are accessed using the <%=
-%> tag within the table cells to render them on the page.
+  HTML file. In this particular example, the forEach loop is used to iterate over an array
+  of products and generate table rows with product information. The product object's
+  properties such as id, name, desc, price, and imageUrl are accessed using the <%=
+  %> tag within the table cells to render them on the page.
 
- - For example, the line <%= product.id %> accesses the id property of the current
-product object within the loop and inserts its value into the table cell. Similarly, other
-product properties are accessed using <%= %> tags to dynamically generate the
-HTML content on the page.
+- For example, the line <%= product.id %> accesses the id property of the current
+  product object within the loop and inserts its value into the table cell. Similarly, other
+  product properties are accessed using <%= %> tags to dynamically generate the
+  HTML content on the page.
 
 ### Changes in product.controller.js file of inventory management project
+
 ```javascript
-import ProductModel from '../models/product.model.js'
+import ProductModel from "../models/product.model.js";
 // Creating ProductController class with getProducts method
-export default class ProductController{
+export default class ProductController {
   // Defining getProducts method
-  getProducts(req, res){
+  getProducts(req, res) {
     // Retrieve products using the ProductModel
     let products = ProductModel.get();
     // Use the res.render() method to render the 'products' view, and pass in the products data
-    res.render("products", {products:products});
+    res.render("products", { products: products });
   }
 }
 ```
 
 #### Explanation:
+
 This code exports a ProductController class with a getProducts method. Inside the
 getProducts method, it retrieves the products data from the ProductModel using the
 ProductModel.get() method. Finally, the res.render() method is used to render the
@@ -471,9 +494,10 @@ of the view to render ('products' in this case), and an object containing the da
 passed to the view (the products data in this case). This allows the 'products' view to
 access the products data and use it to dynamically generate the HTML content.
 
-
 ## Creating Layout Page
+
 ### Using Express-EJS-Layouts Library
+
 In web development, it's common for multiple pages to share a common header,
 footer, and navigation menu. Instead of duplicating this code in each page, you can
 create a layout file to keep your code organized and maintain a consistent look and
@@ -481,23 +505,31 @@ feel throughout your website.
 
 To create a layout file in EJS using Express-EJS-Layouts, you can follow these
 steps:
+
 1. Install `express-ejs-layouts` module using npm:
+
 ```bash
 npm install express-ejs-layouts
 ```
+
 2. In your `index.js` file, require the express-ejs-layouts module:
+
 ```javascript
-const expressLayouts = require('express-ejs-layouts');
+const expressLayouts = require("express-ejs-layouts");
 ```
+
 3. Tell your app to use the expressLayouts middleware:
+
 ```javascript
 app.use(expressLayouts);
 ```
+
 4. Create a new file in your views folder called `layout.ejs`. This file will contain the
-common structure for your web pages like navigation menu, header, and
-footer.
+   common structure for your web pages like navigation menu, header, and
+   footer.
 
 Example code:
+
 ```javascript
 <html>
   <head>
@@ -511,34 +543,33 @@ Example code:
   </body>
 </html>
 ```
+
 Here, the <%- body %> placeholder is used to insert page-specific content
 into the layout when we render a view. This allows us to maintain a consistent
 structure across all our pages while still displaying unique content on each
 page.
 
 ## Summarising it
+
 Let’s summarise what we have learned in this module:
+
 - Learned about different design patterns like MVC, REST, and
-Microservices.
+  Microservices.
 - Got an overview of the Inventory Management project.
 - Created a View folder and added necessary files for implementing MVC
-architecture.
+  architecture.
 - Learned about creating a Controller, which handles incoming requests.
 - Learned about creating a Model, which interacts with the database and
-defines the data structure.
+  defines the data structure.
 - Learned about View Engine (template engine) and EJS, which is a
-popular template engine for generating dynamic HTML pages.
+  popular template engine for generating dynamic HTML pages.
 - Learned about creating layouts using the express-ejs-layouts library,
-which helps maintain a consistent structure across all web pages.
+  which helps maintain a consistent structure across all web pages.
 
 ### Some Additional Resources:
+
 [What is the MVC, Creating a [Node.js-Express] MVC Application](https://medium.com/@ipenywis/what-is-the-mvc-creating-a-node-js-express-mvc-application-da10625a4eda)
 
-[what is EJS](https://ejs.co/)
+[What is EJS](https://ejs.co/)
 
 [How to use EJS to template your Node.js application](https://blog.logrocket.com/how-to-use-ejs-template-node-js-application/)
-
-
-
-
-
